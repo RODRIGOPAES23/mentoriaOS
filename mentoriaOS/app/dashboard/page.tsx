@@ -10,6 +10,7 @@ export default function DashboardPage() {
   const [checkin, setCheckin] = useState<Checkin | null>(null)
   const [analise, setAnalise] = useState<AnaliseIA | null>(null)
   const [loading, setLoading] = useState(true)
+  const [copiedLink, setCopiedLink] = useState(false)
 
   useEffect(() => {
     fetchMentorados()
@@ -67,6 +68,27 @@ export default function DashboardPage() {
     setCheckin(null)
     setAnalise(null)
     fetchMentoradoData(mentorado.id)
+    setCopiedLink(false)
+  }
+
+  const generateAndCopyLink = async () => {
+    if (!selectedMentorado) return
+
+    const nomeFormatado = selectedMentorado.nome
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .normalize("NFD")
+      .replace(/[̀-ͯ]/g, "")
+
+    const link = `https://mentoriaos.vercel.app/formulario/${nomeFormatado}`
+
+    try {
+      await navigator.clipboard.writeText(link)
+      setCopiedLink(true)
+      setTimeout(() => setCopiedLink(false), 3000)
+    } catch (error) {
+      console.error("Erro ao copiar link:", error)
+    }
   }
 
   if (loading) {
@@ -123,19 +145,31 @@ export default function DashboardPage() {
           <>
             {/* Info Card */}
             <div className="bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6 mb-8">
-              <div className="space-y-2 text-sm">
-                <div>
-                  <span className="text-slate-400">Nome:</span>
-                  <span className="ml-2 font-semibold">{selectedMentorado.nome}</span>
+              <div className="flex justify-between items-start">
+                <div className="space-y-2 text-sm flex-1">
+                  <div>
+                    <span className="text-slate-400">Nome:</span>
+                    <span className="ml-2 font-semibold">{selectedMentorado.nome}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400">Nicho:</span>
+                    <span className="ml-2 font-semibold">{selectedMentorado.nicho}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400">Foco:</span>
+                    <span className="ml-2 font-semibold">{selectedMentorado.foco_macro}</span>
+                  </div>
                 </div>
-                <div>
-                  <span className="text-slate-400">Nicho:</span>
-                  <span className="ml-2 font-semibold">{selectedMentorado.nicho}</span>
-                </div>
-                <div>
-                  <span className="text-slate-400">Foco:</span>
-                  <span className="ml-2 font-semibold">{selectedMentorado.foco_macro}</span>
-                </div>
+                <button
+                  onClick={generateAndCopyLink}
+                  className={`ml-4 px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition-all ${
+                    copiedLink
+                      ? "bg-green-500/20 border border-green-500 text-green-400"
+                      : "bg-blue-500/20 border border-blue-500 text-blue-400 hover:bg-blue-500/30"
+                  }`}
+                >
+                  {copiedLink ? "✅ Copiado!" : "🔗 Gerar Link"}
+                </button>
               </div>
             </div>
 
