@@ -15,26 +15,37 @@ export function MenteeSelector({ onSelect, selected }: MenteeSelectorProps) {
   const [search, setSearch] = useState("")
   const [isOpen, setIsOpen] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetchMentorados()
   }, [])
 
   async function fetchMentorados() {
-    setLoading(true)
-    const { data, error } = await supabase
-      .from("mentorados")
-      .select("*")
-      .eq("status", "Ativo")
-      .order("nome", { ascending: true })
+    try {
+      setLoading(true)
+      setError(null)
+      const { data, error: supabaseError } = await supabase
+        .from("mentorados")
+        .select("*")
+        .eq("status", "Ativo")
+        .order("nome", { ascending: true })
 
-    if (!error && data) {
-      setMentorados(data as Mentorado[])
-      if (data.length > 0 && !selected) {
-        onSelect(data[0] as Mentorado)
+      if (supabaseError) {
+        setError(`Erro ao carregar mentorados: ${supabaseError.message}`)
+        console.error("Supabase error:", supabaseError)
+      } else if (data) {
+        setMentorados(data as Mentorado[])
+        if (data.length > 0 && !selected) {
+          onSelect(data[0] as Mentorado)
+        }
       }
+    } catch (err) {
+      setError(`Erro inesperado: ${err instanceof Error ? err.message : String(err)}`)
+      console.error("Fetch error:", err)
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   const filtered = mentorados.filter((m) =>
@@ -88,11 +99,26 @@ export function MenteeSelector({ onSelect, selected }: MenteeSelectorProps) {
             <div className="max-h-64 overflow-y-auto">
               {loading ? (
                 <div className="p-4 text-center text-slate-400">
-                  Carregando...
+                  Carregando mentorados...
+                </div>
+              ) : error ? (
+                <div className="p-4 text-center">
+                  <div className="text-sm text-red-400 mb-2">{error}</div>
+                  <button
+                    onClick={fetchMentorados}
+                    className="px-2 py-1 bg-primary border border-slate-600 rounded text-xs hover:bg-secondary transition-colors"
+                  >
+                    Tentar novamente
+                  </button>
+                </div>
+              ) : mentorados.length === 0 ? (
+                <div className="p-4 text-center text-slate-400">
+                  <div className="text-sm mb-2">Nenhum mentorado encontrado</div>
+                  <div className="text-xs text-slate-500">Insira dados na tabela mentorados do Supabase</div>
                 </div>
               ) : filtered.length === 0 ? (
                 <div className="p-4 text-center text-slate-400">
-                  Nenhum mentorado encontrado
+                  Nenhum resultado para "{search}"
                 </div>
               ) : (
                 filtered.map((m) => (
