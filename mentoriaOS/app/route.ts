@@ -1,0 +1,19 @@
+import { readFile } from 'fs/promises'
+import { join } from 'path'
+
+export const dynamic = 'force-dynamic'
+
+export async function GET(request: Request) {
+  try {
+    const filePath = join(process.cwd(), 'index.html')
+    const content = await readFile(filePath, 'utf-8')
+
+    return new Response(content, {
+      headers: {
+        'Content-Type': 'text/html; charset=utf-8',
+      },
+    })
+  } catch (error) {
+    return new Response('Dashboard not found', { status: 404 })
+  }
+}
