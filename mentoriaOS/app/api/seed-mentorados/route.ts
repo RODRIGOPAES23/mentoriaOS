@@ -37,7 +37,7 @@ export async function POST() {
     ]
 
     // Check if mentorados already exist
-    const { data: existing, error: checkError } = await supabase
+    const { data: existing } = await supabase
       .from("mentorados")
       .select("id")
       .limit(1)

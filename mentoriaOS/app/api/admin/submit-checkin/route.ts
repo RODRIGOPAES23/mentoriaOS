@@ -5,13 +5,7 @@
 
 import { createClient } from "@supabase/supabase-js"
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 const adminToken = process.env.ADMIN_SEED_TOKEN || "dev-seed-token"
-
-if (!supabaseUrl || !supabaseServiceKey) {
-  throw new Error("Missing Supabase credentials")
-}
 
 export async function POST(request: Request) {
   const authHeader = request.headers.get("authorization")
@@ -20,6 +14,16 @@ export async function POST(request: Request) {
   }
 
   try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+    if (!supabaseUrl || !supabaseServiceKey) {
+      return Response.json(
+        { error: "Missing Supabase credentials" },
+        { status: 500 }
+      )
+    }
+
     const { mentoradoId, vendas_reais, leads_gerados, investimento_trafego, videos_postados, dificuldades_texto, tarefas_executadas } = await request.json()
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey)

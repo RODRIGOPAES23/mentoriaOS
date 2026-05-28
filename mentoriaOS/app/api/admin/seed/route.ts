@@ -6,13 +6,6 @@
 
 import { createClient } from "@supabase/supabase-js"
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-if (!supabaseUrl || !supabaseServiceKey) {
-  throw new Error("Missing Supabase credentials")
-}
-
 export async function POST(request: Request) {
   // Security: In production, verify admin token here
   const authHeader = request.headers.get("authorization")
@@ -23,6 +16,16 @@ export async function POST(request: Request) {
   }
 
   try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+    if (!supabaseUrl || !supabaseServiceKey) {
+      return Response.json(
+        { error: "Missing Supabase credentials" },
+        { status: 500 }
+      )
+    }
+
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
     // Attempt 1: Direct insert via Supabase client with upsert
