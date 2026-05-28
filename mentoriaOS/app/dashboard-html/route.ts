@@ -11,9 +11,15 @@ export async function GET() {
     return new Response(content, {
       headers: {
         'Content-Type': 'text/html; charset=utf-8',
+        'Cache-Control': 'public, max-age=3600',
       },
     })
   } catch (error) {
-    return new Response('Dashboard not found', { status: 404 })
+    return new Response('<!DOCTYPE html><html><body><p>Dashboard not found</p></body></html>', {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/html; charset=utf-8',
+      },
+    })
   }
 }
