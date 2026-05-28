@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mentoriaOS - Dashboard Mockup</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1a1f35 100%);
+            color: #e0e8ff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        /* Header */
+        header {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(100, 100, 120, 0.3);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            sticky: true;
+        }
+
+        .header-left h1 {
+            font-size: 32px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #3b82f6, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+
+        .header-left p {
+            font-size: 11px;
+            color: #96a4b4;
+        }
+
+        .header-right {
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-box {
+            background: rgba(40, 50, 80, 0.6);
+            border: 1px solid rgba(100, 150, 200, 0.4);
+            border-radius: 10px;
+            padding: 10px 20px;
+            color: #96a4b4;
+            width: 250px;
+            backdrop-filter: blur(5px);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 40px;
+        }
+
+        /* Glass Cards */
+        .glass-card {
+            background: rgba(30, 40, 60, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(100, 100, 120, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            background: rgba(30, 40, 60, 0.6);
+            border-color: rgba(100, 150, 200, 0.5);
+            transform: translateY(-2px);
+        }
+
+        /* Labels */
+        .section-label {
+            font-size: 10px;
+            font-weight: bold;
+            letter-spacing: 1.5px;
+            color: #c8c8dc;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+        }
+
+        /* Selector */
+        .selector {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .selector-dropdown {
+            background: rgba(30, 40, 60, 0.6);
+            border: 1px solid rgba(100, 100, 120, 0.3);
+            border-radius: 12px;
+            padding: 12px 20px;
+            color: #c8dcff;
+            width: 300px;
+            cursor: pointer;
+        }
+
+        /* Info Card */
+        .info-card {
+            background: rgba(25, 45, 85, 0.5);
+            border: 1px solid rgba(100, 150, 200, 0.4);
+            padding: 25px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            line-height: 1.8;
+        }
+
+        .info-card strong {
+            color: #c8dcff;
+        }
+
+        .info-card p {
+            color: #96b4c8;
+        }
+
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: rgba(30, 40, 60, 0.5);
+            border: 1.5px solid;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Card Styles */
+        .metric-card.green {
+            border-color: rgba(100, 180, 120, 0.6);
+            background: rgba(40, 80, 60, 0.4);
+        }
+
+        .metric-card.purple {
+            border-color: rgba(180, 100, 150, 0.6);
+            background: rgba(90, 40, 70, 0.4);
+        }
+
+        .metric-card.gray {
+            border-color: rgba(100, 100, 120, 0.4);
+            background: rgba(50, 50, 70, 0.3);
+        }
+
+        .metric-card.blue {
+            border-color: rgba(100, 150, 200, 0.6);
+            background: rgba(30, 60, 100, 0.4);
+        }
+
+        .metric-label {
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .metric-value {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .metric-trend {
+            font-size: 11px;
+        }
+
+        .green .metric-label { color: #96dc96; }
+        .green .metric-value { color: #64ff64; }
+        .green .metric-trend { color: #96dc96; }
+
+        .purple .metric-label { color: #ff96c8; }
+        .purple .metric-value { color: #ff96c8; }
+        .purple .metric-trend { color: #ff96c8; }
+
+        .gray .metric-label { color: #b4b4d2; }
+        .gray .metric-value { color: #c8c8e0; }
+        .gray .metric-trend { color: #96a4b4; }
+
+        .blue .metric-label { color: #96c8ff; }
+        .blue .metric-value { color: #96c8ff; }
+        .blue .metric-trend { color: #96c8ff; }
+
+        /* Briefing Section */
+        .briefing-card {
+            background: rgba(25, 45, 100, 0.4);
+            border: 1.5px solid rgba(120, 150, 200, 0.5);
+            border-radius: 16px;
+            padding: 30px;
+        }
+
+        .briefing-section {
+            margin-bottom: 25px;
+        }
+
+        .briefing-title {
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .diagnostic-title {
+            color: #ffc464;
+        }
+
+        .agenda-title {
+            color: #96dc96;
+        }
+
+        .briefing-content {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #b4bcd2;
+        }
+
+        .agenda-item {
+            margin-bottom: 8px;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #787888;
+            font-size: 12px;
+            margin-top: 40px;
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .glass-card {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        .metric-card {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        .metric-card:nth-child(1) { animation-delay: 0s; }
+        .metric-card:nth-child(2) { animation-delay: 0.1s; }
+        .metric-card:nth-child(3) { animation-delay: 0.2s; }
+        .metric-card:nth-child(4) { animation-delay: 0.3s; }
+
+        @media (max-width: 1024px) {
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-left">
+            <h1>mentoriaOS</h1>
+            <p>Sistema Operacional de Mentoria</p>
+        </div>
+        <div class="header-right">
+            <input type="text" class="search-box" placeholder="🔍 Buscar Mentorado...">
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Selector -->
+        <div class="glass-card">
+            <div class="section-label">Selecionar Mentorado</div>
+            <div class="selector">
+                <select class="selector-dropdown">
+                    <option>👤 João Silva (Tráfego Local)</option>
+                    <option>👤 Maria Oliveira (E-commerce)</option>
+                    <option>👤 Carlos Santos (Consultoria)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Info Card -->
+        <div class="info-card">
+            <p><strong>👑 João Silva</strong> | <strong>Nicho:</strong> Tráfego Local | <strong>Início:</strong> Jan/2026</p>
+            <p><strong>Status:</strong> Ativo | <strong>Foco:</strong> Estruturação Comercial & Escala de Tráfego</p>
+        </div>
+
+        <!-- Metrics Label -->
+        <div class="section-label" style="margin-left: -20px;">Métricas da Semana (tendência)</div>
+
+        <!-- Metrics Grid -->
+        <div class="metrics-grid">
+            <div class="metric-card green">
+                <div class="metric-label">📊 Leads Gerados</div>
+                <div class="metric-value">450</div>
+                <div class="metric-trend">▲ +15% vs semana anterior</div>
+            </div>
+
+            <div class="metric-card purple">
+                <div class="metric-label">🎯 Vendas Reais</div>
+                <div class="metric-value">R$ 2.4k</div>
+                <div class="metric-trend">▼ -30% vs semana anterior</div>
+            </div>
+
+            <div class="metric-card gray">
+                <div class="metric-label">💰 Investimento</div>
+                <div class="metric-value">R$ 1.1k</div>
+                <div class="metric-trend">Estável</div>
+            </div>
+
+            <div class="metric-card blue">
+                <div class="metric-label">🎬 Vídeos Postados</div>
+                <div class="metric-value">8</div>
+                <div class="metric-trend">▲ +2 vs semana anterior</div>
+            </div>
+        </div>
+
+        <!-- Briefing Section -->
+        <div class="section-label" style="margin-left: -20px; margin-top: 30px;">Briefing da IA (Claude 3.5 Sonnet)</div>
+
+        <div class="briefing-card">
+            <!-- Diagnostic -->
+            <div class="briefing-section">
+                <div class="briefing-title diagnostic-title">🎯 DIAGNÓSTICO DO MAIOR GARGALO</div>
+                <div class="briefing-content">
+                    Volume de leads subiu (+15%), mas a conversão comercial derreteu (-30%). O problema não é tráfego, é a mudança no script de vendas no WhatsApp ocorrida na terça-feira.
+                </div>
+            </div>
+
+            <!-- Call Agenda -->
+            <div class="briefing-section">
+                <div class="briefing-title agenda-title">📋 PAUTA DA CALL SUGERIDA</div>
+                <div class="briefing-content">
+                    <div class="agenda-item"><strong>1. Auditar últimos 5 atendimentos comerciais</strong> (0-10m)</div>
+                    <div class="agenda-item"><strong>2. Reverter alteração do script e alinhar criativos</strong> (10-25m)</div>
+                    <div class="agenda-item"><strong>3. Definir meta de taxa de conversão 12% (min) para destravar novos investimentos</strong> (25-30m)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        Tokens: 4.250  |  Modelo: Claude 3.5 Sonnet  |  Atualizado em: 28 de maio, 2026
+    </footer>
+</body>
+</html>
