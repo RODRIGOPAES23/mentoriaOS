@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Append ao histórico acumulado do mentorado
+    // Append ao histórico acumulado do mentorado (optional - non-blocking)
     const historicoEntry = {
       tipo: "analise_ia",
       data: new Date().toISOString(),
@@ -83,10 +83,26 @@ export async function POST(request: NextRequest) {
       gargalo: analise.gargalo_identificado,
     }
 
-    await supabaseAdmin.rpc("append_to_historico", {
-      p_mentorado_id: mentorado_id,
-      p_evento: historicoEntry,
-    })
+    try {
+      // Try to call the RPC, but don't fail if it doesn't exist
+      await supabaseAdmin.rpc("append_to_historico", {
+        p_mentorado_id: mentorado_id,
+        p_evento: historicoEntry,
+      })
+    } catch (rpcError) {
+      console.warn("RPC call failed (non-blocking):", String(rpcError))
+      // Fallback: manually update the historico_acumulado
+      try {
+        const { historico_acumulado = [] } = mentorado
+        const updatedHistorico = [...(Array.isArray(historico_acumulado) ? historico_acumulado : []), historicoEntry]
+        await supabaseAdmin
+          .from("mentorados")
+          .update({ historico_acumulado: updatedHistorico })
+          .eq("id", mentorado_id)
+      } catch (fallbackError) {
+        console.warn("Fallback historico update also failed:", String(fallbackError))
+      }
+    }
 
     return NextResponse.json(
       {
