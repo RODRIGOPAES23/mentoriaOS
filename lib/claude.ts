@@ -3,6 +3,7 @@ import type { Mentorado, Checkin } from "./supabase"
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
+  baseURL: "https://openrouter.ai/api/v1",
 })
 
 const SYSTEM_PROMPT = `Você é um Diretor de Operações e Estrategista de Negócios Digital de Elite.

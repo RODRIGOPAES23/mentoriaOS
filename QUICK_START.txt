@@ -1,0 +1,114 @@
+================================================================================
+mentoriaOS — QUICK START (4 HORAS ATÉ MVP LOCAL)
+================================================================================
+
+✅ GIT REPO JÁ INICIALIZADO LOCALMENTE
+
+PRÓXIMO: 4 PASSOS SIMPLES
+
+================================================================================
+PASSO 1: CRIAR GITHUB REPO (5 min)
+================================================================================
+
+Abra: https://github.com/new
+Preencha:
+  - Name: mentoriaOS
+  - Privacy: Private ✓
+  - NÃO inicialize com README
+
+Copie a URL criada (ex: https://github.com/seu-user/mentoriaOS.git)
+
+Depois, no PowerShell:
+
+cd "C:\Users\rodri\Desktop\Projetos\NEXUS\mentoriaOS"
+git remote add origin https://github.com/SEU_USER/mentoriaOS.git
+git branch -M main
+git push -u origin main
+
+Pronto! Código no GitHub ✓
+
+================================================================================
+PASSO 2: SUPABASE (30 min)
+================================================================================
+
+1. Abra: https://supabase.com
+2. New Project
+   - Name: mentoriaOS
+   - Region: São Paulo (br-sao-1)
+3. Crie (aguarde 2-3 min)
+
+4. Copie credenciais (Settings > API):
+   NEXT_PUBLIC_SUPABASE_URL = [copie aqui]
+   NEXT_PUBLIC_SUPABASE_ANON_KEY = [copie aqui]
+   SUPABASE_SERVICE_ROLE_KEY = [copie aqui]
+
+5. SQL Editor > New Query
+   - Cole TODA a rota de schema.sql (do seu projeto)
+   - Clique RUN ✓
+
+✓ 3 tabelas criadas com RLS
+
+================================================================================
+PASSO 3: ANTHROPIC API KEY (5 min)
+================================================================================
+
+1. Abra: https://console.anthropic.com
+2. API Keys (esquerda)
+3. Create Key > Nome: mentoriaOS-prod
+4. Copie: sk-ant-v4-...
+
+================================================================================
+PASSO 4: RODAR LOCALMENTE (30 min)
+================================================================================
+
+PowerShell (pasta do projeto):
+
+# Editar .env.local (já foi criado)
+# Cole aqui as 3 credenciais do Supabase + 1 do Anthropic:
+
+notepad .env.local
+
+NEXT_PUBLIC_SUPABASE_URL=https://[valor]
+NEXT_PUBLIC_SUPABASE_ANON_KEY=[valor]
+SUPABASE_SERVICE_ROLE_KEY=[valor]
+ANTHROPIC_API_KEY=sk-ant-v4-[valor]
+
+Salve e feche.
+
+Depois:
+
+npm install
+npm run dev
+
+Abra: http://localhost:3000
+
+✓ Dashboard carregando!
+
+================================================================================
+VALIDAÇÃO (5 min)
+================================================================================
+
+[ ] localhost:3000 carrega
+[ ] Nenhum erro no console do navegador
+[ ] Dropdown de mentorados aparece (pode estar vazio)
+[ ] Componentes de métricas visíveis
+
+✓ MVP LOCAL PRONTO!
+
+================================================================================
+PRÓXIMO: DEPLOY VERCEL (amanhã — 30 min)
+================================================================================
+
+1. Vercel.com > New Project
+2. Connect GitHub > Select mentoriaOS
+3. Environment Variables (adicione as 4)
+4. Deploy
+
+Pronto: mentoriaOS.nexus-tecnolog.ia.br LIVE ✓
+
+================================================================================
+TOTAL TIME: ~2-3 horas hoje + 30 min amanhã = MVP LIVE
+
+Questões? Abra SETUP.md para guia passo-a-passo completo.
+
+================================================================================
