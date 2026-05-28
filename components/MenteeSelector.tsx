@@ -1,7 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Search, User } from "lucide-react"
+import { Search, User, AlertCircle } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
 import { supabase } from "@/lib/supabase"
 import type { Mentorado } from "@/lib/supabase"
 
@@ -54,23 +55,34 @@ export function MenteeSelector({ onSelect, selected }: MenteeSelectorProps) {
   )
 
   return (
-    <div className="relative w-full md:w-80">
-      <div className="relative">
-        <button
+    <div className="relative w-full md:w-96">
+      <motion.div
+        className="relative"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <motion.button
           onClick={() => setIsOpen(!isOpen)}
-          className="w-full px-4 py-3 bg-secondary border border-slate-700 rounded-lg flex items-center gap-2 hover:border-accent transition-colors"
+          className="w-full px-4 py-3 glass border border-slate-600/30 rounded-xl flex items-center gap-3 hover:border-accent/50 transition-all duration-200 group"
+          whileHover={{ boxShadow: "0 0 20px rgba(59, 130, 246, 0.1)" }}
         >
-          <User className="w-4 h-4 text-accent" />
-          <span className="flex-1 text-left">
+          <motion.div
+            animate={{ rotate: isOpen ? 180 : 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <User className="w-5 h-5 text-accent group-hover:text-accent-light transition-colors" />
+          </motion.div>
+          <span className="flex-1 text-left text-sm font-medium">
             {selected?.nome || "Selecionar mentorado"}
           </span>
-          <svg
-            className={`w-4 h-4 transition-transform ${
-              isOpen ? "rotate-180" : ""
-            }`}
+          <motion.svg
+            className="w-4 h-4 text-slate-400"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
+            animate={{ rotate: isOpen ? 180 : 0 }}
+            transition={{ duration: 0.3 }}
           >
             <path
               strokeLinecap="round"
@@ -78,68 +90,99 @@ export function MenteeSelector({ onSelect, selected }: MenteeSelectorProps) {
               strokeWidth={2}
               d="M19 14l-7 7m0 0l-7-7m7 7V3"
             />
-          </svg>
-        </button>
+          </motion.svg>
+        </motion.button>
 
-        {isOpen && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-secondary border border-slate-700 rounded-lg shadow-lg z-50">
-            <div className="p-3 border-b border-slate-700">
-              <div className="relative">
-                <Search className="absolute left-3 top-3 w-4 h-4 text-slate-500" />
-                <input
-                  type="text"
-                  placeholder="Buscar mentorado..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-primary border border-slate-600 rounded text-sm focus:outline-none focus:border-accent"
-                />
+        {/* Dropdown Menu */}
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+              className="absolute top-full left-0 right-0 mt-3 glass border border-slate-600/30 rounded-xl shadow-2xl z-50 overflow-hidden backdrop-blur-xl"
+            >
+              {/* Search Input */}
+              <div className="p-4 border-b border-slate-600/20 bg-secondary/20">
+                <div className="relative">
+                  <Search className="absolute left-3 top-3 w-4 h-4 text-slate-500" />
+                  <input
+                    type="text"
+                    placeholder="Buscar mentorado..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 bg-primary/50 border border-slate-600/20 rounded-lg text-sm focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/20 transition-all"
+                    autoFocus
+                  />
+                </div>
               </div>
-            </div>
 
-            <div className="max-h-64 overflow-y-auto">
-              {loading ? (
-                <div className="p-4 text-center text-slate-400">
-                  Carregando mentorados...
-                </div>
-              ) : error ? (
-                <div className="p-4 text-center">
-                  <div className="text-sm text-red-400 mb-2">{error}</div>
-                  <button
-                    onClick={fetchMentorados}
-                    className="px-2 py-1 bg-primary border border-slate-600 rounded text-xs hover:bg-secondary transition-colors"
+              {/* Content */}
+              <div className="max-h-72 overflow-y-auto">
+                {loading ? (
+                  <div className="p-8 text-center">
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                      className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full mx-auto mb-2"
+                    />
+                    <p className="text-sm text-slate-400">Carregando mentorados...</p>
+                  </div>
+                ) : error ? (
+                  <div className="p-4 text-center">
+                    <div className="flex items-center justify-center gap-2 text-red-400 mb-3">
+                      <AlertCircle className="w-4 h-4" />
+                      <span className="text-sm">{error}</span>
+                    </div>
+                    <button
+                      onClick={fetchMentorados}
+                      className="px-3 py-1.5 bg-accent/20 border border-accent/30 rounded text-xs font-medium hover:bg-accent/30 transition-colors"
+                    >
+                      Tentar novamente
+                    </button>
+                  </div>
+                ) : mentorados.length === 0 ? (
+                  <div className="p-8 text-center">
+                    <div className="text-sm text-slate-400 mb-1">Nenhum mentorado encontrado</div>
+                    <div className="text-xs text-slate-500">Insira dados na tabela mentorados do Supabase</div>
+                  </div>
+                ) : filtered.length === 0 ? (
+                  <div className="p-8 text-center text-sm text-slate-400">
+                    Nenhum resultado para "{search}"
+                  </div>
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="divide-y divide-slate-600/10"
                   >
-                    Tentar novamente
-                  </button>
-                </div>
-              ) : mentorados.length === 0 ? (
-                <div className="p-4 text-center text-slate-400">
-                  <div className="text-sm mb-2">Nenhum mentorado encontrado</div>
-                  <div className="text-xs text-slate-500">Insira dados na tabela mentorados do Supabase</div>
-                </div>
-              ) : filtered.length === 0 ? (
-                <div className="p-4 text-center text-slate-400">
-                  Nenhum resultado para "{search}"
-                </div>
-              ) : (
-                filtered.map((m) => (
-                  <button
-                    key={m.id}
-                    onClick={() => {
-                      onSelect(m)
-                      setIsOpen(false)
-                      setSearch("")
-                    }}
-                    className="w-full px-4 py-3 text-left hover:bg-primary transition-colors border-b border-slate-700 last:border-b-0"
-                  >
-                    <div className="font-medium">{m.nome}</div>
-                    <div className="text-sm text-slate-400">{m.nicho}</div>
-                  </button>
-                ))
-              )}
-            </div>
-          </div>
-        )}
-      </div>
+                    {filtered.map((m, idx) => (
+                      <motion.button
+                        key={m.id}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: idx * 0.05 }}
+                        onClick={() => {
+                          onSelect(m)
+                          setIsOpen(false)
+                          setSearch("")
+                        }}
+                        className="w-full px-4 py-3 text-left hover:bg-accent/5 transition-colors group"
+                      >
+                        <div className="font-medium text-sm group-hover:text-accent transition-colors">
+                          {m.nome}
+                        </div>
+                        <div className="text-xs text-slate-500">{m.nicho}</div>
+                      </motion.button>
+                    ))}
+                  </motion.div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
     </div>
   )
 }

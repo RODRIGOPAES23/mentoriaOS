@@ -2,7 +2,10 @@
 
 import { useEffect, useState } from "react"
 import { TrendingUp, Users, DollarSign, Video } from "lucide-react"
+import { motion } from "framer-motion"
 import { supabase } from "@/lib/supabase"
+import { MetricCard3D } from "@/components/3D/MetricCard3D"
+import { containerVariants } from "@/components/Animations/transitions"
 import type { Checkin } from "@/lib/supabase"
 
 interface MetricsDisplayProps {
@@ -41,13 +44,23 @@ export function MetricsDisplay({ menteeId }: MetricsDisplayProps) {
   }
 
   if (loading) {
-    return <div className="text-slate-400">Carregando métricas...</div>
+    return (
+      <div className="flex items-center justify-center py-12">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+          className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full"
+        />
+        <span className="ml-3 text-slate-400">Carregando métricas...</span>
+      </div>
+    )
   }
 
   if (checkins.length === 0) {
     return (
-      <div className="text-center py-8 text-slate-400">
-        Nenhum checkin disponível ainda
+      <div className="text-center py-12 text-slate-400">
+        <p className="mb-2">Nenhum checkin disponível ainda</p>
+        <p className="text-sm text-slate-500">Envie um checkin para ver as métricas</p>
       </div>
     )
   }
@@ -96,20 +109,23 @@ export function MetricsDisplay({ menteeId }: MetricsDisplayProps) {
   ]
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <motion.div
+      variants={containerVariants}
+      initial="initial"
+      animate="animate"
+      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+    >
       {metrics.map((metric, idx) => (
-        <div
+        <MetricCard3D
           key={idx}
-          className="bg-secondary border border-slate-700 rounded-lg p-6 hover:border-accent transition-colors"
-        >
-          <div className="flex items-start justify-between mb-4">
-            <div className={`${metric.color}`}>{metric.icon}</div>
-            <span className="text-sm text-slate-400">{metric.change}</span>
-          </div>
-          <div className="text-sm text-slate-400 mb-2">{metric.label}</div>
-          <div className="text-2xl font-bold">{metric.value}</div>
-        </div>
+          index={idx}
+          icon={metric.icon}
+          label={metric.label}
+          value={metric.value}
+          change={metric.change}
+          color={metric.color}
+        />
       ))}
-    </div>
+    </motion.div>
   )
 }
