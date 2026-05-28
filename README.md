@@ -1,16 +1,50 @@
-# mentoriaOS — Sistema Operacional de Mentoria
+# 🎓 mentoriaOS — Sistema Operacional de Mentoria
 
-> Centralizar jornada de 12 meses de mentorados, eliminar contexto perdido, gerar pautas de call ultra-precisas baseadas em IA.
+> **Centralizar jornada de 12 meses de mentorados, eliminar contexto perdido, gerar pautas de call ultra-precisas baseadas em Claude IA.**
+
+## 🚀 Status Atual (2026-05-28)
+
+✅ **DEPLOYADO** | ✅ **MCP INTEGRADO** | ⏳ **AGUARDANDO ATIVAÇÃO DO BANCO**
+
+- **App**: https://mentoriaos.vercel.app
+- **Database**: Pronto para criar (schema.sql)
+- **Tempo para ativar**: 5 minutos
+
+## 📋 Guia Rápido
+
+1. **[CHECKLIST_ATIVACAO.md](./CHECKLIST_ATIVACAO.md)** ← **COMECE AQUI** (4 passos ilustrados)
+2. **[SETUP_GUIA_FINAL.md](./SETUP_GUIA_FINAL.md)** ← Detalhado passo-a-passo
+3. **[STATUS_PROJETO.md](./STATUS_PROJETO.md)** ← Status técnico completo
 
 ## 📋 Tabela de Conteúdos
 
 1. [Visão Geral](#visão-geral)
 2. [Stack Tecnológico](#stack-tecnológico)
 3. [Estrutura de Pastas](#estrutura-de-pastas)
-4. [Setup Local](#setup-local)
-5. [Deploy na Vercel](#deploy-na-vercel)
-6. [Fluxo Operacional](#fluxo-operacional)
-7. [Documentação de Banco de Dados](#documentação-de-banco-de-dados)
+4. **[ATIVAÇÃO (5 MIN)](#ativação-rápida-5-minutos)** ← Fazer primeiro
+5. [Fluxo Operacional](#fluxo-operacional)
+6. [Documentação de Banco de Dados](#documentação-de-banco-de-dados)
+
+---
+
+## ⚡ Ativação Rápida (5 minutos)
+
+### 3 Passos para Ligar o Sistema
+
+```bash
+# 1️⃣ Criar schema no Supabase (2 min)
+# → Abra: https://app.supabase.com/project/pywjcpsklvgpadxgotpn/sql/new
+# → Cole: schema.sql (copie TODO o arquivo)
+# → Clique: [Run]
+
+# 2️⃣ Inserir dados de teste (1 min)
+bash insert_mentorados.sh
+
+# 3️⃣ Acessar aplicação (pronto!)
+# → https://mentoriaos.vercel.app
+```
+
+**Mais detalhes?** → [CHECKLIST_ATIVACAO.md](./CHECKLIST_ATIVACAO.md)
 
 ---
 
