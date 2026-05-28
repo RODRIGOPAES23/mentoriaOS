@@ -3,7 +3,7 @@ import { join } from 'path'
 
 export const dynamic = 'force-dynamic'
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const filePath = join(process.cwd(), 'index.html')
     const content = await readFile(filePath, 'utf-8')
