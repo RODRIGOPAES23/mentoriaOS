@@ -3,6 +3,7 @@
 import { useParams, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { createClient } from "@supabase/supabase-js"
+import { submitCheckinAction } from "@/app/actions/submitCheckin"
 import type { Mentorado } from "@/lib/supabase"
 
 const supabase = createClient(
@@ -32,17 +33,17 @@ export default function FormularioPersonalizado() {
     async function fetchMentorado() {
       try {
         setLoading(true)
-        // Decodificar nome do URL e buscar mentorado por nome
-        const nome = decodeURIComponent(nomeParametro.replace(/-/g, " "))
+        // ✅ CORREÇÃO CRÍTICA: Buscar por slug exato (não ILIKE)
+        // Isto evita buscas ambíguas que podem trazer o mentorado errado
 
         const { data, error: queryError } = await supabase
           .from("mentorados")
           .select("*")
-          .ilike("nome", `%${nome}%`)
+          .eq("slug", nomeParametro) // ✅ Busca exata e única por slug
           .single()
 
         if (queryError || !data) {
-          setError(`Mentorado "${nome}" não encontrado`)
+          setError(`Mentorado com slug "${nomeParametro}" não encontrado`)
           return
         }
 
@@ -76,23 +77,19 @@ export default function FormularioPersonalizado() {
 
     setSubmitting(true)
     try {
-      const response = await fetch("/api/admin/submit-checkin", {
-        method: "POST",
-        headers: {
-          "Authorization": "Bearer dev-seed-token",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          mentoradoId: mentorado.id,
-          ...formData,
-          tarefas_executadas: formData.tarefas_executadas
-            .split("\n")
-            .filter(Boolean),
-        }),
+      const result = await submitCheckinAction(mentorado.id, {
+        vendas_reais: formData.vendas_reais,
+        leads_gerados: formData.leads_gerados,
+        investimento_trafego: formData.investimento_trafego,
+        videos_postados: formData.videos_postados,
+        dificuldades_texto: formData.dificuldades_texto,
+        tarefas_executadas: formData.tarefas_executadas
+          .split("\n")
+          .filter(Boolean),
       })
 
-      if (!response.ok) {
-        throw new Error("Erro ao enviar check-in")
+      if (result.status !== "success") {
+        throw new Error(result.message || "Erro ao enviar check-in")
       }
 
       setSuccess(true)
