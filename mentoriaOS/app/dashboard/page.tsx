@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, useCallback } from "react"
-import { Search, Bell, TrendingUp, TrendingDown, Minus, Target, BarChart3, Zap, CheckCircle2, AlertCircle, Clock, Link2, Copy, Check, UserPlus, X } from "lucide-react"
+import { Search, Bell, TrendingUp, TrendingDown, Minus, Target, BarChart3, Zap, CheckCircle2, AlertCircle, Clock, Link2, Copy, Check, UserPlus, X, RefreshCw } from "lucide-react"
 import type { CheckinRow } from "@/lib/supabase"
 
 interface Mentorado {
@@ -53,11 +53,16 @@ export default function DashboardPage() {
   const [showCadastro, setShowCadastro] = useState(false)
   const [salvando, setSalvando] = useState(false)
   const [novo, setNovo] = useState({ nome: "", nicho: "", foco_macro: "", data_inicio: "" })
+  const [atualizando, setAtualizando] = useState(false)
+  const [ultimaAtualizacao, setUltimaAtualizacao] = useState<Date | null>(null)
 
-  // Buscar checkin mais recente (via API server-side: ignora RLS)
+  // Buscar checkin mais recente (via API server-side: ignora RLS).
+  // cache:"no-store" + cache-buster garantem dado sempre fresco (sem cache do browser/edge).
   const buscarCheckin = useCallback(async (mentoradoId: string, mentoradoAtual: Mentorado) => {
     try {
-      const res = await fetch(`/api/dashboard/checkin?mentoradoId=${mentoradoId}`)
+      const res = await fetch(`/api/dashboard/checkin?mentoradoId=${mentoradoId}&t=${Date.now()}`, {
+        cache: "no-store",
+      })
       const json = await res.json()
       const c = json.checkin as CheckinRow | null
       if (c) {
@@ -67,16 +72,27 @@ export default function DashboardPage() {
         setCheckin(null)
         setBriefing(null)
       }
+      setUltimaAtualizacao(new Date())
     } catch {
       setCheckin(null)
       setBriefing(null)
     }
   }, [])
 
+  // Atualização manual / sob demanda do mentorado selecionado
+  const refreshAgora = useCallback(async () => {
+    if (!selectedId) return
+    const atual = mentorados.find((m) => m.id === selectedId)
+    if (!atual) return
+    setAtualizando(true)
+    await buscarCheckin(selectedId, atual)
+    setAtualizando(false)
+  }, [selectedId, mentorados, buscarCheckin])
+
   // Carrega lista de mentorados (reutilizável após cadastro)
   const recarregarMentorados = useCallback(async (selecionarId?: string) => {
     try {
-      const res = await fetch("/api/dashboard/mentorados")
+      const res = await fetch(`/api/dashboard/mentorados?t=${Date.now()}`, { cache: "no-store" })
       const json = await res.json()
       const lista = (json.mentorados || []) as Mentorado[]
       setMentorados(lista)
@@ -142,8 +158,25 @@ export default function DashboardPage() {
     const id = setInterval(() => {
       const atual = mentorados.find((m) => m.id === selectedId)
       if (atual) buscarCheckin(selectedId, atual)
-    }, 12000)
+    }, 8000)
     return () => clearInterval(id)
+  }, [selectedId, mentorados, buscarCheckin])
+
+  // Atualiza na hora quando o mentor volta para a aba do dashboard
+  // (ex.: enviou o form no celular/outra aba e voltou aqui).
+  useEffect(() => {
+    const onFocus = () => {
+      if (document.visibilityState === "visible" && selectedId) {
+        const atual = mentorados.find((m) => m.id === selectedId)
+        if (atual) buscarCheckin(selectedId, atual)
+      }
+    }
+    window.addEventListener("focus", onFocus)
+    document.addEventListener("visibilitychange", onFocus)
+    return () => {
+      window.removeEventListener("focus", onFocus)
+      document.removeEventListener("visibilitychange", onFocus)
+    }
   }, [selectedId, mentorados, buscarCheckin])
 
   const selected = mentorados.find((m) => m.id === selectedId)
@@ -304,7 +337,25 @@ export default function DashboardPage() {
 
                 {/* ── MÉTRICAS GRID 3 COLUNAS ── */}
                 <div>
-                  <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4 px-1">📊 Métricas da Semana</p>
+                  <div className="flex items-center justify-between mb-4 px-1">
+                    <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">📊 Métricas da Semana</p>
+                    <div className="flex items-center gap-3">
+                      {ultimaAtualizacao && (
+                        <span className="text-[10px] text-slate-500">
+                          Atualizado {ultimaAtualizacao.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+                        </span>
+                      )}
+                      <button
+                        onClick={refreshAgora}
+                        disabled={atualizando}
+                        title="Atualizar agora"
+                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800/60 border border-slate-700/50 text-slate-300 hover:bg-slate-700/60 hover:text-white transition-all disabled:opacity-60"
+                      >
+                        <RefreshCw className={`w-3 h-3 ${atualizando ? "animate-spin" : ""}`} />
+                        {atualizando ? "Atualizando" : "Atualizar"}
+                      </button>
+                    </div>
+                  </div>
                   <div className="grid grid-cols-3 gap-4">
                     {/* LEADS */}
                     <div className="group bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent border border-emerald-500/30 rounded-xl p-5 shadow-xl hover:shadow-2xl hover:border-emerald-500/50 transition-all duration-300 cursor-pointer">
