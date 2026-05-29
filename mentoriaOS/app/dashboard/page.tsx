@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from "react"
 import { Search, Bell, TrendingUp, TrendingDown, Minus, Target, BarChart3, Zap, CheckCircle2, AlertCircle, Clock, Link2, Copy, Check, UserPlus, X, RefreshCw, Edit2, Trash2 } from "lucide-react"
 import type { CheckinRow } from "@/lib/supabase"
+import PendenciasSection from "@/components/PendenciasSection"
 
 interface Mentorado {
   id: string
@@ -113,6 +114,7 @@ export default function DashboardPage() {
   const [showEditModal, setShowEditModal] = useState(false)
   const [editData, setEditData] = useState({ nome: "", nicho: "", foco_macro: "", status: "Ativo" })
   const [editando, setEditando] = useState(false)
+  const [mentorId, setMentorId] = useState<string | null>(null)
 
   // Proteger dashboard: se não tiver mentor selecionado, redirecionar para home
   useEffect(() => {
@@ -122,6 +124,8 @@ export default function DashboardPage() {
       if (typeof window !== "undefined") {
         window.location.href = "/"
       }
+    } else {
+      setMentorId(mentorSelecionado)
     }
   }, [])
 
@@ -746,6 +750,9 @@ export default function DashboardPage() {
                     </div>
                   </div>
                 </div>
+
+                {/* ── PENDÊNCIAS DO MENTORADO ── */}
+                <PendenciasSection mentoradoId={selectedId} mentorId={mentorId} />
 
                 {/* ── MÉTRICAS GRID 3 COLUNAS ── */}
                 <div>
