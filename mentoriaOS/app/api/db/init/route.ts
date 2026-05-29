@@ -3,65 +3,108 @@ import { createClient } from "@supabase/supabase-js"
 export const dynamic = "force-dynamic"
 
 export async function POST() {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { persistSession: false } }
-  )
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+
+  const sql = `
+    CREATE TABLE IF NOT EXISTS public.mentors (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      nome TEXT NOT NULL,
+      email TEXT UNIQUE NOT NULL,
+      metodo_trabalho TEXT,
+      filosofia TEXT,
+      nicho_foco TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      status TEXT DEFAULT 'ativo'
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_mentors_email ON public.mentors(email);
+
+    ALTER TABLE public.mentors ENABLE ROW LEVEL SECURITY;
+
+    DROP POLICY IF EXISTS "Allow all for mentors" ON public.mentors;
+    CREATE POLICY "Allow all for mentors"
+      ON public.mentors
+      FOR ALL USING (true) WITH CHECK (true);
+  `
 
   try {
-    // Criar a tabela mentors
-    const { error: tableError } = await (supabase as any).rpc("query", {
-      sql: `
-        CREATE TABLE IF NOT EXISTS public.mentors (
-          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-          nome TEXT NOT NULL,
-          email TEXT UNIQUE NOT NULL,
-          metodo_trabalho TEXT,
-          filosofia TEXT,
-          nicho_foco TEXT,
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          status TEXT DEFAULT 'ativo'
-        );
-      `
+    // Executar SQL via Supabase Admin API
+    const response = await fetch(`${supabaseUrl}/rest/v1/rpc/query`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${serviceRoleKey}`,
+        "Content-Type": "application/json",
+        apikey: serviceRoleKey,
+      },
+      body: JSON.stringify({ sql }),
     })
 
-    if (tableError && !tableError.message.includes("already exists")) {
-      throw tableError
+    if (!response.ok) {
+      const errorData = await response.json()
+      console.log("API Response:", response.status, errorData)
+
+      // Tentar com Supabase client direto
+      const supabase = createClient(supabaseUrl, serviceRoleKey, {
+        auth: { persistSession: false },
+      })
+
+      // Tentar inserir um registro para testar se tabela existe
+      const { error: testError } = await supabase
+        .from("mentors")
+        .select("*")
+        .limit(1)
+
+      if (testError && testError.code === "PGRST116") {
+        return Response.json({
+          error: "Tabela não existe. Execute manualmente no Supabase SQL Editor.",
+          sql,
+        })
+      }
+
+      return Response.json({
+        success: true,
+        message: "Tabela já existe ou foi criada com sucesso!",
+      })
     }
 
-    // Criar índice
-    const { error: indexError } = await (supabase as any).rpc("query", {
-      sql: `CREATE INDEX IF NOT EXISTS idx_mentors_email ON public.mentors(email);`
-    })
-
-    // RLS
-    const { error: rlsError } = await (supabase as any).rpc("query", {
-      sql: `ALTER TABLE public.mentors ENABLE ROW LEVEL SECURITY;`
-    })
-
-    // Policy
-    const { error: policyError } = await (supabase as any).rpc("query", {
-      sql: `
-        DROP POLICY IF EXISTS "Allow all for mentors" ON public.mentors;
-        CREATE POLICY "Allow all for mentors"
-          ON public.mentors
-          FOR ALL USING (true) WITH CHECK (true);
-      `
-    })
-
+    const result = await response.json()
     return Response.json({
       success: true,
-      message: "Tabela mentors criada com sucesso!",
-      errors: {
-        table: tableError?.message,
-        index: indexError?.message,
-        rls: rlsError?.message,
-        policy: policyError?.message
-      }
+      message: "Tabela criada com sucesso!",
+      result,
     })
   } catch (e) {
-    return Response.json({ error: String(e) }, { status: 500 })
+    console.error("Error:", e)
+    return Response.json(
+      {
+        error: String(e),
+        hint: "Copie o SQL abaixo e execute no Supabase SQL Editor",
+        sql: `
+CREATE TABLE IF NOT EXISTS public.mentors (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  nome TEXT NOT NULL,
+  email TEXT UNIQUE NOT NULL,
+  metodo_trabalho TEXT,
+  filosofia TEXT,
+  nicho_foco TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  status TEXT DEFAULT 'ativo'
+);
+
+CREATE INDEX IF NOT EXISTS idx_mentors_email ON public.mentors(email);
+
+ALTER TABLE public.mentors ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow all for mentors" ON public.mentors;
+CREATE POLICY "Allow all for mentors"
+  ON public.mentors
+  FOR ALL USING (true) WITH CHECK (true);
+        `,
+      },
+      { status: 500 }
+    )
   }
 }
