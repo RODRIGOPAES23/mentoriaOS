@@ -108,6 +108,7 @@ export default function DashboardPage() {
   const briefingCache = useRef<Map<string, BriefingIA>>(new Map())
 
   const [selectedMetric, setSelectedMetric] = useState<"leads" | "vendas" | "investimento" | null>(null)
+  const [sidebarOpen, setSidebarOpen] = useState(true)
 
   // Buscar checkin mais recente (via API server-side: ignora RLS).
   // cache:"no-store" + cache-buster garantem dado sempre fresco (sem cache do browser/edge).
@@ -438,76 +439,113 @@ export default function DashboardPage() {
   return (
     <div className="h-screen w-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white flex overflow-hidden">
       {/* ── SIDEBAR ESQUERDA ── */}
-      <aside className="w-64 flex-shrink-0 bg-gradient-to-b from-slate-900/80 to-slate-950/80 backdrop-blur-xl border-r border-slate-700/20 flex flex-col overflow-y-auto" data-test="premium-sidebar-v2">
-        {/* Logo Section */}
-        <div className="p-6 border-b border-slate-700/20">
-          <div className="flex items-center gap-3 mb-1">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center font-bold text-white shadow-lg">Ω</div>
-            <div>
-              <h1 className="text-sm font-bold text-white">S.O. MENTORIA</h1>
-              <p className="text-[10px] text-slate-500">MENTOR: Rodrigo Paes</p>
+      <aside className={`${sidebarOpen ? "w-64" : "w-20"} flex-shrink-0 bg-gradient-to-b from-slate-900/80 to-slate-950/80 backdrop-blur-xl border-r border-slate-700/20 flex flex-col overflow-y-auto transition-all duration-300`} data-test="premium-sidebar-v2">
+        {/* Logo Section + Toggle */}
+        <div className="p-4 border-b border-slate-700/20">
+          <div className="flex items-center justify-between gap-2">
+            <div className={`flex items-center gap-3 ${sidebarOpen ? "opacity-100" : "opacity-0 hidden"} transition-opacity duration-300`}>
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center font-bold text-white shadow-lg">Ω</div>
+              <div>
+                <h1 className="text-sm font-bold text-white">S.O. MENTORIA</h1>
+                <p className="text-[10px] text-slate-500">MENTOR: Rodrigo Paes</p>
+              </div>
             </div>
+            {/* Logo Compacto (quando recolhido) */}
+            {!sidebarOpen && (
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center font-bold text-white shadow-lg">Ω</div>
+            )}
+            {/* Toggle Button */}
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="p-1.5 hover:bg-slate-800/50 rounded-lg transition-colors"
+              title={sidebarOpen ? "Recolher" : "Expandir"}
+            >
+              {sidebarOpen ? (
+                <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              ) : (
+                <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              )}
+            </button>
           </div>
         </div>
 
         {/* Search */}
-        <div className="px-4 pt-4 pb-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-500" />
-            <input
-              type="text"
-              placeholder="Buscar mentorado..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 bg-slate-800/50 border border-slate-700/50 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/50 transition-colors"
-            />
+        {sidebarOpen && (
+          <div className="px-4 pt-4 pb-3 transition-all duration-300">
+            <div className="relative">
+              <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-500" />
+              <input
+                type="text"
+                placeholder="Buscar mentorado..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 bg-slate-800/50 border border-slate-700/50 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/50 transition-colors"
+              />
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Botão Cadastrar Mentorado */}
-        <div className="px-4 pb-2">
+        <div className={`px-4 pb-2 transition-all duration-300 ${!sidebarOpen && "flex justify-center"}`}>
           <button
             onClick={() => setShowCadastro(true)}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-sm font-semibold bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white shadow-lg shadow-blue-500/20 transition-all duration-200"
+            className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-sm font-semibold bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white shadow-lg shadow-blue-500/20 transition-all duration-200 ${sidebarOpen ? "w-full" : "p-2"}`}
+            title={!sidebarOpen ? "Cadastrar Mentorado" : undefined}
           >
-            <UserPlus className="w-4 h-4" /> Cadastrar Mentorado
+            <UserPlus className="w-4 h-4" />
+            {sidebarOpen && "Cadastrar Mentorado"}
           </button>
         </div>
 
         {/* Mentorados List */}
-        <div className="flex-1 px-3 space-y-1.5 overflow-y-auto">
-          <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest px-2 mt-4 mb-3">Mentorados Ativos</p>
+        <div className={`flex-1 overflow-y-auto transition-all duration-300 ${sidebarOpen ? "px-3 space-y-1.5" : "px-2 space-y-2 flex flex-col items-center"}`}>
+          {sidebarOpen && (
+            <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest px-2 mt-4 mb-3">Mentorados Ativos</p>
+          )}
           {filtered.map((m) => (
             <button
               key={m.id}
               onClick={() => setSelectedId(m.id)}
-              className={`w-full group relative p-3 rounded-lg transition-all duration-200 flex items-center gap-3 ${
+              className={`group relative rounded-lg transition-all duration-200 flex items-center gap-3 ${
+                sidebarOpen ? "w-full p-3" : "p-2"
+              } ${
                 selectedId === m.id
                   ? "bg-gradient-to-r from-blue-600/30 to-blue-500/20 border border-blue-500/40 shadow-lg shadow-blue-500/10"
                   : "bg-slate-800/30 border border-slate-700/30 hover:bg-slate-800/50 hover:border-slate-600/50"
               }`}
+              title={!sidebarOpen ? m.nome : undefined}
             >
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center flex-shrink-0 text-xs font-bold">
+              <div className={`rounded-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center flex-shrink-0 text-xs font-bold ${sidebarOpen ? "w-10 h-10" : "w-8 h-8"}`}>
                 {m.nome.split(" ").map(n => n[0]).join("")}
               </div>
-              <div className="flex-1 min-w-0 text-left">
-                <p className="text-sm font-semibold text-white truncate">{m.nome}</p>
-                <p className="text-[10px] text-slate-400 truncate">{m.nicho}</p>
-              </div>
-              <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${
-                m.status === "Ativo" ? "bg-emerald-400 shadow-lg shadow-emerald-400/50" : "bg-slate-500"
-              }`} />
+              {sidebarOpen && (
+                <>
+                  <div className="flex-1 min-w-0 text-left">
+                    <p className="text-sm font-semibold text-white truncate">{m.nome}</p>
+                    <p className="text-[10px] text-slate-400 truncate">{m.nicho}</p>
+                  </div>
+                  <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${
+                    m.status === "Ativo" ? "bg-emerald-400 shadow-lg shadow-emerald-400/50" : "bg-slate-500"
+                  }`} />
+                </>
+              )}
             </button>
           ))}
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-slate-700/20">
-          <div className="text-[10px] text-slate-500 text-center">
-            <p>Dashboard v2.0</p>
-            <p className="mt-1">Powered by Supabase + Claude</p>
+        {sidebarOpen && (
+          <div className="p-4 border-t border-slate-700/20 transition-all duration-300">
+            <div className="text-[10px] text-slate-500 text-center">
+              <p>Dashboard v2.0</p>
+              <p className="mt-1">Powered by Supabase + Claude</p>
+            </div>
           </div>
-        </div>
+        )}
       </aside>
 
       {/* ── MAIN CONTENT ── */}
