@@ -159,6 +159,13 @@ export default function DashboardPage() {
     recarregarMentorados()
   }, [recarregarMentorados])
 
+  // Selecionar automaticamente o primeiro mentorado quando a lista carrega
+  useEffect(() => {
+    if (mentorados.length > 0 && !selectedId) {
+      setSelectedId(mentorados[0].id)
+    }
+  }, [mentorados, selectedId])
+
   // Gerar / copiar link do formulário do mentorado selecionado
   const copiarLink = useCallback(async () => {
     if (!selectedId) return
