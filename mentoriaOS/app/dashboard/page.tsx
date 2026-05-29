@@ -5,6 +5,7 @@ import { createPortal } from "react-dom"
 import { Search, Bell, TrendingUp, TrendingDown, Minus, Target, BarChart3, Zap, CheckCircle2, AlertCircle, Clock, Link2, Copy, Check, UserPlus, X, RefreshCw, Edit2, Trash2, LogOut, User, History, ChevronRight, Calendar, Briefcase, BookOpen } from "lucide-react"
 import type { CheckinRow } from "@/lib/supabase"
 import PendenciasSection from "@/components/PendenciasSection"
+import { getRealtimeClient } from "@/lib/supabase-realtime"
 
 interface Mentorado {
   id: string
@@ -109,7 +110,8 @@ export default function DashboardPage() {
   const [ultimaAtualizacao, setUltimaAtualizacao] = useState<Date | null>(null)
 
   const [briefingLoading, setBriefingLoading] = useState(false)
-  const briefingCache = useRef<Map<string, BriefingIA>>(new Map())
+  const [realtimeStatus, setRealtimeStatus] = useState<"connecting" | "connected" | "error">("connecting")
+  // briefingCache removido — persistência agora é via checkins.briefing_ia no banco
 
   const [selectedMetric, setSelectedMetric] = useState<"leads" | "vendas" | "investimento" | null>(null)
   const [sidebarOpen, setSidebarOpen] = useState(true)
@@ -388,20 +390,17 @@ export default function DashboardPage() {
   }, [selectedId, mentorados, buscarCheckin])
 
   // Gera o Briefing IA (Gemini Flash via OpenRouter) 1x por check-in.
-  // Cache por id evita chamar a IA a cada polling. Template entra como
-  // fallback instantâneo enquanto a IA responde (ou se ela falhar).
+  // Briefing IA — persistência no banco (checkins.briefing_ia)
+  // Cache in-memory removido. O banco é a fonte da verdade.
+  // Na primeira chamada: gera via Gemini + persiste.
+  // Nas seguintes: API retorna o JSON salvo (cached: true, 0 tokens).
   useEffect(() => {
     if (!checkin || !selected) {
       setBriefing(null)
       return
     }
     const cid = checkin.id
-    const cached = briefingCache.current.get(cid)
-    if (cached) {
-      setBriefing(cached)
-      return
-    }
-    setBriefing(gerarBriefing(selected, checkin)) // fallback instantâneo
+    setBriefing(gerarBriefing(selected, checkin)) // fallback síncrono imediato
     setBriefingLoading(true)
     let cancelado = false
     fetch("/api/dashboard/briefing", {
@@ -413,43 +412,44 @@ export default function DashboardPage() {
       .then((j) => {
         if (cancelado) return
         if (j?.briefing && Array.isArray(j.briefing.pauta)) {
-          briefingCache.current.set(cid, j.briefing)
           setBriefing(j.briefing)
         }
       })
       .catch(() => {})
-      .finally(() => {
-        if (!cancelado) setBriefingLoading(false)
-      })
-    return () => {
-      cancelado = true
-    }
+      .finally(() => { if (!cancelado) setBriefingLoading(false) })
+    return () => { cancelado = true }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [checkin?.id, selectedId])
 
-  // Auto-refresh (polling): novos check-ins enviados pelo mentorado aparecem
-  // sem reload. Realtime via anon é bloqueado pelo RLS, então usamos polling.
+  // ── REALTIME — substitui polling de 8s ───────────────────────────────────
+  // Assina mudanças em `checkins` e `tarefas` para o mentorado selecionado.
+  // Quando chega novo check-in → buscarCheckin() atualiza métricas e briefing.
+  // O componente PendenciasSection tem seu próprio refetch via prop key.
   useEffect(() => {
-    if (!selectedId || mentorados.length === 0) return
-    const id = setInterval(() => buscarCheckin(selectedId), 8000)
-    return () => clearInterval(id)
-  }, [selectedId, mentorados, buscarCheckin])
+    if (!selectedId) return
 
-  // Atualiza na hora quando o mentor volta para a aba do dashboard
-  // (ex.: enviou o form no celular/outra aba e voltou aqui).
-  useEffect(() => {
-    const onFocus = () => {
-      if (document.visibilityState === "visible" && selectedId) {
-        buscarCheckin(selectedId)
-      }
-    }
-    window.addEventListener("focus", onFocus)
-    document.addEventListener("visibilitychange", onFocus)
+    const supabase = getRealtimeClient()
+    const channelName = `dashboard-${selectedId}`
+
+    const channel = supabase
+      .channel(channelName)
+      // Novo check-in do mentorado → atualiza métricas
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "checkins", filter: `mentorado_id=eq.${selectedId}` },
+        () => { buscarCheckin(selectedId) }
+      )
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") setRealtimeStatus("connected")
+        if (status === "CHANNEL_ERROR") setRealtimeStatus("error")
+      })
+
+    setRealtimeStatus("connecting")
+
     return () => {
-      window.removeEventListener("focus", onFocus)
-      document.removeEventListener("visibilitychange", onFocus)
+      supabase.removeChannel(channel)
     }
-  }, [selectedId, mentorados, buscarCheckin])
+  }, [selectedId, buscarCheckin])
 
   const selected = mentorados.find((m) => m.id === selectedId)
   const filtered = mentorados.filter((m) =>
@@ -752,9 +752,21 @@ export default function DashboardPage() {
         {/* Footer */}
         {sidebarOpen && (
           <div className="p-4 border-t border-slate-700/20 transition-all duration-300">
-            <div className="text-[10px] text-slate-500 text-center">
+            <div className="text-[10px] text-slate-500 text-center space-y-1">
               <p>Dashboard v2.0</p>
-              <p className="mt-1">Powered by Supabase + Claude</p>
+              <div className="flex items-center justify-center gap-1.5">
+                <span className={`w-1.5 h-1.5 rounded-full ${
+                  realtimeStatus === "connected" ? "bg-emerald-400 animate-pulse" :
+                  realtimeStatus === "error" ? "bg-red-400" : "bg-yellow-400 animate-pulse"
+                }`} />
+                <span className={
+                  realtimeStatus === "connected" ? "text-emerald-500" :
+                  realtimeStatus === "error" ? "text-red-500" : "text-yellow-500"
+                }>
+                  {realtimeStatus === "connected" ? "Realtime ativo" :
+                   realtimeStatus === "error" ? "Realtime erro" : "Conectando..."}
+                </span>
+              </div>
             </div>
           </div>
         )}
@@ -831,7 +843,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* ── PENDÊNCIAS DO MENTORADO ── */}
-                <PendenciasSection mentoradoId={selectedId} mentorId={mentorId} />
+                <PendenciasSection key={selectedId} mentoradoId={selectedId} mentorId={mentorId} />
 
                 {/* ── MÉTRICAS GRID 3 COLUNAS ── */}
                 <div>
