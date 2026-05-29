@@ -154,7 +154,14 @@ export default function DashboardPage() {
   // Carrega lista de mentorados (reutilizável após cadastro)
   const recarregarMentorados = useCallback(async (selecionarId?: string) => {
     try {
-      const res = await fetch(`/api/dashboard/mentorados?t=${Date.now()}`, { cache: "no-store" })
+      // Pegar mentor selecionado do localStorage
+      const mentorId = localStorage.getItem("mentorSelecionado")
+      const params = new URLSearchParams({ t: Date.now().toString() })
+      if (mentorId) {
+        params.append("mentorId", mentorId)
+      }
+
+      const res = await fetch(`/api/dashboard/mentorados?${params}`, { cache: "no-store" })
       const json = await res.json()
       const lista = (json.mentorados || []) as Mentorado[]
       setMentorados(lista)
@@ -167,11 +174,14 @@ export default function DashboardPage() {
     setLoading(false)
   }, [])
 
-  // Carregar nome do mentor
+  // Carregar nome do mentor selecionado
   useEffect(() => {
     const carregarMentor = async () => {
       try {
-        const res = await fetch("/api/mentor/info", {
+        const mentorId = localStorage.getItem("mentorSelecionado")
+        if (!mentorId) return
+
+        const res = await fetch(`/api/mentor/info?mentorId=${mentorId}`, {
           cache: "no-store",
         })
         const json = await res.json()

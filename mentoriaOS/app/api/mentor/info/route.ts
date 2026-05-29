@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic"
 
 const NO_CACHE = { "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0" }
 
-export async function GET() {
+export async function GET(request: Request) {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -12,11 +12,20 @@ export async function GET() {
   )
 
   try {
-    const { data: mentor } = await supabase
+    // Pegar mentor_id do query string
+    const url = new URL(request.url)
+    const mentorId = url.searchParams.get("mentorId")
+
+    let query = supabase
       .from("mentors")
       .select("nome, nicho_foco, metodo_trabalho, filosofia")
-      .limit(1)
-      .single()
+
+    // Se houver mentor_id, buscar aquele específico
+    if (mentorId) {
+      query = query.eq("id", mentorId)
+    }
+
+    const { data: mentor } = await query.limit(1).single()
 
     return Response.json({ mentor }, { headers: NO_CACHE })
   } catch (e) {
