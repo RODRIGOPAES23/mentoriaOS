@@ -144,7 +144,7 @@ export default function DashboardPage() {
   return (
     <div className="h-screen w-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white flex overflow-hidden">
       {/* ── SIDEBAR ESQUERDA ── */}
-      <aside className="w-64 flex-shrink-0 bg-gradient-to-b from-slate-900/80 to-slate-950/80 backdrop-blur-xl border-r border-slate-700/20 flex flex-col overflow-y-auto">
+      <aside className="w-64 flex-shrink-0 bg-gradient-to-b from-slate-900/80 to-slate-950/80 backdrop-blur-xl border-r border-slate-700/20 flex flex-col overflow-y-auto" data-test="premium-sidebar-v2">
         {/* Logo Section */}
         <div className="p-6 border-b border-slate-700/20">
           <div className="flex items-center gap-3 mb-1">
