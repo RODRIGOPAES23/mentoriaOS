@@ -230,6 +230,7 @@ export default function DashboardPage() {
         method: "DELETE",
       })
       if (res.ok) {
+        setSelectedId(null) // Reset selection
         await recarregarMentorados()
       }
     } finally {
