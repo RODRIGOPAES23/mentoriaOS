@@ -107,6 +107,8 @@ export default function DashboardPage() {
   const [briefingLoading, setBriefingLoading] = useState(false)
   const briefingCache = useRef<Map<string, BriefingIA>>(new Map())
 
+  const [selectedMetric, setSelectedMetric] = useState<"leads" | "vendas" | "investimento" | null>(null)
+
   // Buscar checkin mais recente (via API server-side: ignora RLS).
   // cache:"no-store" + cache-buster garantem dado sempre fresco (sem cache do browser/edge).
   // Define só o checkin; o briefing IA é gerado por um effect separado (1x por check-in).
@@ -272,6 +274,153 @@ export default function DashboardPage() {
   const varLeads = variacao(historico, "leads_gerados")
   const varVendas = variacao(historico, "vendas_reais")
   const varInvest = variacao(historico, "investimento_trafego")
+
+  // Componente: Modal com histórico de uma métrica específica.
+  const HistoryModal = ({ metric }: { metric: "leads" | "vendas" | "investimento" }) => {
+    const metricLabels = {
+      leads: { label: "Leads Gerados", key: "leads_gerados" as keyof CheckinRow },
+      vendas: { label: "Vendas Reais (R$)", key: "vendas_reais" as keyof CheckinRow },
+      investimento: { label: "Investimento (R$)", key: "investimento_trafego" as keyof CheckinRow },
+    }
+    const config = metricLabels[metric]
+    // Prepara dados para o gráfico (cronológico: antiga → recente)
+    const chartData = cronologico.map((c, i) => ({
+      semana: `S${i + 1}`,
+      valor: Number(c[config.key]) || 0,
+      data: new Date(c.data_envio).toLocaleDateString("pt-BR"),
+    }))
+
+    return (
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="bg-slate-900/95 border border-slate-700/50 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+          {/* Header */}
+          <div className="flex items-center justify-between p-6 border-b border-slate-700/30">
+            <div>
+              <h2 className="text-xl font-bold text-white">{config.label}</h2>
+              <p className="text-xs text-slate-400 mt-1">Histórico de {cronologico.length} semana(s)</p>
+            </div>
+            <button
+              onClick={() => setSelectedMetric(null)}
+              className="p-2 hover:bg-slate-800/50 rounded-lg transition-colors"
+            >
+              <X className="w-5 h-5 text-slate-400" />
+            </button>
+          </div>
+
+          {/* Gráfico usando recharts */}
+          <div className="p-6">
+            {chartData.length > 0 ? (
+              <>
+                <div className="mb-6">
+                  {/* Renderizar com recharts se disponível, senão SVG manual */}
+                  <svg viewBox="0 0 500 200" className="w-full h-64 bg-slate-950/30 rounded-lg p-4">
+                    {/* Eixos */}
+                    <line x1="40" y1="160" x2="480" y2="160" stroke="#475569" strokeWidth="1" />
+                    <line x1="40" y1="20" x2="40" y2="160" stroke="#475569" strokeWidth="1" />
+
+                    {/* Grid e valores */}
+                    {chartData.map((d, i) => {
+                      const x = 40 + (i / (chartData.length - 1 || 1)) * 440
+                      const maxVal = Math.max(...chartData.map((c) => c.valor), 1)
+                      const y = 160 - (d.valor / maxVal) * 120
+
+                      return (
+                        <g key={i}>
+                          {/* Ponto */}
+                          <circle
+                            cx={x}
+                            cy={y}
+                            r="4"
+                            fill={metric === "leads" ? "#10b981" : metric === "vendas" ? "#a855f7" : "#94a3b8"}
+                          />
+                          {/* Label (semana) */}
+                          <text
+                            x={x}
+                            y="175"
+                            textAnchor="middle"
+                            fontSize="12"
+                            fill="#94a3b8"
+                          >
+                            {d.semana}
+                          </text>
+                          {/* Valor acima do ponto */}
+                          <text
+                            x={x}
+                            y={y - 8}
+                            textAnchor="middle"
+                            fontSize="11"
+                            fill="#e2e8f0"
+                            fontWeight="600"
+                          >
+                            {d.valor.toLocaleString("pt-BR")}
+                          </text>
+                        </g>
+                      )
+                    })}
+
+                    {/* Linhas conectando os pontos */}
+                    {chartData.map((_, i) => {
+                      if (i === 0) return null
+                      const x1 = 40 + ((i - 1) / (chartData.length - 1 || 1)) * 440
+                      const x2 = 40 + (i / (chartData.length - 1 || 1)) * 440
+                      const maxVal = Math.max(...chartData.map((c) => c.valor), 1)
+                      const y1 = 160 - (chartData[i - 1].valor / maxVal) * 120
+                      const y2 = 160 - (chartData[i].valor / maxVal) * 120
+                      const color =
+                        metric === "leads" ? "#10b981" : metric === "vendas" ? "#a855f7" : "#94a3b8"
+                      return <line key={`line-${i}`} x1={x1} y1={y1} x2={x2} y2={y2} stroke={color} strokeWidth="2" />
+                    })}
+                  </svg>
+                </div>
+
+                {/* Tabela detalhada */}
+                <div className="mt-6">
+                  <h3 className="text-sm font-semibold text-slate-300 mb-3">Detalhes por Semana</h3>
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {chartData.map((d, i) => {
+                      const anterior = i > 0 ? chartData[i - 1].valor : null
+                      const var_pct = anterior ? (((d.valor - anterior) / anterior) * 100).toFixed(0) : null
+                      return (
+                        <div
+                          key={i}
+                          className="flex items-center justify-between p-3 bg-slate-950/30 rounded-lg border border-slate-700/20 hover:border-slate-600/30 transition-colors"
+                        >
+                          <div>
+                            <p className="text-sm font-semibold text-white">{d.semana}</p>
+                            <p className="text-xs text-slate-400">{d.data}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-bold text-slate-200">
+                              {d.valor.toLocaleString("pt-BR")}
+                            </p>
+                            {var_pct && (
+                              <p
+                                className={`text-xs font-semibold ${
+                                  parseFloat(var_pct) > 0
+                                    ? "text-green-400"
+                                    : parseFloat(var_pct) < 0
+                                      ? "text-red-400"
+                                      : "text-slate-400"
+                                }`}
+                              >
+                                {parseFloat(var_pct) > 0 ? "↑" : "↓"} {var_pct}%
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <p className="text-slate-400 text-center py-8">Sem dados disponíveis</p>
+            )}
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   if (loading) {
     return (
@@ -447,7 +596,10 @@ export default function DashboardPage() {
                   </div>
                   <div className="grid grid-cols-3 gap-4">
                     {/* LEADS */}
-                    <div className="group bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent border border-emerald-500/30 rounded-xl p-5 shadow-xl hover:shadow-2xl hover:border-emerald-500/50 transition-all duration-300 cursor-pointer">
+                    <div
+                      onClick={() => historico.length > 0 && setSelectedMetric("leads")}
+                      className="group bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent border border-emerald-500/30 rounded-xl p-5 shadow-xl hover:shadow-2xl hover:border-emerald-500/50 transition-all duration-300 cursor-pointer"
+                    >
                       <div className="flex items-center justify-between mb-3">
                         <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Leads Gerados</p>
                         <Target className="w-4 h-4 text-emerald-400" />
@@ -460,7 +612,10 @@ export default function DashboardPage() {
                     </div>
 
                     {/* VENDAS */}
-                    <div className="group bg-gradient-to-br from-purple-500/10 via-purple-500/5 to-transparent border border-purple-500/30 rounded-xl p-5 shadow-xl hover:shadow-2xl hover:border-purple-500/50 transition-all duration-300 cursor-pointer">
+                    <div
+                      onClick={() => historico.length > 0 && setSelectedMetric("vendas")}
+                      className="group bg-gradient-to-br from-purple-500/10 via-purple-500/5 to-transparent border border-purple-500/30 rounded-xl p-5 shadow-xl hover:shadow-2xl hover:border-purple-500/50 transition-all duration-300 cursor-pointer"
+                    >
                       <div className="flex items-center justify-between mb-3">
                         <p className="text-[10px] font-bold text-purple-400 uppercase tracking-widest">Vendas Reais</p>
                         <BarChart3 className="w-4 h-4 text-purple-400" />
@@ -475,7 +630,10 @@ export default function DashboardPage() {
                     </div>
 
                     {/* INVESTIDO */}
-                    <div className="group bg-gradient-to-br from-slate-500/10 via-slate-500/5 to-transparent border border-slate-600/30 rounded-xl p-5 shadow-xl hover:shadow-2xl hover:border-slate-600/50 transition-all duration-300 cursor-pointer">
+                    <div
+                      onClick={() => historico.length > 0 && setSelectedMetric("investimento")}
+                      className="group bg-gradient-to-br from-slate-500/10 via-slate-500/5 to-transparent border border-slate-600/30 rounded-xl p-5 shadow-xl hover:shadow-2xl hover:border-slate-600/50 transition-all duration-300 cursor-pointer"
+                    >
                       <div className="flex items-center justify-between mb-3">
                         <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Investido</p>
                         <Zap className="w-4 h-4 text-slate-400" />
@@ -687,6 +845,9 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
+
+      {/* Modal de Histórico */}
+      {selectedMetric && <HistoryModal metric={selectedMetric} />}
     </div>
   )
 }
