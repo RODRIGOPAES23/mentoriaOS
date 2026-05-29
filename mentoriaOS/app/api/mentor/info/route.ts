@@ -1,43 +1,28 @@
-import { createClient } from "@supabase/supabase-js"
+import { getAuthContext, authError } from "@/lib/auth-helper"
 
 export const dynamic = "force-dynamic"
-
 const NO_CACHE = { "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0" }
 
-function admin() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { persistSession: false } }
-  )
-}
-
-export async function GET(request: Request) {
-  const supabase = admin()
+export async function GET() {
   try {
-    const url = new URL(request.url)
-    const mentorId = url.searchParams.get("mentorId")
+    const { supabase, mentorId } = await getAuthContext()
 
-    let query = supabase
+    const { data: mentor, error } = await supabase
       .from("mentors")
       .select("id, nome, nicho_foco, metodo_trabalho, filosofia, email, foto_url")
+      .eq("id", mentorId)
+      .single()
 
-    if (mentorId) query = query.eq("id", mentorId)
-
-    const { data: mentor } = await query.limit(1).single()
+    if (error) return Response.json({ mentor: null }, { headers: NO_CACHE })
     return Response.json({ mentor }, { headers: NO_CACHE })
-  } catch {
-    return Response.json({ mentor: null }, { headers: NO_CACHE })
+  } catch (e) {
+    return authError(e)
   }
 }
 
 export async function PATCH(request: Request) {
-  const supabase = admin()
   try {
-    const url = new URL(request.url)
-    const mentorId = url.searchParams.get("mentorId")
-    if (!mentorId) return Response.json({ error: "mentorId obrigatório" }, { status: 400 })
-
+    const { supabase, mentorId } = await getAuthContext()
     const body = await request.json()
     const { nome, nicho_foco, metodo_trabalho, filosofia } = body
 
@@ -51,6 +36,6 @@ export async function PATCH(request: Request) {
     if (error) return Response.json({ error: error.message }, { status: 500, headers: NO_CACHE })
     return Response.json({ mentor: data }, { headers: NO_CACHE })
   } catch (e) {
-    return Response.json({ error: String(e) }, { status: 500 })
+    return authError(e)
   }
 }
