@@ -222,27 +222,47 @@ export default function DashboardPage() {
   // Cadastrar novo mentorado
   const cadastrarMentorado = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!novo.nome.trim()) return
+    console.log("🎯 Cadastrar mentorado clicado", { novo })
+
+    if (!novo.nome.trim()) {
+      console.warn("⚠️ Nome vazio")
+      return
+    }
+
     setSalvando(true)
     try {
       // Incluir mentor_id ao cadastrar
       const mentorId = localStorage.getItem("mentorSelecionado")
+      console.log("📝 Mentor ID:", mentorId)
+
       const dadosMentorado = {
         ...novo,
         mentor_id: mentorId,
       }
+
+      console.log("📤 Enviando dados:", dadosMentorado)
 
       const res = await fetch("/api/dashboard/mentorados", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(dadosMentorado),
       })
+
+      console.log("📥 Response status:", res.status)
+
       const json = await res.json()
+      console.log("📥 Response JSON:", json)
+
       if (res.ok && json.mentorado) {
+        console.log("✅ Sucesso! Mentorado criado:", json.mentorado)
         setShowCadastro(false)
         setNovo({ nome: "", nicho: "", foco_macro: "", data_inicio: "" })
         await recarregarMentorados(json.mentorado.id)
+      } else {
+        console.error("❌ Erro na resposta:", json)
       }
+    } catch (err) {
+      console.error("❌ Erro ao cadastrar:", err)
     } finally {
       setSalvando(false)
     }
