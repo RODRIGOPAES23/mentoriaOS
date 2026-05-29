@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, useCallback, useRef } from "react"
-import { Search, Bell, TrendingUp, TrendingDown, Minus, Target, BarChart3, Zap, CheckCircle2, AlertCircle, Clock, Link2, Copy, Check, UserPlus, X, RefreshCw } from "lucide-react"
+import { Search, Bell, TrendingUp, TrendingDown, Minus, Target, BarChart3, Zap, CheckCircle2, AlertCircle, Clock, Link2, Copy, Check, UserPlus, X, RefreshCw, Edit2, Trash2 } from "lucide-react"
 import type { CheckinRow } from "@/lib/supabase"
 
 interface Mentorado {
@@ -109,6 +109,9 @@ export default function DashboardPage() {
 
   const [selectedMetric, setSelectedMetric] = useState<"leads" | "vendas" | "investimento" | null>(null)
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [editData, setEditData] = useState({ nome: "", nicho: "", foco_macro: "", status: "Ativo" })
+  const [editando, setEditando] = useState(false)
 
   // Buscar checkin mais recente (via API server-side: ignora RLS).
   // cache:"no-store" + cache-buster garantem dado sempre fresco (sem cache do browser/edge).
@@ -190,6 +193,42 @@ export default function DashboardPage() {
       setSalvando(false)
     }
   }, [novo, recarregarMentorados])
+
+  // Editar mentorado
+  const editarMentorado = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!selectedId) return
+    setEditando(true)
+    try {
+      const res = await fetch(`/api/dashboard/mentorados/${selectedId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editData),
+      })
+      if (res.ok) {
+        setShowEditModal(false)
+        await recarregarMentorados(selectedId)
+      }
+    } finally {
+      setEditando(false)
+    }
+  }, [selectedId, editData, recarregarMentorados])
+
+  // Deletar mentorado
+  const deletarMentorado = useCallback(async () => {
+    if (!selectedId || !window.confirm("Tem certeza que deseja deletar este mentorado? Todos os check-ins também serão deletados.")) return
+    setEditando(true)
+    try {
+      const res = await fetch(`/api/dashboard/mentorados/${selectedId}`, {
+        method: "DELETE",
+      })
+      if (res.ok) {
+        await recarregarMentorados()
+      }
+    } finally {
+      setEditando(false)
+    }
+  }, [selectedId, recarregarMentorados])
 
   // Buscar checkin quando mentorado muda
   useEffect(() => {
@@ -592,21 +631,43 @@ export default function DashboardPage() {
                       <span className="px-4 py-1.5 bg-gradient-to-r from-emerald-500/20 to-emerald-500/10 border border-emerald-500/40 text-emerald-300 text-xs font-bold rounded-full shadow-lg shadow-emerald-500/10">
                         ATIVO
                       </span>
-                      <button
-                        onClick={copiarLink}
-                        title="Copiar link do formulário para enviar ao mentorado"
-                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all duration-200 ${
-                          linkCopiado
-                            ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-300"
-                            : "bg-blue-500/15 border-blue-500/30 text-blue-300 hover:bg-blue-500/25 hover:border-blue-500/50"
-                        }`}
-                      >
-                        {linkCopiado ? (
-                          <><Check className="w-3.5 h-3.5" /> Link copiado!</>
-                        ) : (
-                          <><Link2 className="w-3.5 h-3.5" /> Gerar Link do Formulário</>
-                        )}
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={copiarLink}
+                          title="Copiar link do formulário para enviar ao mentorado"
+                          className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all duration-200 ${
+                            linkCopiado
+                              ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-300"
+                              : "bg-blue-500/15 border-blue-500/30 text-blue-300 hover:bg-blue-500/25 hover:border-blue-500/50"
+                          }`}
+                        >
+                          {linkCopiado ? (
+                            <><Check className="w-3.5 h-3.5" /> Link copiado!</>
+                          ) : (
+                            <><Link2 className="w-3.5 h-3.5" /> Gerar Link do Formulário</>
+                          )}
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (selected) {
+                              setEditData({ nome: selected.nome, nicho: selected.nicho, foco_macro: selected.foco_macro, status: "Ativo" })
+                              setShowEditModal(true)
+                            }
+                          }}
+                          title="Editar mentorado"
+                          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500/15 border border-amber-500/30 text-amber-300 hover:bg-amber-500/25 hover:border-amber-500/50 transition-all duration-200"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" /> Editar
+                        </button>
+                        <button
+                          onClick={deletarMentorado}
+                          disabled={editando}
+                          title="Deletar mentorado"
+                          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-500/15 border border-red-500/30 text-red-300 hover:bg-red-500/25 hover:border-red-500/50 transition-all duration-200 disabled:opacity-60"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" /> Deletar
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -877,6 +938,79 @@ export default function DashboardPage() {
                   className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
                   {salvando ? "Salvando..." : "Cadastrar"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL: EDITAR MENTORADO ── */}
+      {showEditModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+          onClick={() => setShowEditModal(false)}
+        >
+          <div
+            className="w-full max-w-md bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700/50 rounded-2xl p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-2">
+                <div className="w-9 h-9 rounded-lg bg-amber-500/20 flex items-center justify-center">
+                  <Edit2 className="w-5 h-5 text-amber-400" />
+                </div>
+                <h2 className="text-lg font-bold text-white">Editar Mentorado</h2>
+              </div>
+              <button onClick={() => setShowEditModal(false)} className="text-slate-400 hover:text-white transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={editarMentorado} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Nome *</label>
+                <input
+                  autoFocus required
+                  value={editData.nome}
+                  onChange={(e) => setEditData({ ...editData, nome: e.target.value })}
+                  className="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/60 transition-colors"
+                  placeholder="Nome do mentorado"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Nicho</label>
+                <input
+                  value={editData.nicho}
+                  onChange={(e) => setEditData({ ...editData, nicho: e.target.value })}
+                  className="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/60 transition-colors"
+                  placeholder="Nicho de atuação"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Foco Macro</label>
+                <input
+                  value={editData.foco_macro}
+                  onChange={(e) => setEditData({ ...editData, foco_macro: e.target.value })}
+                  className="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/60 transition-colors"
+                  placeholder="Foco principal"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold bg-slate-700/50 hover:bg-slate-700 text-slate-300 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={editando || !editData.nome.trim()}
+                  className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white shadow-lg shadow-amber-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                >
+                  {editando ? "Salvando..." : "Salvar Mudanças"}
                 </button>
               </div>
             </form>
