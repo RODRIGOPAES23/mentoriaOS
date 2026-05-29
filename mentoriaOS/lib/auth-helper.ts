@@ -1,43 +1,50 @@
 /**
- * Helper para API Routes autenticadas.
+ * Auth Helper — MODO TESTE (sem autenticação)
  *
- * Retorna { supabase, mentorId } onde:
- *   - supabase: cliente com sessão do usuário logado (aciona RLS)
- *   - mentorId: UUID do mentor na tabela mentors (ligado ao auth.uid())
- *
- * Se não houver sessão válida → lança erro 401.
- * Se mentor não existir para o usuário → lança erro 403.
+ * Usa service_role + mentorId via query param (comportamento v1.x)
+ * Para ativar RLS real: descomentar bloco getAuthContext() abaixo
+ * e remover getDevContext()
  */
 
-import { createServerClient } from "./supabase-server"
+import { adminClient } from "./supabase-server"
 
-export async function getAuthContext() {
-  const supabase = createServerClient()
+// ── MODO TESTE: lê mentorId do query param ou body ──────────────────
+export async function getAuthContext(request?: Request) {
+  const supabase = adminClient()
 
-  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  let mentorId: string | null = null
 
-  if (userError || !user) {
-    throw { status: 401, message: "Não autenticado" }
+  if (request) {
+    const url = new URL(request.url)
+    mentorId = url.searchParams.get("mentorId") || url.searchParams.get("mentor_id")
   }
 
-  // Busca o mentor linkado ao user_id do auth
-  const { data: mentor, error: mentorError } = await supabase
-    .from("mentors")
-    .select("id")
-    .eq("user_id", user.id)
-    .single()
-
-  if (mentorError || !mentor) {
-    throw { status: 403, message: "Mentor não encontrado para este usuário" }
-  }
-
-  return { supabase, mentorId: mentor.id, userId: user.id, user }
+  return { supabase, mentorId: mentorId || "", userId: null, user: null }
 }
 
 export function authError(e: unknown) {
   const err = e as { status?: number; message?: string }
   return Response.json(
-    { error: err.message || "Erro de autenticação" },
+    { error: err.message || "Erro interno" },
     { status: err.status || 500 }
   )
 }
+
+/* ── ATIVAR EM PRODUÇÃO — substitui as funções acima ──────────────────
+import { createServerClient } from "./supabase-server"
+
+export async function getAuthContext() {
+  const supabase = createServerClient()
+  const { data: { user }, error } = await supabase.auth.getUser()
+  if (error || !user) throw { status: 401, message: "Não autenticado" }
+
+  const { data: mentor, error: mErr } = await supabase
+    .from("mentors")
+    .select("id")
+    .eq("user_id", user.id)
+    .single()
+
+  if (mErr || !mentor) throw { status: 403, message: "Mentor não encontrado" }
+  return { supabase, mentorId: mentor.id, userId: user.id, user }
+}
+────────────────────────────────────────────────────────────────────── */

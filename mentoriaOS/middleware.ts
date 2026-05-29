@@ -1,12 +1,20 @@
-import { createServerClient } from "@supabase/ssr"
+/**
+ * Middleware de Auth — DESATIVADO EM TESTES
+ * Para reativar: descomentar o bloco de redirect abaixo
+ */
 import { NextResponse, type NextRequest } from "next/server"
 
-const URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-
 export async function middleware(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request })
+  // AUTH DESATIVADO — passa tudo sem verificação
+  return NextResponse.next()
 
+  /* REATIVAR QUANDO PRONTO PARA PRODUÇÃO COM AUTH:
+
+  import { createServerClient } from "@supabase/ssr"
+  const URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+
+  let supabaseResponse = NextResponse.next({ request })
   const supabase = createServerClient(URL, ANON, {
     cookies: {
       getAll() { return request.cookies.getAll() },
@@ -20,12 +28,9 @@ export async function middleware(request: NextRequest) {
     },
   })
 
-  // Renova token se expirado (IMPORTANTE: não remover)
   const { data: { user } } = await supabase.auth.getUser()
-
   const { pathname } = request.nextUrl
 
-  // Rotas públicas: login, callback, formulário de check-in
   const isPublic =
     pathname === "/login" ||
     pathname.startsWith("/auth/") ||
@@ -34,14 +39,12 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/api/auth/") ||
     pathname.startsWith("/api/form/")
 
-  // Sem sessão → redireciona para /login (exceto rotas públicas)
   if (!user && !isPublic) {
     const loginUrl = request.nextUrl.clone()
     loginUrl.pathname = "/login"
     return NextResponse.redirect(loginUrl)
   }
 
-  // Com sessão → não deixa voltar para /login
   if (user && pathname === "/login") {
     const dashUrl = request.nextUrl.clone()
     dashUrl.pathname = "/dashboard"
@@ -49,6 +52,7 @@ export async function middleware(request: NextRequest) {
   }
 
   return supabaseResponse
+  */
 }
 
 export const config = {
