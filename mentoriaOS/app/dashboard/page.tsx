@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState, useCallback, useRef } from "react"
 import { Search, Bell, TrendingUp, TrendingDown, Minus, Target, BarChart3, Zap, CheckCircle2, AlertCircle, Clock, Link2, Copy, Check, UserPlus, X, RefreshCw } from "lucide-react"
 import type { CheckinRow } from "@/lib/supabase"
 
@@ -56,38 +56,32 @@ export default function DashboardPage() {
   const [atualizando, setAtualizando] = useState(false)
   const [ultimaAtualizacao, setUltimaAtualizacao] = useState<Date | null>(null)
 
+  const [briefingLoading, setBriefingLoading] = useState(false)
+  const briefingCache = useRef<Map<string, BriefingIA>>(new Map())
+
   // Buscar checkin mais recente (via API server-side: ignora RLS).
   // cache:"no-store" + cache-buster garantem dado sempre fresco (sem cache do browser/edge).
-  const buscarCheckin = useCallback(async (mentoradoId: string, mentoradoAtual: Mentorado) => {
+  // Define só o checkin; o briefing IA é gerado por um effect separado (1x por check-in).
+  const buscarCheckin = useCallback(async (mentoradoId: string) => {
     try {
       const res = await fetch(`/api/dashboard/checkin?mentoradoId=${mentoradoId}&t=${Date.now()}`, {
         cache: "no-store",
       })
       const json = await res.json()
-      const c = json.checkin as CheckinRow | null
-      if (c) {
-        setCheckin(c)
-        setBriefing(gerarBriefing(mentoradoAtual, c))
-      } else {
-        setCheckin(null)
-        setBriefing(null)
-      }
+      setCheckin((json.checkin as CheckinRow | null) ?? null)
       setUltimaAtualizacao(new Date())
     } catch {
       setCheckin(null)
-      setBriefing(null)
     }
   }, [])
 
   // Atualização manual / sob demanda do mentorado selecionado
   const refreshAgora = useCallback(async () => {
     if (!selectedId) return
-    const atual = mentorados.find((m) => m.id === selectedId)
-    if (!atual) return
     setAtualizando(true)
-    await buscarCheckin(selectedId, atual)
+    await buscarCheckin(selectedId)
     setAtualizando(false)
-  }, [selectedId, mentorados, buscarCheckin])
+  }, [selectedId, buscarCheckin])
 
   // Carrega lista de mentorados (reutilizável após cadastro)
   const recarregarMentorados = useCallback(async (selecionarId?: string) => {
@@ -147,18 +141,54 @@ export default function DashboardPage() {
   // Buscar checkin quando mentorado muda
   useEffect(() => {
     if (!selectedId || mentorados.length === 0) return
-    const atual = mentorados.find((m) => m.id === selectedId)
-    if (atual) buscarCheckin(selectedId, atual)
+    buscarCheckin(selectedId)
   }, [selectedId, mentorados, buscarCheckin])
+
+  // Gera o Briefing IA (Gemini Flash via OpenRouter) 1x por check-in.
+  // Cache por id evita chamar a IA a cada polling. Template entra como
+  // fallback instantâneo enquanto a IA responde (ou se ela falhar).
+  useEffect(() => {
+    if (!checkin || !selected) {
+      setBriefing(null)
+      return
+    }
+    const cid = checkin.id
+    const cached = briefingCache.current.get(cid)
+    if (cached) {
+      setBriefing(cached)
+      return
+    }
+    setBriefing(gerarBriefing(selected, checkin)) // fallback instantâneo
+    setBriefingLoading(true)
+    let cancelado = false
+    fetch("/api/dashboard/briefing", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mentoradoId: selected.id, checkinId: cid }),
+    })
+      .then((r) => r.json())
+      .then((j) => {
+        if (cancelado) return
+        if (j?.briefing && Array.isArray(j.briefing.pauta)) {
+          briefingCache.current.set(cid, j.briefing)
+          setBriefing(j.briefing)
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelado) setBriefingLoading(false)
+      })
+    return () => {
+      cancelado = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [checkin?.id, selectedId])
 
   // Auto-refresh (polling): novos check-ins enviados pelo mentorado aparecem
   // sem reload. Realtime via anon é bloqueado pelo RLS, então usamos polling.
   useEffect(() => {
     if (!selectedId || mentorados.length === 0) return
-    const id = setInterval(() => {
-      const atual = mentorados.find((m) => m.id === selectedId)
-      if (atual) buscarCheckin(selectedId, atual)
-    }, 8000)
+    const id = setInterval(() => buscarCheckin(selectedId), 8000)
     return () => clearInterval(id)
   }, [selectedId, mentorados, buscarCheckin])
 
@@ -167,8 +197,7 @@ export default function DashboardPage() {
   useEffect(() => {
     const onFocus = () => {
       if (document.visibilityState === "visible" && selectedId) {
-        const atual = mentorados.find((m) => m.id === selectedId)
-        if (atual) buscarCheckin(selectedId, atual)
+        buscarCheckin(selectedId)
       }
     }
     window.addEventListener("focus", onFocus)
@@ -418,7 +447,14 @@ export default function DashboardPage() {
                 <div className="bg-gradient-to-br from-slate-800/50 via-slate-800/30 to-slate-900/50 backdrop-blur-xl border border-slate-700/30 rounded-2xl p-6 shadow-2xl overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-transparent to-purple-500/5 pointer-events-none" />
                   <div className="relative">
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-5">🤖 Briefing da IA (Claude 3.5)</p>
+                    <div className="flex items-center justify-between mb-5">
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">🤖 Briefing da IA (Gemini Flash)</p>
+                      {briefingLoading && (
+                        <span className="flex items-center gap-1.5 text-[10px] text-blue-300">
+                          <Zap className="w-3 h-3 animate-pulse" /> Gerando análise inteligente…
+                        </span>
+                      )}
+                    </div>
 
                     {briefing ? (
                       <div className="space-y-5">
