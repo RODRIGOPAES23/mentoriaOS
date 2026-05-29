@@ -225,10 +225,17 @@ export default function DashboardPage() {
     if (!novo.nome.trim()) return
     setSalvando(true)
     try {
+      // Incluir mentor_id ao cadastrar
+      const mentorId = localStorage.getItem("mentorSelecionado")
+      const dadosMentorado = {
+        ...novo,
+        mentor_id: mentorId,
+      }
+
       const res = await fetch("/api/dashboard/mentorados", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(novo),
+        body: JSON.stringify(dadosMentorado),
       })
       const json = await res.json()
       if (res.ok && json.mentorado) {
