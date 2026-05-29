@@ -752,7 +752,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* ── PENDÊNCIAS DO MENTORADO ── */}
-                <PendenciasSection mentoradoId={selectedId} mentorId={mentorId} />
+                {/* <PendenciasSection mentoradoId={selectedId} mentorId={mentorId} /> */}
 
                 {/* ── MÉTRICAS GRID 3 COLUNAS ── */}
                 <div>
