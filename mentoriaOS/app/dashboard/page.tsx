@@ -114,6 +114,17 @@ export default function DashboardPage() {
   const [editData, setEditData] = useState({ nome: "", nicho: "", foco_macro: "", status: "Ativo" })
   const [editando, setEditando] = useState(false)
 
+  // Proteger dashboard: se não tiver mentor selecionado, redirecionar para home
+  useEffect(() => {
+    const mentorSelecionado = localStorage.getItem("mentorSelecionado")
+    if (!mentorSelecionado) {
+      // Usar window.location em vez de router para garantir redirect
+      if (typeof window !== "undefined") {
+        window.location.href = "/"
+      }
+    }
+  }, [])
+
   // Buscar checkin mais recente (via API server-side: ignora RLS).
   // cache:"no-store" + cache-buster garantem dado sempre fresco (sem cache do browser/edge).
   // Define só o checkin; o briefing IA é gerado por um effect separado (1x por check-in).

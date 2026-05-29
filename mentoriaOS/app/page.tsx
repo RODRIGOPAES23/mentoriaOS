@@ -23,7 +23,7 @@ export default function HomePage() {
   const [nicho, setNicho] = useState("")
   const [salvando, setSalvando] = useState(false)
 
-  // Carregar mentores e verificar se já tem um selecionado
+  // Carregar mentores (sempre mostrar landing page)
   useEffect(() => {
     const carregarMentores = async () => {
       try {
@@ -31,13 +31,8 @@ export default function HomePage() {
         const json = await res.json()
         setMentores(json.mentores || [])
 
-        // Verificar se há um mentor selecionado no localStorage
-        const mentorSelecionadoStorage = localStorage.getItem("mentorSelecionado")
-        if (mentorSelecionadoStorage && json.mentores?.some((m: Mentor) => m.id === mentorSelecionadoStorage)) {
-          // Se tem mentor selecionado e ele existe, ir direto pro dashboard
-          router.push("/dashboard")
-        } else if (json.mentores?.length === 1) {
-          // Se tem só 1 mentor, selecionar automaticamente
+        // Se tem só 1 mentor, selecionar automaticamente (mas não redireciona)
+        if (json.mentores?.length === 1) {
           setMentorSelecionado(json.mentores[0].id)
         }
       } catch {
@@ -47,7 +42,7 @@ export default function HomePage() {
       }
     }
     carregarMentores()
-  }, [router])
+  }, [])
 
   const handleSetup = async (e: React.FormEvent) => {
     e.preventDefault()
