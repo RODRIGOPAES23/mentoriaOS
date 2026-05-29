@@ -1,7 +1,8 @@
 "use client"
 
 import { useEffect, useState, useCallback, useRef } from "react"
-import { Search, Bell, TrendingUp, TrendingDown, Minus, Target, BarChart3, Zap, CheckCircle2, AlertCircle, Clock, Link2, Copy, Check, UserPlus, X, RefreshCw, Edit2, Trash2 } from "lucide-react"
+import { createPortal } from "react-dom"
+import { Search, Bell, TrendingUp, TrendingDown, Minus, Target, BarChart3, Zap, CheckCircle2, AlertCircle, Clock, Link2, Copy, Check, UserPlus, X, RefreshCw, Edit2, Trash2, LogOut, User, History, ChevronRight, Calendar, Briefcase, BookOpen } from "lucide-react"
 import type { CheckinRow } from "@/lib/supabase"
 import PendenciasSection from "@/components/PendenciasSection"
 
@@ -12,6 +13,7 @@ interface Mentorado {
   status: string
   foco_macro: string
   data_inicio: string
+  foto_url?: string
 }
 
 interface BriefingIA {
@@ -115,12 +117,20 @@ export default function DashboardPage() {
   const [editData, setEditData] = useState({ nome: "", nicho: "", foco_macro: "", status: "Ativo" })
   const [editando, setEditando] = useState(false)
   const [mentorId, setMentorId] = useState<string | null>(null)
+  const [mentorDados, setMentorDados] = useState<{id?: string, nome: string, metodo_trabalho?: string, filosofia?: string, nicho_foco?: string, foto_url?: string} | null>(null)
+  const [showMenuPerfil, setShowMenuPerfil] = useState(false)
+  const [showPerfilModal, setShowPerfilModal] = useState(false)
+  const [showHistoricoModal, setShowHistoricoModal] = useState(false)
+  const [editandoPerfil, setEditandoPerfil] = useState(false)
+  const [perfilEdit, setPerfilEdit] = useState({ nome: "", nicho_foco: "", metodo_trabalho: "", filosofia: "" })
+  const [salvandoPerfil, setSalvandoPerfil] = useState(false)
+  const [uploadingFoto, setUploadingFoto] = useState<string | null>(null)
+  const menuPerfilRef = useRef<HTMLDivElement>(null)
 
   // Proteger dashboard: se não tiver mentor selecionado, redirecionar para home
   useEffect(() => {
     const mentorSelecionado = localStorage.getItem("mentorSelecionado")
     if (!mentorSelecionado) {
-      // Usar window.location em vez de router para garantir redirect
       if (typeof window !== "undefined") {
         window.location.href = "/"
       }
@@ -128,6 +138,67 @@ export default function DashboardPage() {
       setMentorId(mentorSelecionado)
     }
   }, [])
+
+  // Fechar menu ao clicar fora (checa tanto o botão quanto o dropdown)
+  useEffect(() => {
+    if (!showMenuPerfil) return
+    function handleClickOutside(e: MouseEvent) {
+      const target = e.target as Node
+      // Se clicou no botão do avatar (dentro do menuPerfilRef), ignora
+      if (menuPerfilRef.current && menuPerfilRef.current.contains(target)) return
+      // Qualquer outro clique fecha o menu
+      setShowMenuPerfil(false)
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [showMenuPerfil])
+
+  // Upload de foto (mentor ou mentorado)
+  const uploadFoto = useCallback(async (file: File, type: "mentor" | "mentorado", id: string) => {
+    setUploadingFoto(id)
+    try {
+      const form = new FormData()
+      form.append("file", file)
+      form.append("type", type)
+      form.append("id", id)
+      const res = await fetch("/api/upload/avatar", { method: "POST", body: form })
+      const json = await res.json()
+      if (json.url) {
+        if (type === "mentor") {
+          setMentorDados(prev => prev ? { ...prev, foto_url: json.url } : prev)
+        } else {
+          setMentorados(prev => prev.map(m => m.id === id ? { ...m, foto_url: json.url } : m))
+        }
+      }
+    } catch (e) {
+      console.error("Erro ao fazer upload:", e)
+    } finally {
+      setUploadingFoto(null)
+    }
+  }, [])
+
+  // Salvar perfil do mentor
+  const salvarPerfil = useCallback(async () => {
+    if (!mentorId) return
+    setSalvandoPerfil(true)
+    try {
+      const res = await fetch(`/api/mentor/info?mentorId=${mentorId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(perfilEdit),
+      })
+      const json = await res.json()
+      if (json.mentor) {
+        setMentorDados(json.mentor)
+        setMentorNome(json.mentor.nome)
+        setEditandoPerfil(false)
+      }
+    } catch (e) {
+      console.error("Erro ao salvar perfil:", e)
+    } finally {
+      setSalvandoPerfil(false)
+    }
+  }, [mentorId, perfilEdit])
 
   // Buscar checkin mais recente (via API server-side: ignora RLS).
   // cache:"no-store" + cache-buster garantem dado sempre fresco (sem cache do browser/edge).
@@ -191,6 +262,7 @@ export default function DashboardPage() {
         const json = await res.json()
         if (json.mentor?.nome) {
           setMentorNome(json.mentor.nome)
+          setMentorDados(json.mentor)
         }
       } catch {
         // fallback: manter "S.O. MENTORIA"
@@ -562,7 +634,15 @@ export default function DashboardPage() {
         <div className="p-4 border-b border-slate-700/20">
           <div className="flex items-center justify-between gap-2">
             <div className={`flex items-center gap-3 ${sidebarOpen ? "opacity-100" : "opacity-0 hidden"} transition-opacity duration-300`}>
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center font-bold text-white shadow-lg">Ω</div>
+              <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 shadow-lg">
+                {mentorDados?.foto_url ? (
+                  <img src={mentorDados.foto_url} alt={mentorNome} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center font-bold text-white">
+                    {mentorNome.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+                  </div>
+                )}
+              </div>
               <div>
                 <h1 className="text-lg font-bold bg-gradient-to-r from-yellow-400 to-amber-500 bg-clip-text text-transparent">{mentorNome}</h1>
                 <p className="text-[10px] text-slate-400">S.O. MENTORIA</p>
@@ -570,7 +650,15 @@ export default function DashboardPage() {
             </div>
             {/* Logo Compacto (quando recolhido) */}
             {!sidebarOpen && (
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center font-bold text-white shadow-lg">Ω</div>
+              <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 shadow-lg">
+                {mentorDados?.foto_url ? (
+                  <img src={mentorDados.foto_url} alt={mentorNome} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center font-bold text-white">
+                    {mentorNome.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+                  </div>
+                )}
+              </div>
             )}
             {/* Toggle Button */}
             <button
@@ -637,8 +725,14 @@ export default function DashboardPage() {
               }`}
               title={!sidebarOpen ? m.nome : undefined}
             >
-              <div className={`rounded-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center flex-shrink-0 text-xs font-bold ${sidebarOpen ? "w-10 h-10" : "w-8 h-8"}`}>
-                {m.nome.split(" ").map(n => n[0]).join("")}
+              <div className={`rounded-full overflow-hidden flex-shrink-0 ${sidebarOpen ? "w-10 h-10" : "w-8 h-8"}`}>
+                {m.foto_url ? (
+                  <img src={m.foto_url} alt={m.nome} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center text-xs font-bold">
+                    {m.nome.split(" ").map((n: string) => n[0]).join("")}
+                  </div>
+                )}
               </div>
               {sidebarOpen && (
                 <>
@@ -680,11 +774,18 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="relative hidden sm:block">
-              <Bell className="w-5 h-5 text-slate-400 cursor-pointer hover:text-slate-300 transition-colors" />
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+            {/* Menu Perfil */}
+            <div className="relative" ref={menuPerfilRef}>
+              <button
+                onClick={() => setShowMenuPerfil(!showMenuPerfil)}
+                className="w-9 h-9 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-xs font-bold shadow-lg hover:scale-105 hover:shadow-blue-500/30 transition-all cursor-pointer"
+                title="Menu do mentor"
+              >
+                {mentorNome.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+              </button>
+
+              {/* Dropdown renderizado via Portal no body — evita z-index/stacking context */}
             </div>
-            <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-xs font-bold shadow-lg">RP</div>
           </div>
         </nav>
 
@@ -710,49 +811,27 @@ export default function DashboardPage() {
                       <span className="px-4 py-1.5 bg-gradient-to-r from-emerald-500/20 to-emerald-500/10 border border-emerald-500/40 text-emerald-300 text-xs font-bold rounded-full shadow-lg shadow-emerald-500/10">
                         ATIVO
                       </span>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={copiarLink}
-                          title="Copiar link do formulário para enviar ao mentorado"
-                          className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all duration-200 ${
-                            linkCopiado
-                              ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-300"
-                              : "bg-blue-500/15 border-blue-500/30 text-blue-300 hover:bg-blue-500/25 hover:border-blue-500/50"
-                          }`}
-                        >
-                          {linkCopiado ? (
-                            <><Check className="w-3.5 h-3.5" /> Link copiado!</>
-                          ) : (
-                            <><Link2 className="w-3.5 h-3.5" /> Gerar Link do Formulário</>
-                          )}
-                        </button>
-                        <button
-                          onClick={() => {
-                            if (selected) {
-                              setEditData({ nome: selected.nome, nicho: selected.nicho, foco_macro: selected.foco_macro, status: "Ativo" })
-                              setShowEditModal(true)
-                            }
-                          }}
-                          title="Editar mentorado"
-                          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500/15 border border-amber-500/30 text-amber-300 hover:bg-amber-500/25 hover:border-amber-500/50 transition-all duration-200"
-                        >
-                          <Edit2 className="w-3.5 h-3.5" /> Editar
-                        </button>
-                        <button
-                          onClick={deletarMentorado}
-                          disabled={editando}
-                          title="Deletar mentorado"
-                          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-500/15 border border-red-500/30 text-red-300 hover:bg-red-500/25 hover:border-red-500/50 transition-all duration-200 disabled:opacity-60"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" /> Deletar
-                        </button>
-                      </div>
+                      <button
+                        onClick={copiarLink}
+                        title="Copiar link do formulário para enviar ao mentorado"
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all duration-200 ${
+                          linkCopiado
+                            ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-300"
+                            : "bg-blue-500/15 border-blue-500/30 text-blue-300 hover:bg-blue-500/25 hover:border-blue-500/50"
+                        }`}
+                      >
+                        {linkCopiado ? (
+                          <><Check className="w-3.5 h-3.5" /> Link copiado!</>
+                        ) : (
+                          <><Link2 className="w-3.5 h-3.5" /> Gerar Link do Formulário</>
+                        )}
+                      </button>
                     </div>
                   </div>
                 </div>
 
                 {/* ── PENDÊNCIAS DO MENTORADO ── */}
-                {/* <PendenciasSection mentoradoId={selectedId} mentorId={mentorId} /> */}
+                <PendenciasSection mentoradoId={selectedId} mentorId={mentorId} />
 
                 {/* ── MÉTRICAS GRID 3 COLUNAS ── */}
                 <div>
@@ -945,6 +1024,290 @@ export default function DashboardPage() {
         </div>
       </main>
 
+      {/* ── DROPDOWN MENU PERFIL (Portal — fora do stacking context) ── */}
+      {showMenuPerfil && typeof document !== "undefined" && createPortal(
+        <div
+          className="fixed right-4 top-16 w-72 bg-slate-900 border border-slate-700/60 rounded-xl shadow-2xl shadow-black/80 overflow-hidden"
+          style={{ zIndex: 99999 }}
+          ref={menuPerfilRef}
+        >
+          {/* Header */}
+          <div className="px-4 py-3 border-b border-slate-700/30 bg-gradient-to-r from-blue-600/10 to-purple-600/10">
+            <p className="text-sm font-bold text-white">{mentorNome}</p>
+            <p className="text-xs text-slate-400 mt-0.5">Mentor ativo</p>
+          </div>
+          {/* Mentorado atual */}
+          {selected && (
+            <div className="px-4 py-3 border-b border-slate-700/30 bg-slate-800/40">
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Mentorado Atual</p>
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-xs font-bold flex-shrink-0">
+                  {selected.nome.split(" ").map((n: string) => n[0]).join("").slice(0, 2)}
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-white">{selected.nome}</p>
+                  <p className="text-[10px] text-slate-400">{selected.nicho} · desde {selected.data_inicio}</p>
+                </div>
+              </div>
+            </div>
+          )}
+          {/* Ações */}
+          <div className="p-2">
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-2 mb-1">Mentorado</p>
+            <button onClick={() => { setShowHistoricoModal(true); setShowMenuPerfil(false) }}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 transition-colors text-left group">
+              <div className="w-7 h-7 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                <History className="w-3.5 h-3.5 text-blue-400" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm text-white font-medium">Histórico Completo</p>
+                <p className="text-[10px] text-slate-400">{historico.length} semanas de dados</p>
+              </div>
+              <ChevronRight className="w-3.5 h-3.5 text-slate-500" />
+            </button>
+            <button onClick={() => {
+                if (selected) { setEditData({ nome: selected.nome, nicho: selected.nicho, foco_macro: selected.foco_macro, status: "Ativo" }); setShowEditModal(true) }
+                setShowMenuPerfil(false)
+              }}
+              disabled={!selected}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 transition-colors text-left group disabled:opacity-40">
+              <div className="w-7 h-7 rounded-lg bg-amber-500/20 flex items-center justify-center">
+                <Edit2 className="w-3.5 h-3.5 text-amber-400" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm text-white font-medium">Editar Mentorado</p>
+                <p className="text-[10px] text-slate-400">Alterar dados e foco</p>
+              </div>
+              <ChevronRight className="w-3.5 h-3.5 text-slate-500" />
+            </button>
+            <div className="border-t border-slate-700/30 my-2" />
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-2 mb-1">Conta</p>
+            <button onClick={() => { setShowPerfilModal(true); setShowMenuPerfil(false) }}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 transition-colors text-left group">
+              <div className="w-7 h-7 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                <User className="w-3.5 h-3.5 text-purple-400" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm text-white font-medium">Meu Perfil</p>
+                <p className="text-[10px] text-slate-400">Método, filosofia e nicho</p>
+              </div>
+              <ChevronRight className="w-3.5 h-3.5 text-slate-500" />
+            </button>
+            <button onClick={() => { localStorage.removeItem("mentorSelecionado"); window.location.href = "/" }}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-red-500/10 transition-colors text-left">
+              <div className="w-7 h-7 rounded-lg bg-red-500/20 flex items-center justify-center">
+                <LogOut className="w-3.5 h-3.5 text-red-400" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm text-red-300 font-medium">Trocar Mentor</p>
+                <p className="text-[10px] text-slate-400">Voltar para seleção</p>
+              </div>
+            </button>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* ── MODAL: PERFIL DO MENTOR ── */}
+      {showPerfilModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => { setShowPerfilModal(false); setEditandoPerfil(false) }}>
+          <div className="bg-slate-900 border border-slate-700/50 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-slate-700/30">
+              <div className="flex items-center gap-4">
+                {/* Avatar com upload */}
+                <label className="relative cursor-pointer group">
+                  <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-slate-600 group-hover:border-blue-500 transition-colors">
+                    {mentorDados?.foto_url ? (
+                      <img src={mentorDados.foto_url} alt={mentorNome} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-lg font-bold">
+                        {mentorNome.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      {uploadingFoto === mentorId ? (
+                        <RefreshCw className="w-5 h-5 text-white animate-spin" />
+                      ) : (
+                        <span className="text-white text-xs font-bold">FOTO</span>
+                      )}
+                    </div>
+                  </div>
+                  <input type="file" accept="image/*" className="hidden" onChange={e => {
+                    const file = e.target.files?.[0]
+                    if (file && mentorId) uploadFoto(file, "mentor", mentorId)
+                  }} />
+                </label>
+                <div>
+                  <h2 className="text-xl font-bold text-white">{mentorNome}</h2>
+                  <p className="text-xs text-slate-400">Clique na foto para alterar</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {!editandoPerfil ? (
+                  <button onClick={() => { setEditandoPerfil(true); setPerfilEdit({ nome: mentorDados?.nome || mentorNome, nicho_foco: mentorDados?.nicho_foco || "", metodo_trabalho: mentorDados?.metodo_trabalho || "", filosofia: mentorDados?.filosofia || "" }) }}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-500/15 border border-blue-500/30 text-blue-300 hover:bg-blue-500/25 transition-all">
+                    <Edit2 className="w-3.5 h-3.5" /> Editar
+                  </button>
+                ) : (
+                  <button onClick={() => { setEditandoPerfil(false) }}
+                    className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition-colors">
+                    Cancelar
+                  </button>
+                )}
+                <button onClick={() => { setShowPerfilModal(false); setEditandoPerfil(false) }} className="p-2 hover:bg-slate-800/50 rounded-lg transition-colors">
+                  <X className="w-5 h-5 text-slate-400" />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {!editandoPerfil ? (
+                /* VIEW MODE */
+                <>
+                  <div className="bg-slate-800/40 border border-slate-700/30 rounded-xl p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Briefcase className="w-4 h-4 text-blue-400" />
+                      <p className="text-xs font-bold text-blue-400 uppercase tracking-widest">Método de Trabalho</p>
+                    </div>
+                    <p className="text-sm text-slate-300 leading-relaxed">{mentorDados?.metodo_trabalho || "—"}</p>
+                  </div>
+                  <div className="bg-slate-800/40 border border-slate-700/30 rounded-xl p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <BookOpen className="w-4 h-4 text-purple-400" />
+                      <p className="text-xs font-bold text-purple-400 uppercase tracking-widest">Filosofia</p>
+                    </div>
+                    <p className="text-sm text-slate-300 leading-relaxed">{mentorDados?.filosofia || "—"}</p>
+                  </div>
+                  <div className="bg-slate-800/40 border border-slate-700/30 rounded-xl p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Target className="w-4 h-4 text-emerald-400" />
+                      <p className="text-xs font-bold text-emerald-400 uppercase tracking-widest">Nicho Foco</p>
+                    </div>
+                    <p className="text-sm text-slate-300">{mentorDados?.nicho_foco || "—"}</p>
+                  </div>
+                </>
+              ) : (
+                /* EDIT MODE */
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1.5">Nome</label>
+                    <input value={perfilEdit.nome} onChange={e => setPerfilEdit(p => ({ ...p, nome: e.target.value }))}
+                      className="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1.5">Nicho Foco</label>
+                    <input value={perfilEdit.nicho_foco} onChange={e => setPerfilEdit(p => ({ ...p, nicho_foco: e.target.value }))}
+                      className="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors text-sm" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-blue-400 uppercase tracking-widest mb-1.5">Método de Trabalho</label>
+                    <textarea value={perfilEdit.metodo_trabalho} onChange={e => setPerfilEdit(p => ({ ...p, metodo_trabalho: e.target.value }))} rows={6}
+                      className="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors text-sm resize-none" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-purple-400 uppercase tracking-widest mb-1.5">Filosofia</label>
+                    <textarea value={perfilEdit.filosofia} onChange={e => setPerfilEdit(p => ({ ...p, filosofia: e.target.value }))} rows={5}
+                      className="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-purple-500 transition-colors text-sm resize-none" />
+                  </div>
+                  <button onClick={salvarPerfil} disabled={salvandoPerfil}
+                    className="w-full py-2.5 rounded-lg text-sm font-bold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white disabled:opacity-50 transition-all">
+                    {salvandoPerfil ? "Salvando..." : "Salvar Perfil"}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL: HISTÓRICO DO MENTORADO ── */}
+      {showHistoricoModal && selected && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setShowHistoricoModal(false)}>
+          <div className="bg-slate-900/98 border border-slate-700/50 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-6 border-b border-slate-700/30">
+              <div>
+                <h2 className="text-xl font-bold text-white">Histórico — {selected.nome}</h2>
+                <p className="text-xs text-slate-400 mt-1">{historico.length} semanas de dados · {selected.nicho}</p>
+              </div>
+              <button onClick={() => setShowHistoricoModal(false)} className="p-2 hover:bg-slate-800/50 rounded-lg transition-colors">
+                <X className="w-5 h-5 text-slate-400" />
+              </button>
+            </div>
+            <div className="p-6">
+              {historico.length === 0 ? (
+                <p className="text-slate-400 text-center py-8">Nenhum check-in registrado ainda.</p>
+              ) : (
+                <div className="space-y-3">
+                  {/* Resumo do mentorado */}
+                  <div className="grid grid-cols-3 gap-3 mb-6">
+                    <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 text-center">
+                      <p className="text-2xl font-bold text-emerald-400">{historico[0]?.leads_gerados ?? "—"}</p>
+                      <p className="text-[10px] text-emerald-400/70 uppercase tracking-widest mt-1">Leads (última sem.)</p>
+                    </div>
+                    <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-3 text-center">
+                      <p className="text-2xl font-bold text-purple-400">R$ {historico[0]?.vendas_reais?.toLocaleString("pt-BR") ?? "—"}</p>
+                      <p className="text-[10px] text-purple-400/70 uppercase tracking-widest mt-1">Vendas (última sem.)</p>
+                    </div>
+                    <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-3 text-center">
+                      <p className="text-2xl font-bold text-blue-400">{historico.length}</p>
+                      <p className="text-[10px] text-blue-400/70 uppercase tracking-widest mt-1">Semanas de dados</p>
+                    </div>
+                  </div>
+
+                  {/* Tabela histórico */}
+                  <div className="overflow-x-auto rounded-xl border border-slate-700/30">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-slate-800/50">
+                          <th className="text-left px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Data</th>
+                          <th className="text-right px-4 py-3 text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Leads</th>
+                          <th className="text-right px-4 py-3 text-[10px] font-bold text-purple-500 uppercase tracking-widest">Vendas</th>
+                          <th className="text-right px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Invest.</th>
+                          <th className="text-right px-4 py-3 text-[10px] font-bold text-amber-500 uppercase tracking-widest">ROI%</th>
+                          <th className="text-right px-4 py-3 text-[10px] font-bold text-cyan-500 uppercase tracking-widest">Vídeos</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {[...historico].reverse().map((c, i) => {
+                          const roi = c.investimento_trafego > 0
+                            ? (((c.vendas_reais - c.investimento_trafego) / c.investimento_trafego) * 100).toFixed(0)
+                            : "—"
+                          const isLast = i === historico.length - 1
+                          return (
+                            <tr key={c.id} className={`border-t border-slate-700/20 ${isLast ? "bg-blue-500/5" : "hover:bg-slate-800/30"} transition-colors`}>
+                              <td className="px-4 py-3 text-slate-300">
+                                <div className="flex items-center gap-2">
+                                  {isLast && <span className="w-1.5 h-1.5 rounded-full bg-blue-400 inline-block" />}
+                                  {new Date(c.data_envio).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "2-digit" })}
+                                </div>
+                              </td>
+                              <td className="px-4 py-3 text-right font-semibold text-emerald-400">{c.leads_gerados}</td>
+                              <td className="px-4 py-3 text-right font-semibold text-purple-400">R$ {c.vendas_reais?.toLocaleString("pt-BR")}</td>
+                              <td className="px-4 py-3 text-right text-slate-400">R$ {c.investimento_trafego?.toLocaleString("pt-BR")}</td>
+                              <td className={`px-4 py-3 text-right font-bold ${Number(roi) > 0 ? "text-emerald-400" : "text-red-400"}`}>{roi}%</td>
+                              <td className="px-4 py-3 text-right text-cyan-400">{c.videos_postados ?? "—"}</td>
+                            </tr>
+                          )
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Dificuldades do último checkin */}
+                  {historico[0]?.dificuldades_texto && (
+                    <div className="mt-4 bg-amber-500/10 border border-amber-500/20 rounded-xl p-4">
+                      <p className="text-[10px] font-bold text-amber-400 uppercase tracking-widest mb-2">Última dificuldade relatada</p>
+                      <p className="text-sm text-slate-300">{historico[0].dificuldades_texto}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── MODAL: CADASTRAR MENTORADO ── */}
       {showCadastro && (
         <div
@@ -1038,10 +1401,30 @@ export default function DashboardPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-5">
-              <div className="flex items-center gap-2">
-                <div className="w-9 h-9 rounded-lg bg-amber-500/20 flex items-center justify-center">
-                  <Edit2 className="w-5 h-5 text-amber-400" />
-                </div>
+              <div className="flex items-center gap-3">
+                {/* Avatar mentorado com upload */}
+                <label className="relative cursor-pointer group">
+                  <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-slate-600 group-hover:border-amber-500 transition-colors">
+                    {selected?.foto_url ? (
+                      <img src={selected.foto_url} alt={selected?.nome} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-sm font-bold">
+                        {selected?.nome.split(" ").map((n: string) => n[0]).join("").slice(0, 2)}
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      {uploadingFoto === selectedId ? (
+                        <RefreshCw className="w-4 h-4 text-white animate-spin" />
+                      ) : (
+                        <span className="text-white text-[10px] font-bold">FOTO</span>
+                      )}
+                    </div>
+                  </div>
+                  <input type="file" accept="image/*" className="hidden" onChange={e => {
+                    const file = e.target.files?.[0]
+                    if (file && selectedId) uploadFoto(file, "mentorado", selectedId)
+                  }} />
+                </label>
                 <h2 className="text-lg font-bold text-white">Editar Mentorado</h2>
               </div>
               <button onClick={() => setShowEditModal(false)} className="text-slate-400 hover:text-white transition-colors">
@@ -1083,7 +1466,7 @@ export default function DashboardPage() {
                 <button
                   type="button"
                   onClick={() => setShowEditModal(false)}
-                  className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold bg-slate-700/50 hover:bg-slate-700 text-slate-300 transition-colors"
+                  className="px-4 py-2.5 rounded-lg text-sm font-semibold bg-slate-700/50 hover:bg-slate-700 text-slate-300 transition-colors"
                 >
                   Cancelar
                 </button>
@@ -1093,6 +1476,20 @@ export default function DashboardPage() {
                   className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white shadow-lg shadow-amber-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
                   {editando ? "Salvando..." : "Salvar Mudanças"}
+                </button>
+              </div>
+
+              {/* Zona de perigo */}
+              <div className="border-t border-slate-700/40 pt-4 mt-2">
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Zona de Perigo</p>
+                <button
+                  type="button"
+                  onClick={() => { setShowEditModal(false); deletarMentorado() }}
+                  disabled={editando}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 hover:border-red-500/50 hover:text-red-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Deletar Mentorado permanentemente
                 </button>
               </div>
             </form>

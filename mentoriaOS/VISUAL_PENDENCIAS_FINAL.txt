@@ -1,0 +1,164 @@
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                   VISUAL FINAL: DASHBOARD COM PENDÊNCIAS                       ║
+║                            mentoriaOS v2.1                                      ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+📍 LOCALIZAÇÃO: Entre Header Info Card e Métricas Grid
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                                                                                ┃
+┃  João Silva (Vendas B2B)                      [ATIVO]  [Gerar Link] [Editar]  ┃
+┃  📅 Início: 15/05/2026 | 🎯 Foco: Crescimento de pipeline                   ┃
+┃                                                                                ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+                              ↓ NOVO COMPONENTE ↓
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                                                                                ┃
+┃  ▌ Pendências                                                          3      ┃
+┃  Clique para concluir                                                        ┃
+┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+┃                                                                                ┃
+┃  ☐ Contactar os 5 leads qualificados de ontem                           🗑️   ┃
+┃     Hoje                                                                      ┃
+┃                                                                                ┃
+┃  ☐ Enviar proposta final para cliente Acme Corp                         🗑️   ┃
+┃     Hoje                                                                      ┃
+┃                                                                                ┃
+┃  ☐ Follow-up com time comercial sobre KPIs                             🗑️   ┃
+┃     ⚠️  Vencida: 28/05 (vermelho)                                             ┃
+┃                                                                                ┃
+┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+┃                                                                                ┃
+┃  ┌─ NOVA TAREFA ────────────────────────────────────────────────────────┐   ┃
+┃  │ [Descrever tarefa aqui...        ] [📅 Data vencimento]  [+ Adicionar] │   ┃
+┃  └─────────────────────────────────────────────────────────────────────────┘   ┃
+┃                                                                                ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+                              ↓ SEÇÃO COLAPSÁVEL ↓
+
+┌─ Completadas Hoje   2  ▼ ─────────────────────────────────────────────────────┐
+│                                                                                │
+│  ☑ Postar story Instagram sobre case de sucesso                         🗑️   │
+│    ✓ Concluída em 13:45                                                      │
+│                                                                                │
+│  ☑ Responder 8 emails de clientes pendentes                             🗑️   │
+│    ✓ Concluída em 13:22                                                      │
+│                                                                                │
+└────────────────────────────────────────────────────────────────────────────────┘
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                                                                                ┃
+┃  📊 Métricas da Semana                  Atualizado 14:30:45  [🔄 Atualizar]  ┃
+┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+┃                                                                                ┃
+┃  ┌──────────────────────┐  ┌──────────────────────┐  ┌──────────────────────┐┃
+┃  │ 🎯 Leads Gerados     │  │ 📈 Vendas Reais      │  │ 💸 Investimento      ││
+┃  │                      │  │                      │  │                      ││
+┃  │      450             │  │   R$ 2.400           │  │   R$ 1.100           ││
+┃  │  ↑ +15% vs sem.ant   │  │   ↓ -30% vs sem.ant  │  │   ↑ +8% vs sem.ant   ││
+┃  │      📊              │  │      📊              │  │      📊              ││
+┃  │ ▁▂▃▄▅ (sparkline)    │  │ ▁▂▃▄▅ (sparkline)    │  │ ▁▂▃▄▅ (sparkline)    ││
+┃  └──────────────────────┘  └──────────────────────┘  └──────────────────────┘┃
+┃                                                                                ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+
+════════════════════════════════════════════════════════════════════════════════
+
+CORES USADAS:
+
+🟠 Pendências:
+   - Badge: Gradiente amber-500 a orange-600
+   - Barra lateral: Gradiente from-amber-400 to-orange-500
+   - Contador: Fundo orange
+
+🟢 Completadas Hoje:
+   - Barra lateral: Gradiente from-green-400 to-emerald-600
+   - Título: green-400
+   - Badges: green-600/30
+
+🔴 Vencidas:
+   - Texto: red-400
+   - Ícone: red-400
+   - Badge: "Vencida"
+
+⚫ Fundo Cards:
+   - from-slate-700/40 to-slate-800/40
+   - border: slate-600/30
+   - hover: slate-600/40
+
+═══════════════════════════════════════════════════════════════════════════════
+
+INTERAÇÕES:
+
+1️⃣  Criar Tarefa:
+    • User digita no input "Nova tarefa..."
+    • User seleciona data (opcional)
+    • User clica "+ Adicionar"
+    • ✅ Tarefa aparece em <100ms no topo da lista
+    • 📊 Badge contador aumenta de 2 para 3
+
+2️⃣  Marcar Completa:
+    • User clica checkbox ☐
+    • ✅ Checkbox fica ☑ (verde)
+    • Tarefa some da seção "Pendências"
+    • 📊 Badge diminui de 3 para 2
+    • Tarefa aparece em "Completadas Hoje" com strikethrough
+    • Mostra: "✓ Concluída em HH:MM"
+
+3️⃣  Deletar:
+    • User hover na tarefa → aparece 🗑️ (vermelho)
+    • User clica 🗑️
+    • Confirmação: "Tem certeza que deseja deletar?"
+    • ✅ Tarefa desaparece imediatamente
+    • 📊 Badge e contadores atualizam
+
+4️⃣  Trocar Mentorado:
+    • User clica em mentorado diferente na sidebar
+    • ⚡ Seção "Pendências" recarrega em <1s
+    • Mostra tarefas do novo mentorado
+    • Completadas Hoje reseta (tarefas do dia anterior)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+LAYOUT RESPONSIVO:
+
+📱 MOBILE (< 768px):
+   • Sidebar colapsável (ícone hambúrguer)
+   • Cards em stack vertical (100% width)
+   • Input + data picker em coluna
+   • Botão "+ Adicionar" ocupa full-width
+
+💻 DESKTOP (≥ 768px):
+   • Sidebar sempre aberta
+   • Cards em layout horizontal otimizado
+   • Input + date picker + botão em linha
+   • Hover effects (lixeira) aparecem
+
+═══════════════════════════════════════════════════════════════════════════════
+
+VALIDAÇÕES:
+
+✅ Texto não pode ser vazio
+✅ Data vencimento é opcional
+✅ Se data passada, marca "Vencida" em vermelho
+✅ Se data hoje, marca "Hoje"
+✅ Se data amanhã, marca "Amanhã"
+✅ Checkbox só aparece se mentorado selecionado
+✅ Sem tarefas mostra: "Nenhuma pendência! 🎉"
+
+═══════════════════════════════════════════════════════════════════════════════
+
+PERFORMANCE:
+
+⚡ CREATE: <100ms (API POST + refetch)
+⚡ UPDATE (toggle): <100ms (API PATCH + refetch)
+⚡ DELETE: <100ms (API DELETE + refetch)
+⚡ LIST (trocar mentorado): <1s (API GET com cache-buster)
+
+═══════════════════════════════════════════════════════════════════════════════

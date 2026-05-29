@@ -11,14 +11,14 @@ export async function GET() {
     { auth: { persistSession: false } }
   )
 
-  try {
-    const { data: mentores } = await supabase
-      .from("mentors")
-      .select("id, nome, nicho_foco")
-      .order("created_at", { ascending: false })
+  const { data: mentores, error } = await supabase
+    .from("mentors")
+    .select("id, nome, nicho_foco")
+    .order("nome", { ascending: true })
 
-    return Response.json({ mentores: mentores || [] }, { headers: NO_CACHE })
-  } catch (e) {
-    return Response.json({ mentores: [], error: String(e) }, { headers: NO_CACHE })
+  if (error) {
+    return Response.json({ mentores: [], error: error.message }, { headers: NO_CACHE })
   }
+
+  return Response.json({ mentores: mentores || [] }, { headers: NO_CACHE })
 }

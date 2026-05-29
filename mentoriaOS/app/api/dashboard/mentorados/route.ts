@@ -70,7 +70,7 @@ export async function GET(request: Request) {
 
   let query = supabase
     .from("mentorados")
-    .select("id, nome, nicho, status, foco_macro, data_inicio")
+    .select("id, nome, nicho, status, foco_macro, data_inicio, foto_url")
     .eq("status", "Ativo")
 
   // Se houver mentor_id, filtrar por ele
