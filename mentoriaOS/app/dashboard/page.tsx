@@ -15,7 +15,17 @@ interface Mentorado {
 
 interface BriefingIA {
   diagnostico: string
+  evolucao?: string
   pauta: string[]
+}
+
+// Calcula variação % entre a semana atual e a anterior (do histórico real).
+function variacao(historicoDesc: CheckinRow[], campo: keyof CheckinRow): number | null {
+  if (!historicoDesc || historicoDesc.length < 2) return null
+  const atual = Number(historicoDesc[0][campo]) || 0
+  const anterior = Number(historicoDesc[1][campo]) || 0
+  if (anterior === 0) return atual > 0 ? 100 : null
+  return ((atual - anterior) / anterior) * 100
 }
 
 function gerarBriefing(m: Mentorado, c: CheckinRow): BriefingIA {
@@ -32,13 +42,50 @@ function gerarBriefing(m: Mentorado, c: CheckinRow): BriefingIA {
   }
 }
 
-// Sparkline component (SVG mini-gráfico)
-function Sparkline({ trend }: { trend: boolean | null }) {
-  const points = trend === true ? "0,30 15,20 30,25 45,15 60,10" : trend === false ? "0,10 15,20 30,15 45,25 60,30" : "0,20 15,20 30,20 45,20 60,20"
+// Sparkline real: desenha a série histórica (cronológica) escalada ao card.
+function Sparkline({ valores }: { valores: number[] }) {
+  if (!valores || valores.length === 0) {
+    return <svg width="60" height="30" viewBox="0 0 60 30" className="w-full h-auto" />
+  }
+  // Uma só semana: linha plana neutra.
+  if (valores.length === 1) {
+    return (
+      <svg width="60" height="30" viewBox="0 0 60 30" className="w-full h-auto">
+        <polyline points="0,15 60,15" fill="none" stroke="#9ca3af" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
+      </svg>
+    )
+  }
+  const min = Math.min(...valores)
+  const max = Math.max(...valores)
+  const span = max - min || 1
+  const W = 60
+  const H = 30
+  const pad = 3
+  const pts = valores.map((v, i) => {
+    const x = (i / (valores.length - 1)) * W
+    const y = H - pad - ((v - min) / span) * (H - pad * 2)
+    return `${x.toFixed(1)},${y.toFixed(1)}`
+  })
+  const subindo = valores[valores.length - 1] >= valores[0]
+  const cor = subindo ? "#10b981" : "#ef4444"
   return (
     <svg width="60" height="30" viewBox="0 0 60 30" className="w-full h-auto">
-      <polyline points={points} fill="none" stroke={trend === true ? "#10b981" : trend === false ? "#ef4444" : "#9ca3af"} strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
+      <polyline points={pts.join(" ")} fill="none" stroke={cor} strokeWidth="1.5" vectorEffect="non-scaling-stroke" strokeLinejoin="round" strokeLinecap="round" />
     </svg>
+  )
+}
+
+// Badge de tendência (% vs semana anterior) com cor e seta.
+function Trend({ pct }: { pct: number | null }) {
+  if (pct === null) return <p className="text-xs text-slate-500 mt-1">1ª semana</p>
+  const up = pct > 0.5
+  const down = pct < -0.5
+  const cor = up ? "text-emerald-400" : down ? "text-red-400" : "text-slate-400"
+  const seta = up ? "↑" : down ? "↓" : "—"
+  return (
+    <p className={`text-xs font-semibold mt-1 ${cor}`}>
+      {seta} {pct > 0 ? "+" : ""}{pct.toFixed(0)}% vs sem.ant
+    </p>
   )
 }
 
@@ -46,6 +93,7 @@ export default function DashboardPage() {
   const [mentorados, setMentorados] = useState<Mentorado[]>([])
   const [selectedId, setSelectedId] = useState<string>("")
   const [checkin, setCheckin] = useState<CheckinRow | null>(null)
+  const [historico, setHistorico] = useState<CheckinRow[]>([])
   const [briefing, setBriefing] = useState<BriefingIA | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
   const [loading, setLoading] = useState(true)
@@ -69,9 +117,11 @@ export default function DashboardPage() {
       })
       const json = await res.json()
       setCheckin((json.checkin as CheckinRow | null) ?? null)
+      setHistorico((json.historico as CheckinRow[]) ?? [])
       setUltimaAtualizacao(new Date())
     } catch {
       setCheckin(null)
+      setHistorico([])
     }
   }, [])
 
@@ -212,6 +262,16 @@ export default function DashboardPage() {
   const filtered = mentorados.filter((m) =>
     m.nome.toLowerCase().includes(searchTerm.toLowerCase())
   )
+
+  // Séries cronológicas (mais antiga → mais recente) para os mini-gráficos reais.
+  const cronologico = [...historico].reverse()
+  const serieLeads = cronologico.map((c) => Number(c.leads_gerados) || 0)
+  const serieVendas = cronologico.map((c) => Number(c.vendas_reais) || 0)
+  const serieInvest = cronologico.map((c) => Number(c.investimento_trafego) || 0)
+  // Variações % vs semana anterior (histórico real).
+  const varLeads = variacao(historico, "leads_gerados")
+  const varVendas = variacao(historico, "vendas_reais")
+  const varInvest = variacao(historico, "investimento_trafego")
 
   if (loading) {
     return (
@@ -394,13 +454,9 @@ export default function DashboardPage() {
                       </div>
                       <div className="mb-3">
                         <p className="text-3xl font-bold text-white">{checkin?.leads_gerados ?? "—"}</p>
-                        {checkin ? (
-                          <p className="text-xs text-emerald-400 font-semibold mt-1">↑ +15% vs sem.ant</p>
-                        ) : (
-                          <p className="text-xs text-slate-500 mt-1">Sem dados</p>
-                        )}
+                        {checkin ? <Trend pct={varLeads} /> : <p className="text-xs text-slate-500 mt-1">Sem dados</p>}
                       </div>
-                      {checkin && <Sparkline trend={checkin.leads_gerados > 300} />}
+                      {checkin && <Sparkline valores={serieLeads} />}
                     </div>
 
                     {/* VENDAS */}
@@ -413,13 +469,9 @@ export default function DashboardPage() {
                         <p className="text-3xl font-bold text-white">
                           {checkin ? `R$ ${checkin.vendas_reais.toLocaleString("pt-BR")}` : "—"}
                         </p>
-                        {checkin ? (
-                          <p className="text-xs text-red-400 font-semibold mt-1">↓ -30% vs sem.ant</p>
-                        ) : (
-                          <p className="text-xs text-slate-500 mt-1">Sem dados</p>
-                        )}
+                        {checkin ? <Trend pct={varVendas} /> : <p className="text-xs text-slate-500 mt-1">Sem dados</p>}
                       </div>
-                      {checkin && <Sparkline trend={false} />}
+                      {checkin && <Sparkline valores={serieVendas} />}
                     </div>
 
                     {/* INVESTIDO */}
@@ -432,13 +484,9 @@ export default function DashboardPage() {
                         <p className="text-3xl font-bold text-white">
                           {checkin ? `R$ ${checkin.investimento_trafego.toLocaleString("pt-BR")}` : "—"}
                         </p>
-                        {checkin ? (
-                          <p className="text-xs text-slate-400 font-semibold mt-1">— Estável</p>
-                        ) : (
-                          <p className="text-xs text-slate-500 mt-1">Sem dados</p>
-                        )}
+                        {checkin ? <Trend pct={varInvest} /> : <p className="text-xs text-slate-500 mt-1">Sem dados</p>}
                       </div>
-                      {checkin && <Sparkline trend={null} />}
+                      {checkin && <Sparkline valores={serieInvest} />}
                     </div>
                   </div>
                 </div>
@@ -467,6 +515,21 @@ export default function DashboardPage() {
                             <p className="text-sm text-slate-300 leading-relaxed">{briefing.diagnostico}</p>
                           </div>
                         </div>
+
+                        {briefing.evolucao && (
+                          <>
+                            <div className="h-px bg-gradient-to-r from-transparent via-slate-700/50 to-transparent" />
+                            <div className="flex gap-4">
+                              <div className="w-10 h-10 rounded-lg bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center flex-shrink-0">
+                                <TrendingUp className="w-5 h-5 text-emerald-400" />
+                              </div>
+                              <div>
+                                <p className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Evolução vs Semanas Anteriores</p>
+                                <p className="text-sm text-slate-300 leading-relaxed">{briefing.evolucao}</p>
+                              </div>
+                            </div>
+                          </>
+                        )}
 
                         <div className="h-px bg-gradient-to-r from-transparent via-slate-700/50 to-transparent" />
 

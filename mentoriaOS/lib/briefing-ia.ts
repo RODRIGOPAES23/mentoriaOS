@@ -1,5 +1,6 @@
 // Briefing inteligente via OpenRouter + Gemini Flash (econômico).
-// Gera diagnóstico do gargalo + pauta de call a partir do check-in real.
+// Analisa o histórico de check-ins (comparando semanas) e gera:
+// diagnóstico do gargalo + evolução + pauta de call.
 
 // Modelo econômico do Gemini Flash no OpenRouter. Troque aqui se quiser:
 //   google/gemini-2.0-flash-001       (recomendado: barato + bom)
@@ -9,6 +10,7 @@ export const BRIEFING_MODEL = "google/gemini-2.0-flash-001"
 
 export interface BriefingIA {
   diagnostico: string
+  evolucao: string
   pauta: string[]
 }
 
@@ -32,57 +34,65 @@ const SYSTEM_PROMPT = `Você é um Diretor de Operações e Estrategista de Neg�
 
 REGRAS:
 - Analise os números com frieza. Se estão ruins, aponte a falha operacional sem suavizar.
-- Correlacione os números frios com o relato de dificuldades (ex: muitos leads e poucas vendas = gargalo comercial).
-- Seja específico, direto e acionável. Sem enrolação, sem elogios vazios.
+- COMPARE AS SEMANAS do histórico: identifique tendências (subindo/caindo/estagnado) e o que mudou.
+- Correlacione os números frios com o relato de dificuldades (ex: leads subindo mas vendas caindo = gargalo comercial).
+- Seja específico, direto e acionável. Cite números e variações reais (%). Sem elogios vazios.
 - Escreva em português do Brasil.
 
 Responda SOMENTE com um JSON válido, sem markdown, neste formato exato:
 {
-  "diagnostico": "Um parágrafo curto (máx 4 linhas) com o maior gargalo atual e o porquê, citando os números.",
-  "pauta": ["Item 1 da call com tempo (ex: 0-10m)", "Item 2 (10-25m)", "Item 3 (25-30m)"]
+  "diagnostico": "Parágrafo curto (máx 4 linhas) com o maior gargalo atual e o porquê, citando números da semana mais recente.",
+  "evolucao": "Parágrafo curto (máx 4 linhas) comparando as semanas: o que melhorou, o que piorou e a tendência. Cite variações (%). Se só há 1 semana, diga que é a primeira e não há base de comparação.",
+  "pauta": ["Item 1 da call com janela de tempo (ex: 0-10m)", "Item 2 (10-25m)", "Item 3 (25-30m)"]
 }
 A pauta deve ter de 3 a 5 itens acionáveis com janelas de tempo.`
 
+function roiPct(c: DadosCheckin): string {
+  return c.investimento_trafego > 0
+    ? (((c.vendas_reais - c.investimento_trafego) / c.investimento_trafego) * 100).toFixed(0)
+    : "N/A"
+}
+
+/**
+ * @param historicoDesc check-ins ordenados do MAIS RECENTE para o mais antigo.
+ */
 export async function gerarBriefingIA(
   mentorado: DadosMentorado,
-  checkin: DadosCheckin
+  historicoDesc: DadosCheckin[]
 ): Promise<BriefingIA> {
   const apiKey = process.env.ANTHROPIC_API_KEY // chave OpenRouter (sk-or-...)
   if (!apiKey) throw new Error("OpenRouter API key ausente")
+  if (!historicoDesc || historicoDesc.length === 0) {
+    throw new Error("Sem check-ins para analisar")
+  }
 
-  const roi =
-    checkin.investimento_trafego > 0
-      ? (
-          ((checkin.vendas_reais - checkin.investimento_trafego) /
-            checkin.investimento_trafego) *
-          100
-        ).toFixed(0)
-      : "N/A"
-  const conversao =
-    checkin.leads_gerados > 0
-      ? (checkin.vendas_reais / checkin.leads_gerados).toFixed(0)
-      : "N/A"
+  const atual = historicoDesc[0]
+  // Tabela cronológica (mais antiga → mais recente) para a IA enxergar a evolução.
+  const cronologico = [...historicoDesc].reverse()
+  const tabela = cronologico
+    .map((c, i) => {
+      const data = new Date(c.data_envio).toLocaleDateString("pt-BR")
+      const conv = c.leads_gerados > 0 ? (c.vendas_reais / c.leads_gerados).toFixed(0) : "N/A"
+      return `Semana ${i + 1} (${data}): Vendas R$ ${c.vendas_reais} | Leads ${c.leads_gerados} | Invest R$ ${c.investimento_trafego} | ROI ${roiPct(c)}% | R$/lead ${conv} | Vídeos ${c.videos_postados}`
+    })
+    .join("\n")
 
-  const tarefas = Array.isArray(checkin.tarefas_executadas)
-    ? checkin.tarefas_executadas.map((t, i) => `${i + 1}. ${t}`).join("\n")
+  const tarefas = Array.isArray(atual.tarefas_executadas)
+    ? atual.tarefas_executadas.map((t, i) => `${i + 1}. ${t}`).join("\n")
     : "Nenhuma registrada"
 
   const userMessage = `MENTORADO: ${mentorado.nome} | Nicho: ${mentorado.nicho} | Foco: ${mentorado.foco_macro || "Não definido"}
 
-DADOS DA SEMANA:
-- Vendas: R$ ${checkin.vendas_reais}
-- Leads: ${checkin.leads_gerados}
-- Investimento em tráfego: R$ ${checkin.investimento_trafego}
-- ROI: ${roi}% | R$/lead convertido: ${conversao}
-- Vídeos postados: ${checkin.videos_postados}
+HISTÓRICO DE CHECK-INS (mais antiga → mais recente, ${cronologico.length} semana(s)):
+${tabela}
 
-DIFICULDADES RELATADAS:
-"${checkin.dificuldades_texto || "Nenhuma relatada"}"
+SEMANA MAIS RECENTE — DIFICULDADES RELATADAS:
+"${atual.dificuldades_texto || "Nenhuma relatada"}"
 
-TAREFAS EXECUTADAS:
+SEMANA MAIS RECENTE — TAREFAS EXECUTADAS:
 ${tarefas}
 
-Gere o diagnóstico e a pauta da call.`
+Compare as semanas, diagnostique o gargalo e gere a pauta da call.`
 
   const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
@@ -98,7 +108,7 @@ Gere o diagnóstico e a pauta da call.`
         { role: "system", content: SYSTEM_PROMPT },
         { role: "user", content: userMessage },
       ],
-      max_tokens: 800,
+      max_tokens: 1000,
       temperature: 0.4,
       response_format: { type: "json_object" },
     }),
@@ -112,7 +122,6 @@ Gere o diagnóstico e a pauta da call.`
   const json = await res.json()
   const content: string = json?.choices?.[0]?.message?.content || ""
 
-  // Parsing robusto: tenta JSON direto; se vier com cercas, extrai o objeto.
   let parsed: any
   try {
     parsed = JSON.parse(content)
@@ -127,6 +136,7 @@ Gere o diagnóstico e a pauta da call.`
 
   return {
     diagnostico: parsed.diagnostico,
+    evolucao: typeof parsed.evolucao === "string" ? parsed.evolucao : "",
     pauta: Array.isArray(parsed.pauta) ? parsed.pauta.map(String) : [],
   }
 }

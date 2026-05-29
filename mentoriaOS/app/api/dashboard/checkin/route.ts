@@ -24,19 +24,23 @@ export async function GET(request: Request) {
     auth: { persistSession: false },
   })
 
+  // Últimos 8 check-ins (mais recente primeiro): [0] = atual, resto = histórico p/ comparação.
   const { data, error } = await supabase
     .from("checkins")
     .select("*")
     .eq("mentorado_id", mentoradoId)
     .order("data_envio", { ascending: false })
-    .limit(1)
+    .limit(8)
 
   if (error) {
     return Response.json({ error: error.message }, { status: 500, headers: NO_CACHE })
   }
 
   return Response.json(
-    { checkin: data && data.length > 0 ? data[0] : null },
+    {
+      checkin: data && data.length > 0 ? data[0] : null,
+      historico: data || [],
+    },
     { headers: NO_CACHE }
   )
 }

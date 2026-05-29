@@ -27,17 +27,23 @@ export async function POST(request: Request) {
     { auth: { persistSession: false } }
   )
 
-  const [{ data: mentorado }, { data: checkin }] = await Promise.all([
+  const [{ data: mentorado }, { data: historico }] = await Promise.all([
     supabase.from("mentorados").select("nome, nicho, foco_macro").eq("id", mentoradoId).single(),
-    supabase.from("checkins").select("*").eq("id", checkinId).single(),
+    supabase
+      .from("checkins")
+      .select("*")
+      .eq("mentorado_id", mentoradoId)
+      .order("data_envio", { ascending: false })
+      .limit(8),
   ])
 
-  if (!mentorado || !checkin) {
+  if (!mentorado || !historico || historico.length === 0) {
     return Response.json({ error: "Dados não encontrados" }, { status: 404, headers: NO_CACHE })
   }
 
   try {
-    const briefing = await gerarBriefingIA(mentorado as any, checkin as any)
+    // historico vem do mais recente para o mais antigo (como a lib espera)
+    const briefing = await gerarBriefingIA(mentorado as any, historico as any)
     return Response.json({ briefing }, { headers: NO_CACHE })
   } catch (e) {
     return Response.json({ error: String(e) }, { status: 502, headers: NO_CACHE })
