@@ -20,6 +20,13 @@ interface DadosMentorado {
   foco_macro?: string
 }
 
+interface DadosMentor {
+  nome?: string
+  metodo_trabalho?: string
+  filosofia?: string
+  nicho_foco?: string
+}
+
 interface DadosCheckin {
   vendas_reais: number
   leads_gerados: number
@@ -58,7 +65,8 @@ function roiPct(c: DadosCheckin): string {
  */
 export async function gerarBriefingIA(
   mentorado: DadosMentorado,
-  historicoDesc: DadosCheckin[]
+  historicoDesc: DadosCheckin[],
+  mentor?: DadosMentor | null
 ): Promise<BriefingIA> {
   const apiKey = process.env.ANTHROPIC_API_KEY // chave OpenRouter (sk-or-...)
   if (!apiKey) throw new Error("OpenRouter API key ausente")
@@ -81,7 +89,14 @@ export async function gerarBriefingIA(
     ? atual.tarefas_executadas.map((t, i) => `${i + 1}. ${t}`).join("\n")
     : "Nenhuma registrada"
 
-  const userMessage = `MENTORADO: ${mentorado.nome} | Nicho: ${mentorado.nicho} | Foco: ${mentorado.foco_macro || "Não definido"}
+  const mentorInfo = mentor?.metodo_trabalho || mentor?.filosofia
+    ? `\nMENTOR: ${mentor?.nome || "Não configurado"}
+MÉTODO DE TRABALHO: ${mentor?.metodo_trabalho || "Não definido"}
+FILOSOFIA DE MENTORIA: ${mentor?.filosofia || "Não definida"}
+NICHO FOCO DO MENTOR: ${mentor?.nicho_foco || "Geral"}`
+    : ""
+
+  const userMessage = `MENTORADO: ${mentorado.nome} | Nicho: ${mentorado.nicho} | Foco: ${mentorado.foco_macro || "Não definido"}${mentorInfo}
 
 HISTÓRICO DE CHECK-INS (mais antiga → mais recente, ${cronologico.length} semana(s)):
 ${tabela}
@@ -92,7 +107,8 @@ SEMANA MAIS RECENTE — DIFICULDADES RELATADAS:
 SEMANA MAIS RECENTE — TAREFAS EXECUTADAS:
 ${tarefas}
 
-Compare as semanas, diagnostique o gargalo e gere a pauta da call.`
+Considere o método de trabalho e filosofia do mentor ao gerar o diagnóstico e a pauta.
+Compare as semanas, diagnostique o gargalo e gere a pauta da call alinhada com a metodologia do mentor.`
 
   const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",

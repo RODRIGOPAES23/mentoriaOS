@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     { auth: { persistSession: false } }
   )
 
-  const [{ data: mentorado }, { data: historico }] = await Promise.all([
+  const [{ data: mentorado }, { data: historico }, { data: mentores }] = await Promise.all([
     supabase.from("mentorados").select("nome, nicho, foco_macro").eq("id", mentoradoId).single(),
     supabase
       .from("checkins")
@@ -35,6 +35,7 @@ export async function POST(request: Request) {
       .eq("mentorado_id", mentoradoId)
       .order("data_envio", { ascending: false })
       .limit(8),
+    supabase.from("mentors").select("nome, metodo_trabalho, filosofia, nicho_foco").limit(1),
   ])
 
   if (!mentorado || !historico || historico.length === 0) {
@@ -43,7 +44,8 @@ export async function POST(request: Request) {
 
   try {
     // historico vem do mais recente para o mais antigo (como a lib espera)
-    const briefing = await gerarBriefingIA(mentorado as any, historico as any)
+    const mentor = mentores?.[0] || null
+    const briefing = await gerarBriefingIA(mentorado as any, historico as any, mentor as any)
     return Response.json({ briefing }, { headers: NO_CACHE })
   } catch (e) {
     return Response.json({ error: String(e) }, { status: 502, headers: NO_CACHE })
