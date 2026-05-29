@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mentoriaOS - Dashboard Preview</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.5s ease-out;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white overflow-x-hidden">
+  <!-- Navbar -->
+  <nav class="bg-slate-900/50 backdrop-blur-xl border-b border-slate-700/30 sticky top-0 z-50">
+    <div class="px-6 py-4">
+      <div class="flex items-center justify-between gap-8">
+        <!-- Logo -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg flex items-center justify-center font-bold text-white text-lg">
+            Ω
+          </div>
+          <div>
+            <h1 class="text-sm font-bold text-white">S.O. MENTORIA</h1>
+            <p class="text-xs text-slate-400">MENTOR: Rodrigo Paes</p>
+          </div>
+        </div>
+
+        <!-- Search -->
+        <div class="flex-1 max-w-md">
+          <div class="relative">
+            <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            <input type="text" placeholder="Buscar Mentorado..." class="w-full pl-10 pr-4 py-2 bg-slate-800/50 border border-slate-700/50 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/50" />
+          </div>
+        </div>
+
+        <!-- Right section -->
+        <div class="flex items-center gap-4">
+          <button class="relative p-2 hover:bg-slate-800/50 rounded-lg transition-colors">
+            <svg class="w-5 h-5 text-slate-400 hover:text-blue-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+            </svg>
+            <span class="absolute top-1 right-1 w-2 h-2 bg-rose-500 rounded-full"></span>
+          </button>
+          <div class="w-8 h-8 bg-gradient-to-br from-emerald-400 to-blue-500 rounded-full flex items-center justify-center text-xs font-bold cursor-pointer">
+            RP
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Layout -->
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-slate-900/30 backdrop-blur-sm border-r border-slate-700/30 overflow-y-auto">
+      <div class="px-4 py-4 border-b border-slate-700/20">
+        <h2 class="text-sm font-semibold text-slate-300">Mentorados</h2>
+        <p class="text-xs text-slate-500 mt-1">3 ativos</p>
+      </div>
+
+      <div class="p-3 space-y-2">
+        <button class="w-full text-left p-3 rounded-lg border bg-slate-800/60 border-blue-500/40 shadow-lg shadow-blue-500/10 transition-all">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex-1 min-w-0">
+              <h3 class="text-sm font-semibold text-white truncate">João Silva</h3>
+              <p class="text-xs text-slate-400 truncate mt-1">Tráfego Local</p>
+            </div>
+            <div class="w-2 h-2 bg-emerald-400 rounded-full flex-shrink-0 mt-1"></div>
+          </div>
+          <div class="mt-2 text-xs text-blue-400 font-medium">Estruturação Comercial...</div>
+        </button>
+
+        <button class="w-full text-left p-3 rounded-lg border bg-slate-800/20 border-slate-700/30 hover:bg-slate-800/40 transition-all">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex-1 min-w-0">
+              <h3 class="text-sm font-semibold text-white truncate">Maria Oliveira</h3>
+              <p class="text-xs text-slate-400 truncate mt-1">E-commerce</p>
+            </div>
+            <div class="w-2 h-2 bg-emerald-400 rounded-full flex-shrink-0 mt-1"></div>
+          </div>
+        </button>
+
+        <button class="w-full text-left p-3 rounded-lg border bg-slate-800/20 border-slate-700/30 hover:bg-slate-800/40 transition-all">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex-1 min-w-0">
+              <h3 class="text-sm font-semibold text-white truncate">Carlos Santos</h3>
+              <p class="text-xs text-slate-400 truncate mt-1">SaaS</p>
+            </div>
+            <div class="w-2 h-2 bg-emerald-400 rounded-full flex-shrink-0 mt-1"></div>
+          </div>
+        </button>
+      </div>
+
+      <div class="px-4 py-3 border-t border-slate-700/20 bg-slate-900/20 text-xs text-slate-400 space-y-1">
+        <div class="flex justify-between">
+          <span>Últimas 24h:</span>
+          <span class="text-emerald-400 font-semibold">↑ 12%</span>
+        </div>
+        <div class="flex justify-between">
+          <span>Conversão Média:</span>
+          <span class="text-blue-400 font-semibold">8.2%</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-auto">
+      <div class="p-6 max-w-7xl mx-auto space-y-6 animate-fade-in">
+        <!-- Header Card -->
+        <div class="bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6">
+          <div class="flex items-start justify-between mb-4">
+            <div>
+              <h1 class="text-3xl font-bold text-white mb-1">João Silva</h1>
+              <p class="text-sm text-slate-400">Tráfego Local</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="px-3 py-1 rounded-full text-xs font-semibold border border-emerald-500/30 bg-emerald-500/10 text-emerald-400">
+                Ativo
+              </div>
+              <div class="px-3 py-1 rounded-full text-xs font-semibold border border-blue-500/30 bg-blue-500/10 text-blue-400">
+                4m ativos
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-4 text-sm">
+            <div>
+              <p class="text-slate-400 mb-1">Foco Macro</p>
+              <p class="text-white font-semibold">Estruturação Comercial & Escala de Tráfego</p>
+            </div>
+            <div>
+              <p class="text-slate-400 mb-1">Data Início</p>
+              <p class="text-white font-semibold">15/01/2026</p>
+            </div>
+            <div>
+              <p class="text-slate-400 mb-1">Status Total</p>
+              <p class="text-white font-semibold">Em andamento</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Metrics Grid -->
+        <div class="grid grid-cols-4 gap-4">
+          <div class="border border-emerald-500/30 bg-emerald-500/5 text-emerald-400 rounded-lg p-4 backdrop-blur-sm">
+            <div class="flex items-start justify-between mb-3">
+              <div class="p-2 bg-current/10 rounded-lg text-lg">🎯</div>
+              <div class="flex items-center gap-1 text-xs font-semibold text-emerald-400">
+                ↑ 15%
+              </div>
+            </div>
+            <p class="text-xs text-slate-400 font-medium mb-1">Leads Gerados</p>
+            <div class="flex items-baseline gap-1">
+              <span class="text-2xl font-bold text-white">450</span>
+            </div>
+          </div>
+
+          <div class="border border-purple-500/30 bg-purple-500/5 text-purple-400 rounded-lg p-4 backdrop-blur-sm">
+            <div class="flex items-start justify-between mb-3">
+              <div class="p-2 bg-current/10 rounded-lg text-lg">📈</div>
+              <div class="flex items-center gap-1 text-xs font-semibold text-rose-400">
+                ↓ 30%
+              </div>
+            </div>
+            <p class="text-xs text-slate-400 font-medium mb-1">Vendas Reais</p>
+            <div class="flex items-baseline gap-1">
+              <span class="text-2xl font-bold text-white">R$ 2.400</span>
+            </div>
+          </div>
+
+          <div class="border border-rose-500/30 bg-rose-500/5 text-rose-400 rounded-lg p-4 backdrop-blur-sm">
+            <div class="flex items-start justify-between mb-3">
+              <div class="p-2 bg-current/10 rounded-lg text-lg">⚠️</div>
+            </div>
+            <p class="text-xs text-slate-400 font-medium mb-1">Investimento</p>
+            <div class="flex items-baseline gap-1">
+              <span class="text-2xl font-bold text-white">R$ 1.100</span>
+            </div>
+          </div>
+
+          <div class="border border-blue-500/30 bg-blue-500/5 text-blue-400 rounded-lg p-4 backdrop-blur-sm">
+            <div class="flex items-start justify-between mb-3">
+              <div class="p-2 bg-current/10 rounded-lg text-lg">✅</div>
+              <div class="flex items-center gap-1 text-xs font-semibold text-emerald-400">
+                ↑ 8%
+              </div>
+            </div>
+            <p class="text-xs text-slate-400 font-medium mb-1">Vídeos Postados</p>
+            <div class="flex items-baseline gap-1">
+              <span class="text-2xl font-bold text-white">8</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Analysis Cards -->
+        <div class="grid grid-cols-3 gap-4">
+          <div class="bg-gradient-to-br from-rose-500/10 to-rose-500/5 border border-rose-500/30 rounded-lg p-5 backdrop-blur-sm">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-rose-400 text-lg">⚠️</span>
+              <h3 class="text-sm font-bold text-rose-400">GARGALO IDENTIFICADO</h3>
+            </div>
+            <p class="text-sm text-slate-300 leading-relaxed">🚨 A conversão comercial derreteu 30% porque o script do WhatsApp está muito genérico. Os leads chegam qualificados, mas a proposição de valor desaparece no atendimento automático.</p>
+          </div>
+
+          <div class="bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border border-emerald-500/30 rounded-lg p-5 backdrop-blur-sm">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-emerald-400 text-lg">🎯</span>
+              <h3 class="text-sm font-bold text-emerald-400">SUGESTÃO ESTRATÉGICA</h3>
+            </div>
+            <p class="text-sm text-slate-300 leading-relaxed">Personalizar o script com gatilhos de urgência e escassez. Criar 3 fluxos diferentes por nicho de lead (B2B, E-commerce, Serviços). Implementar handoff manual para primeiras 5 mensagens.</p>
+          </div>
+
+          <div class="bg-gradient-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/30 rounded-lg p-5 backdrop-blur-sm">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-blue-400 text-lg">⏱️</span>
+              <h3 class="text-sm font-bold text-blue-400">PAUTA DA CALL</h3>
+            </div>
+            <div class="text-xs text-slate-300 space-y-2 leading-relaxed">
+              <p><strong>0-10m:</strong> Revisar transcrições dos últimos atendimentos</p>
+              <p><strong>10-25m:</strong> Estruturar novo script com modelo de copywriting</p>
+              <p><strong>25-30m:</strong> Definir KPIs de teste e próximas ações</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lower Section -->
+        <div class="grid grid-cols-2 gap-4">
+          <div class="bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 rounded-lg p-5">
+            <h3 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
+              ⚠️ Principais Dificuldades
+            </h3>
+            <p class="text-sm text-slate-300 leading-relaxed">O script do WhatsApp não está convertendo leads. A taxa de resposta caiu 30% depois que mudei o copy na terça. Os leads vêm, mas não viram clientes.</p>
+            <div class="mt-4 pt-4 border-t border-slate-700/50">
+              <p class="text-xs text-slate-500">Última atualização: hoje às 14:32</p>
+            </div>
+          </div>
+
+          <div class="bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 rounded-lg p-5">
+            <h3 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
+              ✅ Tarefas Executadas
+            </h3>
+            <div class="space-y-2">
+              <div class="flex items-start gap-3 p-2 bg-slate-700/20 rounded hover:bg-slate-700/40 transition-colors">
+                <div class="w-4 h-4 rounded-full bg-emerald-500/30 border border-emerald-500 flex-shrink-0 mt-0.5"></div>
+                <p class="text-sm text-slate-300">Revisar script do WhatsApp com time</p>
+              </div>
+              <div class="flex items-start gap-3 p-2 bg-slate-700/20 rounded hover:bg-slate-700/40 transition-colors">
+                <div class="w-4 h-4 rounded-full bg-emerald-500/30 border border-emerald-500 flex-shrink-0 mt-0.5"></div>
+                <p class="text-sm text-slate-300">Testar 3 variações de copy</p>
+              </div>
+              <div class="flex items-start gap-3 p-2 bg-slate-700/20 rounded hover:bg-slate-700/40 transition-colors">
+                <div class="w-4 h-4 rounded-full bg-emerald-500/30 border border-emerald-500 flex-shrink-0 mt-0.5"></div>
+                <p class="text-sm text-slate-300">Aumentar orçamento de tráfego em 20%</p>
+              </div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-slate-700/50">
+              <p class="text-xs text-slate-500">3 tarefas concluídas</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer Stats -->
+        <div class="bg-slate-900/50 backdrop-blur-xl border border-slate-700/30 rounded-lg p-4">
+          <div class="grid grid-cols-4 gap-4 text-center text-xs">
+            <div>
+              <p class="text-slate-400 mb-1">Taxa de Conversão</p>
+              <p class="text-lg font-bold text-blue-400">5.3%</p>
+            </div>
+            <div>
+              <p class="text-slate-400 mb-1">ROI Médio</p>
+              <p class="text-lg font-bold text-emerald-400">218%</p>
+            </div>
+            <div>
+              <p class="text-slate-400 mb-1">Ticket Médio</p>
+              <p class="text-lg font-bold text-purple-400">R$ 5.333</p>
+            </div>
+            <div>
+              <p class="text-slate-400 mb-1">Eficiência</p>
+              <p class="text-lg font-bold text-rose-400">1400%</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

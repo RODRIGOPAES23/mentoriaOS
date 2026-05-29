@@ -41,3 +41,7 @@ Thumbs.db
 
 .vercel
 .env*
+
+# Helper scripts com segredos / one-off
+mentoriaOS/add-vercel-env.js
+add-vercel-env.js

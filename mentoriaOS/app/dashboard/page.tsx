@@ -51,37 +51,38 @@ export default function DashboardPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [loading, setLoading] = useState(true)
 
-  // Buscar checkin mais recente
+  // Buscar checkin mais recente (via API server-side: ignora RLS)
   const buscarCheckin = useCallback(async (mentoradoId: string, mentoradoAtual: Mentorado) => {
-    const { data, error } = await supabase
-      .from("checkins")
-      .select("*")
-      .eq("mentorado_id", mentoradoId)
-      .order("data_envio", { ascending: false })
-      .limit(1)
-
-    if (!error && data && data.length > 0) {
-      const c = data[0] as CheckinRow
-      setCheckin(c)
-      setBriefing(gerarBriefing(mentoradoAtual, c))
-    } else {
+    try {
+      const res = await fetch(`/api/dashboard/checkin?mentoradoId=${mentoradoId}`)
+      const json = await res.json()
+      const c = json.checkin as CheckinRow | null
+      if (c) {
+        setCheckin(c)
+        setBriefing(gerarBriefing(mentoradoAtual, c))
+      } else {
+        setCheckin(null)
+        setBriefing(null)
+      }
+    } catch {
       setCheckin(null)
       setBriefing(null)
     }
   }, [])
 
-  // Buscar mentorados
+  // Buscar mentorados (via API server-side: ignora RLS + dedupe)
   useEffect(() => {
     const buscar = async () => {
-      const { data, error } = await supabase
-        .from("mentorados")
-        .select("id, nome, nicho, status, foco_macro, data_inicio")
-        .eq("status", "Ativo")
-        .order("nome")
-
-      if (!error && data && data.length > 0) {
-        setMentorados(data)
-        setSelectedId(data[0].id)
+      try {
+        const res = await fetch("/api/dashboard/mentorados")
+        const json = await res.json()
+        const lista = (json.mentorados || []) as Mentorado[]
+        if (lista.length > 0) {
+          setMentorados(lista)
+          setSelectedId(lista[0].id)
+        }
+      } catch {
+        // mantém vazio
       }
       setLoading(false)
     }
