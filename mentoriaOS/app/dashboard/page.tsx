@@ -98,6 +98,7 @@ export default function DashboardPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [loading, setLoading] = useState(true)
   const [linkCopiado, setLinkCopiado] = useState(false)
+  const [mentorNome, setMentorNome] = useState<string>("S.O. MENTORIA")
   const [showCadastro, setShowCadastro] = useState(false)
   const [salvando, setSalvando] = useState(false)
   const [novo, setNovo] = useState({ nome: "", nicho: "", foco_macro: "", data_inicio: "" })
@@ -153,6 +154,24 @@ export default function DashboardPage() {
       // mantém vazio
     }
     setLoading(false)
+  }, [])
+
+  // Carregar nome do mentor
+  useEffect(() => {
+    const carregarMentor = async () => {
+      try {
+        const res = await fetch("/api/mentor/info", {
+          cache: "no-store",
+        })
+        const json = await res.json()
+        if (json.mentor?.nome) {
+          setMentorNome(json.mentor.nome)
+        }
+      } catch {
+        // fallback: manter "S.O. MENTORIA"
+      }
+    }
+    carregarMentor()
   }, [])
 
   useEffect(() => {
@@ -493,8 +512,8 @@ export default function DashboardPage() {
             <div className={`flex items-center gap-3 ${sidebarOpen ? "opacity-100" : "opacity-0 hidden"} transition-opacity duration-300`}>
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center font-bold text-white shadow-lg">Ω</div>
               <div>
-                <h1 className="text-sm font-bold text-white">S.O. MENTORIA</h1>
-                <p className="text-[10px] text-slate-500">MENTOR: Rodrigo Paes</p>
+                <h1 className="text-lg font-bold bg-gradient-to-r from-yellow-400 to-amber-500 bg-clip-text text-transparent">{mentorNome}</h1>
+                <p className="text-[10px] text-slate-400">S.O. MENTORIA</p>
               </div>
             </div>
             {/* Logo Compacto (quando recolhido) */}
