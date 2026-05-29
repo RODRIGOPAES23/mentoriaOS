@@ -4,6 +4,12 @@ import { createClient } from "@supabase/supabase-js"
 // GET  -> lista mentorados ativos (deduplicados)
 // POST -> cadastra novo mentorado
 export const dynamic = "force-dynamic"
+export const revalidate = 0
+export const fetchCache = "force-no-store"
+
+const NO_CACHE = {
+  "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+}
 
 function admin() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -83,5 +89,5 @@ export async function GET() {
     return (a.nome || "").localeCompare(b.nome || "")
   })
 
-  return Response.json({ mentorados: unique })
+  return Response.json({ mentorados: unique }, { headers: NO_CACHE })
 }
