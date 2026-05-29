@@ -1,15 +1,51 @@
 import { createClient } from "@supabase/supabase-js"
 
-// Server-side: usa service role (ignora RLS) para carregar mentorados.
+// Server-side: usa service role (ignora RLS).
+// GET  -> lista mentorados ativos (deduplicados)
+// POST -> cadastra novo mentorado
 export const dynamic = "force-dynamic"
 
-export async function GET() {
+function admin() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+  return createClient(url, serviceKey, { auth: { persistSession: false } })
+}
 
-  const supabase = createClient(url, serviceKey, {
-    auth: { persistSession: false },
-  })
+export async function POST(request: Request) {
+  let body: any
+  try {
+    body = await request.json()
+  } catch {
+    return Response.json({ error: "Body inválido" }, { status: 400 })
+  }
+
+  const nome = String(body.nome || "").trim()
+  if (!nome) {
+    return Response.json({ error: "Nome é obrigatório" }, { status: 400 })
+  }
+
+  const supabase = admin()
+  const { data, error } = await supabase
+    .from("mentorados")
+    .insert({
+      nome,
+      nicho: String(body.nicho || "").trim() || "Geral",
+      foco_macro: String(body.foco_macro || "").trim() || "Definir foco",
+      status: "Ativo",
+      data_inicio: body.data_inicio || new Date().toISOString().slice(0, 10),
+    })
+    .select("id, nome, nicho, status, foco_macro, data_inicio")
+    .single()
+
+  if (error) {
+    return Response.json({ error: error.message }, { status: 500 })
+  }
+
+  return Response.json({ success: true, mentorado: data })
+}
+
+export async function GET() {
+  const supabase = admin()
 
   const { data, error } = await supabase
     .from("mentorados")

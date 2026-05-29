@@ -1,8 +1,7 @@
 "use client"
 
 import { useEffect, useState, useCallback } from "react"
-import { Search, Bell, TrendingUp, TrendingDown, Minus, Target, BarChart3, Zap, CheckCircle2, AlertCircle, Clock } from "lucide-react"
-import { supabase } from "@/lib/supabase"
+import { Search, Bell, TrendingUp, TrendingDown, Minus, Target, BarChart3, Zap, CheckCircle2, AlertCircle, Clock, Link2, Copy, Check, UserPlus, X } from "lucide-react"
 import type { CheckinRow } from "@/lib/supabase"
 
 interface Mentorado {
@@ -50,6 +49,10 @@ export default function DashboardPage() {
   const [briefing, setBriefing] = useState<BriefingIA | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
   const [loading, setLoading] = useState(true)
+  const [linkCopiado, setLinkCopiado] = useState(false)
+  const [showCadastro, setShowCadastro] = useState(false)
+  const [salvando, setSalvando] = useState(false)
+  const [novo, setNovo] = useState({ nome: "", nicho: "", foco_macro: "", data_inicio: "" })
 
   // Buscar checkin mais recente (via API server-side: ignora RLS)
   const buscarCheckin = useCallback(async (mentoradoId: string, mentoradoAtual: Mentorado) => {
@@ -70,24 +73,60 @@ export default function DashboardPage() {
     }
   }, [])
 
-  // Buscar mentorados (via API server-side: ignora RLS + dedupe)
-  useEffect(() => {
-    const buscar = async () => {
-      try {
-        const res = await fetch("/api/dashboard/mentorados")
-        const json = await res.json()
-        const lista = (json.mentorados || []) as Mentorado[]
-        if (lista.length > 0) {
-          setMentorados(lista)
-          setSelectedId(lista[0].id)
-        }
-      } catch {
-        // mantém vazio
+  // Carrega lista de mentorados (reutilizável após cadastro)
+  const recarregarMentorados = useCallback(async (selecionarId?: string) => {
+    try {
+      const res = await fetch("/api/dashboard/mentorados")
+      const json = await res.json()
+      const lista = (json.mentorados || []) as Mentorado[]
+      setMentorados(lista)
+      if (lista.length > 0) {
+        setSelectedId(selecionarId && lista.some((m) => m.id === selecionarId) ? selecionarId : lista[0].id)
       }
-      setLoading(false)
+    } catch {
+      // mantém vazio
     }
-    buscar()
+    setLoading(false)
   }, [])
+
+  useEffect(() => {
+    recarregarMentorados()
+  }, [recarregarMentorados])
+
+  // Gerar / copiar link do formulário do mentorado selecionado
+  const copiarLink = useCallback(async () => {
+    if (!selectedId) return
+    const link = `${window.location.origin}/form/${selectedId}`
+    try {
+      await navigator.clipboard.writeText(link)
+    } catch {
+      // fallback silencioso
+    }
+    setLinkCopiado(true)
+    setTimeout(() => setLinkCopiado(false), 2500)
+  }, [selectedId])
+
+  // Cadastrar novo mentorado
+  const cadastrarMentorado = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!novo.nome.trim()) return
+    setSalvando(true)
+    try {
+      const res = await fetch("/api/dashboard/mentorados", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(novo),
+      })
+      const json = await res.json()
+      if (res.ok && json.mentorado) {
+        setShowCadastro(false)
+        setNovo({ nome: "", nicho: "", foco_macro: "", data_inicio: "" })
+        await recarregarMentorados(json.mentorado.id)
+      }
+    } finally {
+      setSalvando(false)
+    }
+  }, [novo, recarregarMentorados])
 
   // Buscar checkin quando mentorado muda
   useEffect(() => {
@@ -96,33 +135,16 @@ export default function DashboardPage() {
     if (atual) buscarCheckin(selectedId, atual)
   }, [selectedId, mentorados, buscarCheckin])
 
-  // Realtime listener
+  // Auto-refresh (polling): novos check-ins enviados pelo mentorado aparecem
+  // sem reload. Realtime via anon é bloqueado pelo RLS, então usamos polling.
   useEffect(() => {
-    if (!selectedId) return
-
-    const canal = supabase
-      .channel(`checkins-${selectedId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "checkins",
-          filter: `mentorado_id=eq.${selectedId}`,
-        },
-        (payload) => {
-          const c = payload.new as CheckinRow
-          const atual = mentorados.find((m) => m.id === selectedId)
-          if (atual) {
-            setCheckin(c)
-            setBriefing(gerarBriefing(atual, c))
-          }
-        }
-      )
-      .subscribe()
-
-    return () => { supabase.removeChannel(canal) }
-  }, [selectedId, mentorados])
+    if (!selectedId || mentorados.length === 0) return
+    const id = setInterval(() => {
+      const atual = mentorados.find((m) => m.id === selectedId)
+      if (atual) buscarCheckin(selectedId, atual)
+    }, 12000)
+    return () => clearInterval(id)
+  }, [selectedId, mentorados, buscarCheckin])
 
   const selected = mentorados.find((m) => m.id === selectedId)
   const filtered = mentorados.filter((m) =>
@@ -169,6 +191,16 @@ export default function DashboardPage() {
               className="w-full pl-9 pr-3 py-2 bg-slate-800/50 border border-slate-700/50 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/50 transition-colors"
             />
           </div>
+        </div>
+
+        {/* Botão Cadastrar Mentorado */}
+        <div className="px-4 pb-2">
+          <button
+            onClick={() => setShowCadastro(true)}
+            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-sm font-semibold bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white shadow-lg shadow-blue-500/20 transition-all duration-200"
+          >
+            <UserPlus className="w-4 h-4" /> Cadastrar Mentorado
+          </button>
         </div>
 
         {/* Mentorados List */}
@@ -247,9 +279,26 @@ export default function DashboardPage() {
                         <span>🎯 Foco: <span className="text-slate-300">{selected.foco_macro}</span></span>
                       </div>
                     </div>
-                    <span className="px-4 py-1.5 bg-gradient-to-r from-emerald-500/20 to-emerald-500/10 border border-emerald-500/40 text-emerald-300 text-xs font-bold rounded-full shadow-lg shadow-emerald-500/10">
-                      ATIVO
-                    </span>
+                    <div className="flex flex-col items-end gap-2">
+                      <span className="px-4 py-1.5 bg-gradient-to-r from-emerald-500/20 to-emerald-500/10 border border-emerald-500/40 text-emerald-300 text-xs font-bold rounded-full shadow-lg shadow-emerald-500/10">
+                        ATIVO
+                      </span>
+                      <button
+                        onClick={copiarLink}
+                        title="Copiar link do formulário para enviar ao mentorado"
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all duration-200 ${
+                          linkCopiado
+                            ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-300"
+                            : "bg-blue-500/15 border-blue-500/30 text-blue-300 hover:bg-blue-500/25 hover:border-blue-500/50"
+                        }`}
+                      >
+                        {linkCopiado ? (
+                          <><Check className="w-3.5 h-3.5" /> Link copiado!</>
+                        ) : (
+                          <><Link2 className="w-3.5 h-3.5" /> Gerar Link do Formulário</>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -406,6 +455,88 @@ export default function DashboardPage() {
           </div>
         </div>
       </main>
+
+      {/* ── MODAL: CADASTRAR MENTORADO ── */}
+      {showCadastro && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+          onClick={() => setShowCadastro(false)}
+        >
+          <div
+            className="w-full max-w-md bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700/50 rounded-2xl p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-2">
+                <div className="w-9 h-9 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                  <UserPlus className="w-5 h-5 text-blue-400" />
+                </div>
+                <h2 className="text-lg font-bold text-white">Cadastrar Mentorado</h2>
+              </div>
+              <button onClick={() => setShowCadastro(false)} className="text-slate-400 hover:text-white transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={cadastrarMentorado} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Nome *</label>
+                <input
+                  autoFocus required
+                  value={novo.nome}
+                  onChange={(e) => setNovo({ ...novo, nome: e.target.value })}
+                  className="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/60 transition-colors"
+                  placeholder="Ex: João Silva"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Nicho</label>
+                <input
+                  value={novo.nicho}
+                  onChange={(e) => setNovo({ ...novo, nicho: e.target.value })}
+                  className="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/60 transition-colors"
+                  placeholder="Ex: Tráfego Local"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Foco Macro</label>
+                <input
+                  value={novo.foco_macro}
+                  onChange={(e) => setNovo({ ...novo, foco_macro: e.target.value })}
+                  className="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/60 transition-colors"
+                  placeholder="Ex: Estruturação Comercial"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Data de Início</label>
+                <input
+                  type="date"
+                  value={novo.data_inicio}
+                  onChange={(e) => setNovo({ ...novo, data_inicio: e.target.value })}
+                  className="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500/60 transition-colors [color-scheme:dark]"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowCadastro(false)}
+                  className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold bg-slate-700/50 hover:bg-slate-700 text-slate-300 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={salvando || !novo.nome.trim()}
+                  className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                >
+                  {salvando ? "Salvando..." : "Cadastrar"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
