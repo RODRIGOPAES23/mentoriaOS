@@ -30,16 +30,27 @@ export async function POST(request: Request) {
     return Response.json({ error: "Nome é obrigatório" }, { status: 400 })
   }
 
+  // Pegar mentor_id do body ou query string
+  const url = new URL(request.url)
+  const mentorId = body.mentor_id || url.searchParams.get("mentorId")
+
   const supabase = admin()
+  const insertData: any = {
+    nome,
+    nicho: String(body.nicho || "").trim() || "Geral",
+    foco_macro: String(body.foco_macro || "").trim() || "Definir foco",
+    status: "Ativo",
+    data_inicio: body.data_inicio || new Date().toISOString().slice(0, 10),
+  }
+
+  // Se houver mentor_id, adicionar
+  if (mentorId) {
+    insertData.mentor_id = mentorId
+  }
+
   const { data, error } = await supabase
     .from("mentorados")
-    .insert({
-      nome,
-      nicho: String(body.nicho || "").trim() || "Geral",
-      foco_macro: String(body.foco_macro || "").trim() || "Definir foco",
-      status: "Ativo",
-      data_inicio: body.data_inicio || new Date().toISOString().slice(0, 10),
-    })
+    .insert(insertData)
     .select("id, nome, nicho, status, foco_macro, data_inicio")
     .single()
 
@@ -50,14 +61,24 @@ export async function POST(request: Request) {
   return Response.json({ success: true, mentorado: data })
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   const supabase = admin()
 
-  const { data, error } = await supabase
+  // Pegar mentor_id do query string
+  const url = new URL(request.url)
+  const mentorId = url.searchParams.get("mentorId")
+
+  let query = supabase
     .from("mentorados")
     .select("id, nome, nicho, status, foco_macro, data_inicio")
     .eq("status", "Ativo")
-    .order("nome")
+
+  // Se houver mentor_id, filtrar por ele
+  if (mentorId) {
+    query = query.eq("mentor_id", mentorId)
+  }
+
+  const { data, error } = await query.order("nome")
 
   if (error) {
     return Response.json({ error: error.message }, { status: 500 })
