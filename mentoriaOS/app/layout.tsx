@@ -18,9 +18,9 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" suppressHydrationWarning className={inter.variable}>
       <head>
-        <meta name="theme-color" content="#0f172a" />
+        <meta name="theme-color" content="#0c1c2c" />
       </head>
-      <body className="bg-slate-50 text-slate-900 antialiased">
+      <body className="antialiased text-white" style={{ background: "#0c1c2c" }}>
         {children}
       </body>
     </html>

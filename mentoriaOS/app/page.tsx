@@ -4,6 +4,16 @@ import { useState, useEffect } from "react"
 import { ArrowRight, Sparkles, BarChart3, Brain, CheckCircle2, Zap, Calendar, Users, Target } from "lucide-react"
 import { useRouter } from "next/navigation"
 
+const C = {
+  bg:     "#0c1c2c",
+  card:   "#0f2540",
+  card2:  "#112a4a",
+  border: "#1e3a5f",
+  muted:  "#4d7fa8",
+  green:  "#00d68f",
+  blue:   "#4c9aff",
+}
+
 interface Mentor { id: string; nome: string; nicho_foco?: string; foto_url?: string }
 
 function iniciais(nome: string) {
@@ -15,34 +25,28 @@ export default function HomePage() {
   const [mentores, setMentores] = useState<Mentor[]>([])
   const [carregando, setCarregando] = useState(true)
   const [showSetup, setShowSetup] = useState(false)
-  const [nome, setNome] = useState("")
-  const [email, setEmail] = useState("")
-  const [metodo, setMetodo] = useState("")
-  const [filosofia, setFilosofia] = useState("")
-  const [nicho, setNicho] = useState("")
+  const [form, setForm] = useState({ nome: "", email: "", nicho: "", metodo: "", filosofia: "" })
   const [salvando, setSalvando] = useState(false)
 
   useEffect(() => {
     fetch("/api/mentors/list", { cache: "no-store" })
-      .then(r => r.json())
-      .then(j => setMentores(j.mentores || []))
-      .catch(() => {})
-      .finally(() => setCarregando(false))
+      .then(r => r.json()).then(j => setMentores(j.mentores || []))
+      .catch(() => {}).finally(() => setCarregando(false))
   }, [])
 
-  const selecionarMentor = (mentorId: string) => {
-    localStorage.setItem("mentorSelecionado", mentorId)
+  const selecionarMentor = (id: string) => {
+    localStorage.setItem("mentorSelecionado", id)
     router.push("/dashboard")
   }
 
   const cadastrarMentor = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!nome.trim() || !email.trim()) return
+    if (!form.nome.trim() || !form.email.trim()) return
     setSalvando(true)
     try {
       const res = await fetch("/api/mentors/create", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nome, email, metodo_trabalho: metodo, filosofia, nicho_foco: nicho }),
+        body: JSON.stringify({ nome: form.nome, email: form.email, metodo_trabalho: form.metodo, filosofia: form.filosofia, nicho_foco: form.nicho }),
       })
       if (res.ok) {
         const json = await res.json()
@@ -55,127 +59,139 @@ export default function HomePage() {
     } finally { setSalvando(false) }
   }
 
-  if (carregando) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 rounded-xl bg-teal-600 flex items-center justify-center mx-auto mb-3 shadow-lg shadow-teal-600/30">
-            <Sparkles className="w-6 h-6 text-white animate-pulse" />
-          </div>
-          <p className="text-slate-500 text-sm">Carregando CKlareza...</p>
+  if (carregando) return (
+    <div style={{ background: C.bg }} className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3" style={{ background: "#00d68f22", border: "1px solid #00d68f44" }}>
+          <Sparkles className="w-6 h-6 animate-pulse" style={{ color: C.green }} />
         </div>
+        <p style={{ color: C.muted }} className="text-sm">Carregando CKlareza...</p>
       </div>
-    )
-  }
+    </div>
+  )
 
-  // ── SELETOR DE MENTOR ─────────────────────────────────────────────────────
-  if (mentores.length > 0 && !showSetup) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex flex-col">
-        {/* Header */}
-        <nav className="bg-white border-b border-slate-200 px-8 py-4 flex items-center justify-between shadow-sm">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-teal-600 flex items-center justify-center shadow-lg shadow-teal-600/30">
-              <Sparkles className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h1 className="text-lg font-bold text-slate-900 leading-none tracking-tight">CKlareza</h1>
-              <p className="text-[10px] text-slate-400 tracking-widest">MENTORIA INTELIGENTE</p>
-            </div>
+  // ── SELETOR ──────────────────────────────────────────────────────────────
+  if (mentores.length > 0 && !showSetup) return (
+    <div style={{ background: C.bg }} className="min-h-screen flex flex-col">
+      {/* Header */}
+      <nav style={{ background: C.card, borderBottom: `1px solid ${C.border}` }} className="px-8 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "#00d68f22", border: "1px solid #00d68f44" }}>
+            <Sparkles className="w-5 h-5" style={{ color: C.green }} />
           </div>
-        </nav>
-
-        {/* Seletor */}
-        <div className="flex-1 flex items-center justify-center p-6">
-          <div className="w-full max-w-md">
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 rounded-2xl bg-teal-600 flex items-center justify-center mx-auto mb-4 shadow-xl shadow-teal-600/30">
-                <Sparkles className="w-8 h-8 text-white" />
-              </div>
-              <h2 className="text-2xl font-bold text-slate-900">Bem-vindo de volta!</h2>
-              <p className="text-slate-500 mt-1.5 text-sm">Selecione seu perfil de mentor para continuar</p>
-            </div>
-
-            <div className="space-y-2.5">
-              {mentores.map(mentor => (
-                <button key={mentor.id} onClick={() => selecionarMentor(mentor.id)}
-                  className="w-full flex items-center gap-4 p-4 bg-white rounded-2xl border border-slate-200 hover:border-teal-400 hover:shadow-md transition-all duration-200 group text-left shadow-sm">
-                  <div className="w-11 h-11 rounded-xl overflow-hidden ring-2 ring-slate-100 group-hover:ring-teal-200 transition-all shrink-0">
-                    {mentor.foto_url
-                      ? <img src={mentor.foto_url} alt={mentor.nome} className="w-full h-full object-cover" />
-                      : <div className="w-full h-full bg-slate-900 flex items-center justify-center text-sm font-bold text-white">{iniciais(mentor.nome)}</div>}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-slate-900">{mentor.nome}</p>
-                    {mentor.nicho_foco && <p className="text-xs text-slate-400 truncate">{mentor.nicho_foco}</p>}
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-teal-600 group-hover:translate-x-1 transition-all" />
-                </button>
-              ))}
-            </div>
-
-            <button onClick={() => setShowSetup(true)}
-              className="w-full mt-4 py-3 text-sm font-semibold text-slate-500 hover:text-teal-600 hover:bg-teal-50 rounded-xl transition-colors border border-dashed border-slate-300 hover:border-teal-300">
-              + Adicionar novo mentor
-            </button>
+          <div>
+            <h1 className="text-[15px] font-bold text-white leading-none tracking-tight">CKlareza</h1>
+            <p className="text-[9px] tracking-widest mt-0.5" style={{ color: C.muted }}>MENTORIA INTELIGENTE</p>
           </div>
         </div>
+      </nav>
+
+      {/* Seletor */}
+      <div className="flex-1 flex items-center justify-center p-6">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: "#00d68f15", border: "1px solid #00d68f33" }}>
+              <Sparkles className="w-8 h-8" style={{ color: C.green }} />
+            </div>
+            <h2 className="text-2xl font-bold text-white">Bem-vindo de volta!</h2>
+            <p className="mt-1.5 text-sm" style={{ color: C.muted }}>Selecione seu perfil de mentor</p>
+          </div>
+
+          <div className="space-y-2.5">
+            {mentores.map(m => (
+              <button key={m.id} onClick={() => selecionarMentor(m.id)}
+                className="w-full flex items-center gap-4 p-4 rounded-2xl text-left group transition-all duration-200"
+                style={{ background: C.card, border: `1px solid ${C.border}` }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = C.green; (e.currentTarget as HTMLElement).style.background = C.card2 }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = C.border; (e.currentTarget as HTMLElement).style.background = C.card }}
+              >
+                <div className="w-11 h-11 rounded-xl overflow-hidden shrink-0" style={{ border: `2px solid ${C.border}` }}>
+                  {m.foto_url
+                    ? <img src={m.foto_url} alt={m.nome} className="w-full h-full object-cover" />
+                    : <div className="w-full h-full flex items-center justify-center text-sm font-bold" style={{ background: "#0a1628", color: C.green }}>{iniciais(m.nome)}</div>}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-white">{m.nome}</p>
+                  {m.nicho_foco && <p className="text-xs truncate mt-0.5" style={{ color: C.muted }}>{m.nicho_foco}</p>}
+                </div>
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" style={{ color: C.muted }} />
+              </button>
+            ))}
+          </div>
+
+          <button onClick={() => setShowSetup(true)}
+            className="w-full mt-4 py-3 text-sm font-semibold rounded-xl transition-colors"
+            style={{ color: C.muted, border: `1px dashed ${C.border}` }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = C.green; (e.currentTarget as HTMLElement).style.borderColor = C.green }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = C.muted; (e.currentTarget as HTMLElement).style.borderColor = C.border }}
+          >
+            + Adicionar novo mentor
+          </button>
+        </div>
       </div>
-    )
-  }
+    </div>
+  )
 
   // ── SETUP / LANDING ────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div style={{ background: C.bg }} className="min-h-screen">
       {/* Header */}
-      <nav className="bg-white border-b border-slate-200 px-8 py-4 flex items-center justify-between shadow-sm">
+      <nav style={{ background: C.card, borderBottom: `1px solid ${C.border}` }} className="px-8 py-4 flex items-center justify-between sticky top-0 z-10">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-teal-600 flex items-center justify-center shadow-lg shadow-teal-600/30">
-            <Sparkles className="w-5 h-5 text-white" />
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "#00d68f22", border: "1px solid #00d68f44" }}>
+            <Sparkles className="w-5 h-5" style={{ color: C.green }} />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-slate-900 leading-none tracking-tight">CKlareza</h1>
-            <p className="text-[10px] text-slate-400 tracking-widest">MENTORIA INTELIGENTE</p>
+            <h1 className="text-[15px] font-bold text-white leading-none tracking-tight">CKlareza</h1>
+            <p className="text-[9px] tracking-widest mt-0.5" style={{ color: C.muted }}>MENTORIA INTELIGENTE</p>
           </div>
         </div>
         {!showSetup && (
           <button onClick={() => setShowSetup(true)}
-            className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold rounded-xl transition-colors">
-            Começar agora
+            className="px-4 py-2 text-sm font-semibold rounded-xl text-white transition-all"
+            style={{ background: "#00d68f22", border: "1px solid #00d68f44", color: C.green }}>
+            Começar agora →
           </button>
         )}
       </nav>
 
       {showSetup ? (
-        /* ── FORM SETUP ────────────────────────────────────────────────── */
         <div className="flex items-center justify-center min-h-[calc(100vh-65px)] p-6">
           <div className="w-full max-w-lg">
             <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-slate-900">Configure sua conta</h2>
-              <p className="text-slate-500 mt-1.5 text-sm">Preencha os dados do perfil do mentor</p>
+              <h2 className="text-2xl font-bold text-white">Configure sua conta</h2>
+              <p className="mt-1.5 text-sm" style={{ color: C.muted }}>Perfil do mentor</p>
             </div>
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
+            <div className="rounded-2xl p-8 space-y-4" style={{ background: C.card, border: `1px solid ${C.border}` }}>
               <form onSubmit={cadastrarMentor} className="space-y-4">
                 {[
-                  { label: "Nome completo", key: "nome", setter: setNome, val: nome, ph: "Victor Sidoni", required: true },
-                  { label: "Email", key: "email", setter: setEmail, val: email, ph: "victor@exemplo.com", required: true },
-                  { label: "Nicho de atuação", key: "nicho", setter: setNicho, val: nicho, ph: "Marketing Digital e Tráfego Pago", required: false },
-                  { label: "Método de trabalho", key: "metodo", setter: setMetodo, val: metodo, ph: "Ex: 4 pilares de conversão", required: false },
-                  { label: "Filosofia de mentoria", key: "filosofia", setter: setFilosofia, val: filosofia, ph: "Ex: Resultado antes de escala", required: false },
+                  { label: "Nome completo *", key: "nome", ph: "Victor Sidoni" },
+                  { label: "Email *", key: "email", ph: "victor@exemplo.com" },
+                  { label: "Nicho de atuação", key: "nicho", ph: "Marketing Digital e Tráfego Pago" },
+                  { label: "Método de trabalho", key: "metodo", ph: "Ex: 4 pilares de conversão" },
+                  { label: "Filosofia de mentoria", key: "filosofia", ph: "Ex: Resultado antes de escala" },
                 ].map(f => (
                   <div key={f.key}>
-                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1.5">{f.label}</label>
-                    <input required={f.required} value={f.val} onChange={e => f.setter(e.target.value)} placeholder={f.ph}
-                      className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900 focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition-all" />
+                    <label className="block text-xs font-semibold uppercase tracking-widest mb-1.5" style={{ color: C.muted }}>{f.label}</label>
+                    <input required={f.key === "nome" || f.key === "email"}
+                      value={(form as any)[f.key]} onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))}
+                      placeholder={f.ph}
+                      className="w-full px-4 py-2.5 rounded-xl text-sm text-white placeholder-slate-600 focus:outline-none transition-all"
+                      style={{ background: "#0a1628", border: `1px solid ${C.border}` }}
+                      onFocus={e => e.target.style.borderColor = C.green}
+                      onBlur={e => e.target.style.borderColor = C.border}
+                    />
                   </div>
                 ))}
                 <div className="flex gap-3 pt-2">
                   <button type="button" onClick={() => setShowSetup(false)}
-                    className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">
+                    className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-colors"
+                    style={{ background: "#0a1628", color: C.muted, border: `1px solid ${C.border}` }}>
                     Cancelar
                   </button>
                   <button type="submit" disabled={salvando}
-                    className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white bg-teal-600 hover:bg-teal-700 disabled:opacity-50 transition-colors">
+                    className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-50 transition-all"
+                    style={{ background: "#00d68f22", border: "1px solid #00d68f66", color: C.green }}>
                     {salvando ? "Criando..." : "Criar conta →"}
                   </button>
                 </div>
@@ -184,52 +200,48 @@ export default function HomePage() {
           </div>
         </div>
       ) : (
-        /* ── HERO + FEATURES ──────────────────────────────────────────── */
         <>
-          {/* Hero */}
           <section className="px-8 py-24 text-center">
             <div className="max-w-3xl mx-auto">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-teal-50 border border-teal-200 text-teal-700 text-sm font-semibold rounded-full mb-6">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold mb-6"
+                style={{ background: "#00d68f15", border: "1px solid #00d68f33", color: C.green }}>
                 <Sparkles className="w-4 h-4" /> Plataforma de Mentoria com IA
               </div>
-              <h2 className="text-5xl font-bold text-slate-900 mb-6 leading-tight">
+              <h2 className="text-5xl font-bold text-white mb-6 leading-tight">
                 Clareza total em<br />
-                <span className="text-teal-600">cada jornada de mentoria</span>
+                <span style={{ color: C.green }}>cada jornada de mentoria</span>
               </h2>
-              <p className="text-lg text-slate-500 mb-10 leading-relaxed max-w-2xl mx-auto">
-                Acompanhe sessões, metas e resultados dos seus mentorados com análise de IA em tempo real. Tudo num só lugar, sem perder contexto.
+              <p className="text-lg mb-10 leading-relaxed max-w-2xl mx-auto" style={{ color: C.muted }}>
+                Acompanhe sessões, metas e resultados dos seus mentorados com análise de IA em tempo real. Tudo num só lugar.
               </p>
               <button onClick={() => setShowSetup(true)}
-                className="inline-flex items-center gap-2 px-8 py-4 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-2xl shadow-xl shadow-teal-600/25 transition-all hover:shadow-teal-600/40 hover:-translate-y-0.5">
+                className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-semibold text-white transition-all hover:-translate-y-0.5"
+                style={{ background: "#00d68f22", border: "1px solid #00d68f66", color: C.green, boxShadow: "0 0 30px #00d68f22" }}>
                 Começar gratuitamente <ArrowRight className="w-5 h-5" />
               </button>
             </div>
           </section>
 
-          {/* Features */}
           <section className="px-8 pb-24 max-w-5xl mx-auto">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {[
-                { icon: Brain, cor: "teal", titulo: "Briefing IA", desc: "Análise automática do gargalo, evolução das métricas e pauta de call sugerida pelo Gemini." },
-                { icon: BarChart3, cor: "blue", titulo: "Histórico & Evolução", desc: "8 semanas de dados em visualização interativa. Compare métricas e identifique padrões." },
-                { icon: CheckCircle2, cor: "emerald", titulo: "Check-in Semanal", desc: "Mentorados preenchem formulário simples. Dados fluem direto para seu dashboard." },
-                { icon: Calendar, cor: "violet", titulo: "Calendário de Sessões", desc: "Agende calls, adicione links do Meet/Zoom e receba alertas de próximas sessões." },
-                { icon: Target, cor: "amber", titulo: "Análise de Call IA", desc: "Cole a transcrição de qualquer call e a IA extrai tarefas e compromissos automaticamente." },
-                { icon: Users, cor: "rose", titulo: "Multi-Mentor", desc: "Suporte para vários mentores. Cada um com mentorados, dados e sessões isoladas." },
+                { icon: Brain,        cor: C.green, titulo: "Briefing IA",         desc: "Análise do gargalo + pauta de call gerada pelo Gemini automaticamente." },
+                { icon: BarChart3,    cor: C.blue,  titulo: "Histórico & Evolução", desc: "8 semanas de dados em visualização interativa com variação %." },
+                { icon: CheckCircle2, cor: "#a78bfa",titulo: "Check-in Semanal",    desc: "Mentorados preenchem formulário simples. Dados fluem direto para o dashboard." },
+                { icon: Calendar,     cor: "#f59e0b",titulo: "Calendário de Sessões",desc: "Agende calls com link Meet/Zoom e veja próximas sessões na Visão Geral." },
+                { icon: Target,       cor: "#f05252",titulo: "Análise de Call IA",   desc: "Cola transcrição e a IA extrai tarefas do mentorado + compromissos da equipe." },
+                { icon: Users,        cor: C.muted,  titulo: "Multi-Mentor",         desc: "Larissa, Victor, Silas — cada mentor com seus mentorados e dados isolados." },
               ].map(f => {
                 const Icon = f.icon
-                const bg: Record<string, string> = {
-                  teal: "bg-teal-50 text-teal-600", blue: "bg-blue-50 text-blue-600",
-                  emerald: "bg-emerald-50 text-emerald-600", violet: "bg-violet-50 text-violet-600",
-                  amber: "bg-amber-50 text-amber-600", rose: "bg-rose-50 text-rose-600",
-                }
                 return (
-                  <div key={f.titulo} className="bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-md transition-shadow">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4 ${bg[f.cor]}`}>
-                      <Icon className="w-5 h-5" />
+                  <div key={f.titulo} className="rounded-2xl p-6 transition-all hover:-translate-y-0.5"
+                    style={{ background: C.card, border: `1px solid ${C.border}` }}>
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
+                      style={{ background: `${f.cor}18`, border: `1px solid ${f.cor}33` }}>
+                      <Icon className="w-5 h-5" style={{ color: f.cor }} />
                     </div>
-                    <h4 className="font-bold text-slate-900 mb-2">{f.titulo}</h4>
-                    <p className="text-sm text-slate-500 leading-relaxed">{f.desc}</p>
+                    <h4 className="font-bold text-white mb-2">{f.titulo}</h4>
+                    <p className="text-sm leading-relaxed" style={{ color: C.muted }}>{f.desc}</p>
                   </div>
                 )
               })}

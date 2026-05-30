@@ -20,6 +20,20 @@ import Sidebar, { CkView } from "@/components/ck/Sidebar"
 import VisaoGeral from "@/components/ck/VisaoGeral"
 import SessaoModal from "@/components/ck/SessaoModal"
 
+// ── CORES PLECTO NAVY ─────────────────────────────────────────────────────────
+const C = {
+  bg:     "#0c1c2c",
+  card:   "#0f2540",
+  card2:  "#112a4a",
+  border: "#1e3a5f",
+  muted:  "#4d7fa8",
+  green:  "#00d68f",
+  blue:   "#4c9aff",
+  amber:  "#f59e0b",
+  red:    "#f05252",
+  violet: "#a78bfa",
+}
+
 // ── INTERFACES ────────────────────────────────────────────────────────────────
 interface Mentorado {
   id: string; nome: string; nicho: string; status: string; foco_macro: string
@@ -450,7 +464,7 @@ export default function DashboardPage() {
 
   // ── RENDER ────────────────────────────────────────────────────────────────
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50">
+    <div className="flex h-screen overflow-hidden" style={{ background: C.bg }}>
       {/* ── SIDEBAR CKlareza ─────────────────────────────────────────── */}
       <Sidebar
         active={ckView}
@@ -463,55 +477,61 @@ export default function DashboardPage() {
       {/* ── MAIN AREA ──────────────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* ── HEADER BAR ─────────────────────────────────────────────── */}
-        <header className="bg-white border-b border-slate-200 px-6 py-3.5 flex items-center justify-between shrink-0 shadow-sm">
+        <header className="px-6 py-3.5 flex items-center justify-between shrink-0" style={{ background: C.card, borderBottom: `1px solid ${C.border}` }}>
           <div className="flex items-center gap-3">
-            <h2 className="text-base font-semibold text-slate-900">{MODULE_LABELS[ckView]}</h2>
+            <h2 className="text-base font-semibold text-white">{MODULE_LABELS[ckView]}</h2>
             {realtimeStatus === "connected" && (
-              <span className="flex items-center gap-1 text-[10px] text-teal-600 font-medium">
-                <span className="w-1.5 h-1.5 bg-teal-500 rounded-full animate-pulse" /> Ao vivo
+              <span className="flex items-center gap-1 text-[10px] font-medium" style={{ color: C.green }}>
+                <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: C.green }} /> Ao vivo
               </span>
             )}
           </div>
           <div className="flex items-center gap-3">
             {/* Badge notificações */}
             {tarefasVencidas > 0 && (
-              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-red-50 border border-red-200 rounded-full">
-                <AlertCircle className="w-3.5 h-3.5 text-red-500" />
-                <span className="text-xs font-bold text-red-600">{tarefasVencidas} vencida{tarefasVencidas > 1 ? "s" : ""}</span>
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: `${C.red}18`, border: `1px solid ${C.red}44` }}>
+                <AlertCircle className="w-3.5 h-3.5" style={{ color: C.red }} />
+                <span className="text-xs font-bold" style={{ color: C.red }}>{tarefasVencidas} vencida{tarefasVencidas > 1 ? "s" : ""}</span>
               </div>
             )}
             {/* Avatar do mentor */}
             <div className="relative" ref={menuPerfilRef}>
               <button onClick={() => setShowMenuPerfil(!showMenuPerfil)}
-                className="flex items-center gap-2.5 pl-1 pr-3 py-1 rounded-full hover:bg-slate-100 transition-colors">
-                <div className="w-8 h-8 rounded-full overflow-hidden ring-2 ring-slate-200">
+                className="flex items-center gap-2.5 pl-1 pr-3 py-1 rounded-full transition-all"
+                style={{ border: `1px solid ${C.border}` }}
+                onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = C.green}
+                onMouseLeave={e => (e.currentTarget as HTMLElement).style.borderColor = C.border}>
+                <div className="w-8 h-8 rounded-full overflow-hidden ring-1" style={{ ringColor: C.border }}>
                   {mentorDados?.foto_url
                     ? <img src={mentorDados.foto_url} alt={mentorNome} className="w-full h-full object-cover" />
-                    : <div className="w-full h-full bg-slate-900 flex items-center justify-center text-xs font-bold text-white">
+                    : <div className="w-full h-full flex items-center justify-center text-xs font-bold text-white" style={{ background: "#0a1628" }}>
                         {mentorNome.slice(0, 2).toUpperCase()}
                       </div>}
                 </div>
-                <span className="text-sm font-semibold text-slate-700 hidden sm:block">{mentorNome}</span>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                <span className="text-sm font-semibold text-white hidden sm:block">{mentorNome}</span>
+                <ChevronDown className="w-3.5 h-3.5" style={{ color: C.muted }} />
               </button>
 
               {showMenuPerfil && (
-                <div className="absolute right-0 top-full mt-2 w-52 bg-white border border-slate-200 rounded-xl shadow-lg py-1.5 z-50">
-                  <button onClick={() => { setShowPerfilModal(true); setShowMenuPerfil(false) }}
-                    className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
-                    <User className="w-4 h-4" /> Meu Perfil
-                  </button>
-                  <button onClick={() => { if (selected) { setEditData({ nome: selected.nome, nicho: selected.nicho, foco_macro: selected.foco_macro, status: "Ativo", cidade: selected.cidade || "", data_fim: selected.data_fim || "", faturamento_atual: selected.faturamento_atual?.toString() || "", meta_faturamento: selected.meta_faturamento?.toString() || "", meta_atual: selected.meta_atual || "" }); setShowEditModal(true) }; setShowMenuPerfil(false) }}
-                    className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
-                    <Edit2 className="w-4 h-4" /> Editar Mentorado
-                  </button>
-                  <button onClick={() => { setShowHistoricoModal(true); setShowMenuPerfil(false) }}
-                    className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
-                    <History className="w-4 h-4" /> Histórico
-                  </button>
-                  <div className="my-1 border-t border-slate-100" />
+                <div className="absolute right-0 top-full mt-2 w-52 rounded-xl shadow-xl py-1.5 z-50" style={{ background: C.card2, border: `1px solid ${C.border}` }}>
+                  {[
+                    { label: "Meu Perfil", icon: User, onClick: () => { setShowPerfilModal(true); setShowMenuPerfil(false) } },
+                    { label: "Editar Mentorado", icon: Edit2, onClick: () => { if (selected) { setEditData({ nome: selected.nome, nicho: selected.nicho, foco_macro: selected.foco_macro, status: "Ativo", cidade: selected.cidade || "", data_fim: selected.data_fim || "", faturamento_atual: selected.faturamento_atual?.toString() || "", meta_faturamento: selected.meta_faturamento?.toString() || "", meta_atual: selected.meta_atual || "" }); setShowEditModal(true) }; setShowMenuPerfil(false) } },
+                    { label: "Histórico", icon: History, onClick: () => { setShowHistoricoModal(true); setShowMenuPerfil(false) } },
+                  ].map(item => (
+                    <button key={item.label} onClick={item.onClick}
+                      className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-white transition-colors"
+                      onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#1e3a5f"}
+                      onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}>
+                      <item.icon className="w-4 h-4" style={{ color: C.muted }} /> {item.label}
+                    </button>
+                  ))}
+                  <div className="my-1" style={{ borderTop: `1px solid ${C.border}` }} />
                   <button onClick={() => { localStorage.removeItem("mentorSelecionado"); window.location.href = "/" }}
-                    className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                    className="w-full flex items-center gap-2.5 px-4 py-2 text-sm transition-colors"
+                    style={{ color: C.red }}
+                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = `${C.red}15`}
+                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}>
                     <LogOut className="w-4 h-4" /> Sair
                   </button>
                 </div>
@@ -538,17 +558,21 @@ export default function DashboardPage() {
           {/* ══ MENTORADOS ════════════════════════════════════════════════ */}
           {ckView === "mentorados" && (
             <div className="flex h-full">
-              {/* Lista lateral (light) */}
-              <div className="w-72 shrink-0 border-r border-slate-200 bg-white flex flex-col h-full">
-                <div className="p-4 border-b border-slate-100">
+              {/* Lista lateral dark */}
+              <div className="w-72 shrink-0 flex flex-col h-full" style={{ background: C.card, borderRight: `1px solid ${C.border}` }}>
+                <div className="p-4" style={{ borderBottom: `1px solid ${C.border}` }}>
                   <div className="relative mb-3">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: C.muted }} />
                     <input value={filtroSidebar} onChange={e => setFiltroSidebar(e.target.value)}
                       placeholder="Buscar mentorado..."
-                      className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:border-teal-500" />
+                      className="w-full pl-9 pr-3 py-2 rounded-lg text-sm text-white placeholder-slate-600 focus:outline-none transition-all"
+                      style={{ background: "#0a1628", border: `1px solid ${C.border}` }}
+                      onFocus={e => e.target.style.borderColor = C.green}
+                      onBlur={e => e.target.style.borderColor = C.border} />
                   </div>
                   <button onClick={() => setShowCadastro(true)}
-                    className="w-full flex items-center justify-center gap-2 py-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold rounded-xl transition-colors">
+                    className="w-full flex items-center justify-center gap-2 py-2 text-sm font-semibold rounded-xl transition-all"
+                    style={{ background: `${C.green}18`, border: `1px solid ${C.green}44`, color: C.green }}>
                     <UserPlus className="w-4 h-4" /> Novo Mentorado
                   </button>
                 </div>
@@ -565,18 +589,18 @@ export default function DashboardPage() {
               </div>
 
               {/* Detail panel */}
-              <div className="flex-1 overflow-y-auto p-6">
+              <div className="flex-1 overflow-y-auto p-6" style={{ background: C.bg }}>
                 {!selected ? (
-                  <div className="h-full flex items-center justify-center text-slate-400">
+                  <div className="h-full flex items-center justify-center" style={{ color: C.muted }}>
                     <div className="text-center">
-                      <Users className="w-12 h-12 text-slate-200 mx-auto mb-3" />
+                      <Users className="w-12 h-12 mx-auto mb-3" style={{ color: C.border }} />
                       <p className="text-sm">Selecione um mentorado</p>
                     </div>
                   </div>
                 ) : (
-                  <div className="space-y-6">
+                  <div className="space-y-5">
                     {/* ── Info Card ──────────────────────────────────────── */}
-                    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+                    <div className="rounded-2xl p-6" style={{ background: C.card, border: `1px solid ${C.border}` }}>
                       <div className="flex items-start gap-5">
                         <label className="cursor-pointer">
                           <div className="w-16 h-16 rounded-2xl overflow-hidden ring-2 ring-slate-200 hover:ring-teal-500 transition-all">
@@ -594,28 +618,28 @@ export default function DashboardPage() {
                         <div className="flex-1">
                           <div className="flex items-start justify-between gap-3">
                             <div>
-                              <h1 className="text-xl font-bold text-slate-900">{selected.nome}</h1>
-                              <p className="text-sm text-slate-500 mt-0.5">{selected.nicho}</p>
+                              <h1 className="text-xl font-bold text-white">{selected.nome}</h1>
+                              <p className="text-sm mt-0.5" style={{ color: C.muted }}>{selected.nicho}</p>
                             </div>
-                            <span className="px-3 py-1 bg-teal-50 text-teal-700 text-xs font-bold rounded-full border border-teal-200 shrink-0">
+                            <span className="px-3 py-1 text-xs font-bold rounded-full shrink-0" style={{ background: `${C.green}18`, border: `1px solid ${C.green}44`, color: C.green }}>
                               {selected.status}
                             </span>
                           </div>
-                          <div className="flex flex-wrap gap-x-5 gap-y-1 mt-3 text-xs text-slate-500">
-                            <span>📅 Início: <span className="text-slate-700 font-medium">{selected.data_inicio}</span></span>
+                          <div className="flex flex-wrap gap-x-5 gap-y-1 mt-3 text-xs" style={{ color: C.muted }}>
+                            <span>📅 Início: <span className="text-white font-medium">{selected.data_inicio}</span></span>
                             {selected.data_fim && (
-                              <span>🏁 Término: <span className="text-slate-700 font-medium">{selected.data_fim}</span> · <CountdownDias dataFim={selected.data_fim} /></span>
+                              <span>🏁 Término: <span className="text-white font-medium">{selected.data_fim}</span> · <CountdownDias dataFim={selected.data_fim} /></span>
                             )}
-                            {selected.cidade && <span>📍 <span className="text-slate-700 font-medium">{selected.cidade}</span></span>}
-                            <span>🎯 <span className="text-slate-700 font-medium">{selected.foco_macro}</span></span>
+                            {selected.cidade && <span>📍 <span className="text-white font-medium">{selected.cidade}</span></span>}
+                            <span>🎯 <span className="text-white font-medium">{selected.foco_macro}</span></span>
                           </div>
                           {(selected.faturamento_atual || selected.meta_faturamento) && (
                             <div className="flex gap-4 mt-2">
                               {selected.faturamento_atual && (
-                                <span className="text-xs text-slate-500">💰 Atual: <span className="text-teal-700 font-bold">R$ {Number(selected.faturamento_atual).toLocaleString("pt-BR")}</span></span>
+                                <span className="text-xs" style={{ color: C.muted }}>💰 Atual: <span className="font-bold" style={{ color: C.green }}>R$ {Number(selected.faturamento_atual).toLocaleString("pt-BR")}</span></span>
                               )}
                               {selected.meta_faturamento && (
-                                <span className="text-xs text-slate-500">🚀 Meta: <span className="text-blue-700 font-bold">R$ {Number(selected.meta_faturamento).toLocaleString("pt-BR")}</span></span>
+                                <span className="text-xs" style={{ color: C.muted }}>🚀 Meta: <span className="font-bold" style={{ color: C.blue }}>R$ {Number(selected.meta_faturamento).toLocaleString("pt-BR")}</span></span>
                               )}
                             </div>
                           )}
@@ -623,21 +647,19 @@ export default function DashboardPage() {
                       </div>
 
                       {/* Ações rápidas */}
-                      <div className="flex gap-2 mt-5 pt-5 border-t border-slate-100">
-                        <button onClick={copiarLinkCheckin}
-                          className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-600 bg-slate-50 border border-slate-200 rounded-xl hover:border-slate-300 transition-all">
-                          {linkCopiado ? <Check className="w-3.5 h-3.5 text-teal-600" /> : <Link2 className="w-3.5 h-3.5" />}
-                          {linkCopiado ? "Copiado!" : "Link Check-in"}
-                        </button>
-                        <button onClick={() => carregarCheckin()}
-                          className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-600 bg-slate-50 border border-slate-200 rounded-xl hover:border-slate-300 transition-all">
-                          <RefreshCw className={`w-3.5 h-3.5 ${atualizando ? "animate-spin" : ""}`} />
-                          Atualizar
-                        </button>
-                        <button onClick={() => setShowSessaoModal(true)}
-                          className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-teal-700 bg-teal-50 border border-teal-200 rounded-xl hover:bg-teal-100 transition-all">
-                          <Calendar className="w-3.5 h-3.5" /> Agendar Sessão
-                        </button>
+                      <div className="flex gap-2 mt-5 pt-5" style={{ borderTop: `1px solid ${C.border}` }}>
+                        {[
+                          { icon: linkCopiado ? Check : Link2, label: linkCopiado ? "Copiado!" : "Link Check-in", onClick: copiarLinkCheckin, color: C.muted },
+                          { icon: RefreshCw, label: "Atualizar", onClick: () => carregarCheckin(), color: C.muted },
+                          { icon: Calendar, label: "Agendar Sessão", onClick: () => setShowSessaoModal(true), color: C.green },
+                        ].map(btn => (
+                          <button key={btn.label} onClick={btn.onClick}
+                            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl transition-all"
+                            style={{ background: `${btn.color}15`, border: `1px solid ${btn.color}33`, color: btn.color }}>
+                            <btn.icon className={`w-3.5 h-3.5 ${btn.label === "Atualizar" && atualizando ? "animate-spin" : ""}`} />
+                            {btn.label}
+                          </button>
+                        ))}
                       </div>
                     </div>
 
@@ -645,21 +667,20 @@ export default function DashboardPage() {
                     {checkin && (
                       <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
                         {([
-                          { key: "leads", label: "Leads Gerados", valor: checkin.leads_gerados, prefixo: "", icon: Target, cor: "teal" },
-                          { key: "vendas", label: "Vendas Reais", valor: checkin.vendas_reais, prefixo: "R$", icon: BarChart3, cor: "blue" },
-                          { key: "investimento", label: "Investimento", valor: checkin.investimento_trafego, prefixo: "R$", icon: TrendingUp, cor: "amber" },
-                          { key: "videos", label: "Vídeos Postados", valor: checkin.videos_postados, prefixo: "", icon: BookOpen, cor: "violet" },
+                          { key: "leads_gerados",       label: "Leads Gerados",   valor: checkin.leads_gerados,          prefixo: "",   icon: Target,   cor: C.green  },
+                          { key: "vendas_reais",        label: "Vendas Reais",    valor: checkin.vendas_reais,           prefixo: "R$", icon: BarChart3, cor: C.blue   },
+                          { key: "investimento_trafego",label: "Investimento",    valor: checkin.investimento_trafego,   prefixo: "R$", icon: TrendingUp,cor: C.amber  },
+                          { key: "videos_postados",     label: "Vídeos Postados", valor: checkin.videos_postados,        prefixo: "",   icon: BookOpen,  cor: C.violet },
                         ] as any[]).map(card => {
-                          const pct = variacao(historico, card.key === "videos" ? "videos_postados" : card.key === "leads" ? "leads_gerados" : card.key === "vendas" ? "vendas_reais" : "investimento_trafego")
+                          const pct = variacao(historico, card.key)
                           const Icon = card.icon
-                          const bg: Record<string, string> = { teal: "bg-teal-50 text-teal-600", blue: "bg-blue-50 text-blue-600", amber: "bg-amber-50 text-amber-600", violet: "bg-violet-50 text-violet-600" }
                           return (
-                            <div key={card.key} className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 hover:shadow-md transition-shadow">
-                              <div className={`w-9 h-9 rounded-xl flex items-center justify-center mb-3 ${bg[card.cor]}`}>
-                                <Icon className="w-4.5 h-4.5" />
+                            <div key={card.key} className="rounded-2xl p-5 transition-all hover:-translate-y-0.5" style={{ background: C.card, border: `1px solid ${C.border}` }}>
+                              <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3" style={{ background: `${card.cor}18`, border: `1px solid ${card.cor}30` }}>
+                                <Icon className="w-4 h-4" style={{ color: card.cor }} />
                               </div>
-                              <p className="text-2xl font-bold text-slate-900">{card.prefixo}{card.valor?.toLocaleString("pt-BR")}</p>
-                              <p className="text-xs text-slate-500 mt-0.5 mb-2">{card.label}</p>
+                              <p className="text-2xl font-bold text-white">{card.prefixo}{card.valor?.toLocaleString("pt-BR")}</p>
+                              <p className="text-xs mt-0.5 mb-2" style={{ color: C.muted }}>{card.label}</p>
                               <BadgeVariacao pct={pct} />
                             </div>
                           )
@@ -669,16 +690,17 @@ export default function DashboardPage() {
 
                     {/* ── BRIEFING IA ─────────────────────────────────────── */}
                     {checkin && (
-                      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+                      <div className="rounded-2xl p-6" style={{ background: C.card, border: `1px solid ${C.border}` }}>
                         <div className="flex items-center justify-between mb-5">
                           <div className="flex items-center gap-2.5">
-                            <div className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center">
-                              <Sparkles className="w-4 h-4 text-violet-600" />
+                            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${C.violet}18`, border: `1px solid ${C.violet}30` }}>
+                              <Sparkles className="w-4 h-4" style={{ color: C.violet }} />
                             </div>
-                            <h3 className="text-sm font-semibold text-slate-900">Briefing da IA</h3>
+                            <h3 className="text-sm font-semibold text-white">Briefing da IA</h3>
                           </div>
                           <button onClick={gerarBriefingIA} disabled={briefingLoading}
-                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-violet-700 bg-violet-50 border border-violet-200 rounded-lg hover:bg-violet-100 disabled:opacity-50 transition-colors">
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg disabled:opacity-50 transition-all"
+                            style={{ background: `${C.violet}18`, border: `1px solid ${C.violet}33`, color: C.violet }}>
                             <Zap className={`w-3.5 h-3.5 ${briefingLoading ? "animate-pulse" : ""}`} />
                             {briefingLoading ? "Gerando..." : "Gerar com IA"}
                           </button>
@@ -686,25 +708,25 @@ export default function DashboardPage() {
 
                         {briefing ? (
                           <div className="space-y-5">
-                            <div className="bg-slate-50 rounded-xl p-4">
-                              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">📊 Diagnóstico</p>
-                              <p className="text-sm text-slate-700 leading-relaxed">{briefing.diagnostico}</p>
+                            <div className="rounded-xl p-4" style={{ background: "#0a1628" }}>
+                              <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: C.muted }}>📊 Diagnóstico</p>
+                              <p className="text-sm leading-relaxed" style={{ color: "#94b4cc" }}>{briefing.diagnostico}</p>
                             </div>
                             <div>
-                              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">🎯 Pauta da Call</p>
+                              <p className="text-[10px] font-bold uppercase tracking-widest mb-3" style={{ color: C.muted }}>🎯 Pauta da Call</p>
                               <ol className="space-y-2">
                                 {briefing.pauta.map((item, i) => (
                                   <li key={i} className="flex items-start gap-3">
-                                    <span className="w-5 h-5 rounded-full bg-teal-600 text-white text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">{i + 1}</span>
-                                    <p className="text-sm text-slate-700">{item}</p>
+                                    <span className="w-5 h-5 rounded-full text-white text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5" style={{ background: C.green }}>{i + 1}</span>
+                                    <p className="text-sm" style={{ color: "#94b4cc" }}>{item}</p>
                                   </li>
                                 ))}
                               </ol>
                             </div>
                           </div>
                         ) : (
-                          <p className="text-sm text-slate-400 text-center py-6">
-                            {checkin ? "Clique em 'Gerar com IA' para criar o briefing desta sessão." : "Aguardando check-in do mentorado."}
+                          <p className="text-sm text-center py-6" style={{ color: C.muted }}>
+                            Clique em &apos;Gerar com IA&apos; para criar o briefing desta sessão.
                           </p>
                         )}
                       </div>
@@ -712,20 +734,21 @@ export default function DashboardPage() {
 
                     {/* ── TABS: Pendências / Financeiro / Calls ─────────── */}
                     <div>
-                      <div className="flex gap-1 bg-slate-100 rounded-xl p-1 mb-4">
+                      <div className="flex gap-1 rounded-xl p-1 mb-4" style={{ background: C.card }}>
                         {([
                           { id: "pendencias", label: "Pendências", icon: CheckCircle2 },
                           { id: "financeiro", label: "Financeiro", icon: DollarSign },
                           { id: "calls", label: "Análise de Call", icon: Phone },
                         ] as const).map(tab => (
                           <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition-all ${
-                              activeTab === tab.id ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
-                            }`}>
+                            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition-all"
+                            style={activeTab === tab.id
+                              ? { background: C.green, color: "#0a1628", border: `1px solid ${C.green}` }
+                              : { color: C.muted }}>
                             <tab.icon className="w-3.5 h-3.5" />
                             {tab.label}
                             {tab.id === "pendencias" && tarefasVencidas > 0 && (
-                              <span className="w-4 h-4 bg-red-500 rounded-full text-white text-[9px] flex items-center justify-center">{tarefasVencidas}</span>
+                              <span className="w-4 h-4 rounded-full text-white text-[9px] flex items-center justify-center" style={{ background: C.red }}>{tarefasVencidas}</span>
                             )}
                           </button>
                         ))}
@@ -734,30 +757,32 @@ export default function DashboardPage() {
                       {activeTab === "pendencias" && <PendenciasSection key={selectedId} mentoradoId={selectedId} mentorId={mentorId} />}
                       {activeTab === "financeiro" && <FinanceiroSection key={selectedId} mentoradoId={selectedId} mentorId={mentorId} />}
                       {activeTab === "calls" && (
-                        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+                        <div className="rounded-2xl p-6" style={{ background: C.card, border: `1px solid ${C.border}` }}>
                           <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center">
-                                <Sparkles className="w-4 h-4 text-purple-600" />
+                              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${C.violet}18`, border: `1px solid ${C.violet}30` }}>
+                                <Sparkles className="w-4 h-4" style={{ color: C.violet }} />
                               </div>
-                              <h3 className="text-sm font-semibold text-slate-900">Análise de Call com IA</h3>
+                              <h3 className="text-sm font-semibold text-white">Análise de Call com IA</h3>
                             </div>
                             <button onClick={() => setShowAnalisarCall(true)}
-                              className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-xl transition-colors">
+                              className="flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl transition-all"
+                              style={{ background: `${C.violet}20`, border: `1px solid ${C.violet}44`, color: C.violet }}>
                               <Zap className="w-3.5 h-3.5" /> Analisar Call
                             </button>
                           </div>
-                          <p className="text-sm text-slate-400">Cole a transcrição de uma call e a IA extrai automaticamente as tarefas da mentorada e os compromissos da equipe.</p>
+                          <p className="text-sm" style={{ color: C.muted }}>Cole a transcrição de uma call e a IA extrai automaticamente as tarefas da mentorada e os compromissos da equipe.</p>
                         </div>
                       )}
                     </div>
 
                     {!checkin && (
-                      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 text-center">
-                        <BarChart3 className="w-10 h-10 text-slate-200 mx-auto mb-3" />
-                        <p className="text-sm text-slate-500 mb-4">Nenhum check-in recebido ainda.</p>
+                      <div className="rounded-2xl p-8 text-center" style={{ background: C.card, border: `1px solid ${C.border}` }}>
+                        <BarChart3 className="w-10 h-10 mx-auto mb-3" style={{ color: C.border }} />
+                        <p className="text-sm mb-4" style={{ color: C.muted }}>Nenhum check-in recebido ainda.</p>
                         <button onClick={copiarLinkCheckin}
-                          className="inline-flex items-center gap-2 px-4 py-2.5 bg-teal-600 text-white text-sm font-semibold rounded-xl hover:bg-teal-700 transition-colors">
+                          className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl transition-all"
+                          style={{ background: `${C.green}18`, border: `1px solid ${C.green}44`, color: C.green }}>
                           <Link2 className="w-4 h-4" /> Copiar Link de Check-in
                         </button>
                       </div>
@@ -836,16 +861,16 @@ export default function DashboardPage() {
 
       {/* Modal: Cadastrar Mentorado */}
       {showCadastro && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4" onClick={() => setShowCadastro(false)}>
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm p-4" style={{ background: "#00000070" }} onClick={() => setShowCadastro(false)}>
+          <div className="rounded-2xl shadow-2xl w-full max-w-lg" style={{ background: C.card2, border: `1px solid ${C.border}` }} onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-6 py-5" style={{ borderBottom: `1px solid ${C.border}` }}>
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-teal-50 flex items-center justify-center">
-                  <UserPlus className="w-5 h-5 text-teal-600" />
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: `${C.green}18`, border: `1px solid ${C.green}33` }}>
+                  <UserPlus className="w-5 h-5" style={{ color: C.green }} />
                 </div>
-                <h2 className="text-base font-semibold text-slate-900">Novo Mentorado</h2>
+                <h2 className="text-base font-semibold text-white">Novo Mentorado</h2>
               </div>
-              <button onClick={() => setShowCadastro(false)} className="p-2 hover:bg-slate-100 rounded-lg"><X className="w-5 h-5 text-slate-400" /></button>
+              <button onClick={() => setShowCadastro(false)} className="p-2 rounded-lg transition-colors" style={{ color: C.muted }}><X className="w-5 h-5" /></button>
             </div>
             <form onSubmit={cadastrarMentorado} className="p-6 space-y-4">
               {[
@@ -854,22 +879,26 @@ export default function DashboardPage() {
                 { label: "Foco Macro", key: "foco_macro", placeholder: "Ex: Estruturação Comercial" },
               ].map(f => (
                 <div key={f.key}>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">{f.label}</label>
+                  <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: C.muted }}>{f.label}</label>
                   <input required value={(novo as any)[f.key]} onChange={e => setNovo(n => ({ ...n, [f.key]: e.target.value }))}
                     placeholder={f.placeholder}
-                    className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-lg text-sm text-slate-900 focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20" />
+                    className="w-full px-3.5 py-2.5 rounded-lg text-sm text-white placeholder-slate-600 focus:outline-none transition-all"
+                    style={{ background: C.bg, border: `1px solid ${C.border}` }}
+                    onFocus={e => e.target.style.borderColor = C.green} onBlur={e => e.target.style.borderColor = C.border} />
                 </div>
               ))}
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Data de Início</label>
+                <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: C.muted }}>Data de Início</label>
                 <input type="date" required value={novo.data_inicio} onChange={e => setNovo(n => ({ ...n, data_inicio: e.target.value }))}
-                  className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-lg text-sm text-slate-900 focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20" />
+                  className="w-full px-3.5 py-2.5 rounded-lg text-sm text-white focus:outline-none transition-all"
+                  style={{ background: C.bg, border: `1px solid ${C.border}` }} />
               </div>
               <div className="flex gap-3 pt-1">
                 <button type="button" onClick={() => setShowCadastro(false)}
-                  className="flex-1 py-2.5 rounded-lg text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">Cancelar</button>
+                  className="flex-1 py-2.5 rounded-lg text-sm font-semibold transition-colors" style={{ background: C.card, color: C.muted, border: `1px solid ${C.border}` }}>Cancelar</button>
                 <button type="submit" disabled={salvando}
-                  className="flex-1 py-2.5 rounded-lg text-sm font-semibold text-white bg-teal-600 hover:bg-teal-700 disabled:opacity-50 transition-colors">
+                  className="flex-1 py-2.5 rounded-lg text-sm font-semibold text-white disabled:opacity-50 transition-all"
+                  style={{ background: `${C.green}22`, border: `1px solid ${C.green}55`, color: C.green }}>
                   {salvando ? "Salvando..." : "Cadastrar"}
                 </button>
               </div>
