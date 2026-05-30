@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { ChevronDown, Plus, Trash2, AlertCircle } from "lucide-react"
+import { ChevronDown, Plus, Trash2, AlertCircle, Clock } from "lucide-react"
+import { getRealtimeClient } from "@/lib/supabase-realtime"
 
 interface Tarefa {
   id: string
@@ -18,6 +19,12 @@ interface PendenciasSectionProps {
   mentorId: string | null
 }
 
+// Parse date string como data LOCAL (evita bug UTC-3 que mostrava "Vencida" para tarefas de hoje)
+function parseDateLocal(dateStr: string): Date {
+  const [y, m, d] = dateStr.split("T")[0].split("-").map(Number)
+  return new Date(y, m - 1, d)
+}
+
 export default function PendenciasSection({ mentoradoId, mentorId }: PendenciasSectionProps) {
   const [tarefasPending, setTarefasPending] = useState<Tarefa[]>([])
   const [tarefasCompleted, setTarefasCompleted] = useState<Tarefa[]>([])
@@ -26,24 +33,20 @@ export default function PendenciasSection({ mentoradoId, mentorId }: PendenciasS
   const [novoTexto, setNovoTexto] = useState("")
   const [novaDataVencimento, setNovaDataVencimento] = useState("")
 
-  // Buscar tarefas do mentorado
   const buscarTarefas = useCallback(async () => {
     if (!mentoradoId) {
       setTarefasPending([])
       setTarefasCompleted([])
       return
     }
-
     setLoading(true)
     try {
       const [resPending, resCompleted] = await Promise.all([
         fetch(`/api/dashboard/tarefas?mentoradoId=${mentoradoId}&status=pending&t=${Date.now()}`),
         fetch(`/api/dashboard/tarefas?mentoradoId=${mentoradoId}&status=completed&t=${Date.now()}`),
       ])
-
       const dataPending = await resPending.json()
       const dataCompleted = await resCompleted.json()
-
       setTarefasPending(dataPending.tarefas || [])
       setTarefasCompleted(dataCompleted.tarefas || [])
     } catch (e) {
@@ -53,17 +56,28 @@ export default function PendenciasSection({ mentoradoId, mentorId }: PendenciasS
     }
   }, [mentoradoId])
 
-  // Buscar tarefas ao montar ou mudar mentoradoId
   useEffect(() => {
     buscarTarefas()
   }, [mentoradoId, buscarTarefas])
 
-  // Criar nova tarefa
+  // ── Realtime: escuta INSERT/UPDATE/DELETE em tarefas deste mentorado ──────
+  useEffect(() => {
+    if (!mentoradoId) return
+    const supabase = getRealtimeClient()
+    const channel = supabase
+      .channel(`tarefas-${mentoradoId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "tarefas", filter: `mentorado_id=eq.${mentoradoId}` },
+        () => buscarTarefas()
+      )
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [mentoradoId, buscarTarefas])
+
   const criarTarefa = async (e: React.FormEvent) => {
     e.preventDefault()
-
     if (!novoTexto.trim() || !mentoradoId || !mentorId) return
-
     try {
       const res = await fetch("/api/dashboard/tarefas", {
         method: "POST",
@@ -75,7 +89,6 @@ export default function PendenciasSection({ mentoradoId, mentorId }: PendenciasS
           data_vencimento: novaDataVencimento || null,
         }),
       })
-
       if (res.ok) {
         setNovoTexto("")
         setNovaDataVencimento("")
@@ -86,7 +99,6 @@ export default function PendenciasSection({ mentoradoId, mentorId }: PendenciasS
     }
   }
 
-  // Marcar tarefa como completa/incompleta
   const toggleTarefa = async (tarefaId: string, novoStatus: "pending" | "completed") => {
     try {
       const res = await fetch(`/api/dashboard/tarefas/${tarefaId}`, {
@@ -94,59 +106,70 @@ export default function PendenciasSection({ mentoradoId, mentorId }: PendenciasS
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: novoStatus }),
       })
-
-      if (res.ok) {
-        buscarTarefas()
-      }
+      if (res.ok) buscarTarefas()
     } catch (e) {
       console.error("Erro ao atualizar tarefa:", e)
     }
   }
 
-  // Deletar tarefa
   const deletarTarefa = async (tarefaId: string) => {
     if (!confirm("Tem certeza que deseja deletar esta tarefa?")) return
-
     try {
-      const res = await fetch(`/api/dashboard/tarefas/${tarefaId}`, {
-        method: "DELETE",
-      })
-
-      if (res.ok) {
-        buscarTarefas()
-      }
+      const res = await fetch(`/api/dashboard/tarefas/${tarefaId}`, { method: "DELETE" })
+      if (res.ok) buscarTarefas()
     } catch (e) {
       console.error("Erro ao deletar tarefa:", e)
     }
   }
 
-  // Função auxiliar para formatação de data
+  // Classifica o estado do vencimento
+  type StatusData = "hoje" | "amanha" | "vencida" | "futuro" | null
+  const getStatusData = (dataStr: string | null): StatusData => {
+    if (!dataStr) return null
+    const data = parseDateLocal(dataStr)
+    const hoje = new Date(); hoje.setHours(0, 0, 0, 0)
+    const amanha = new Date(hoje); amanha.setDate(hoje.getDate() + 1)
+    data.setHours(0, 0, 0, 0)
+    if (data.getTime() === hoje.getTime()) return "hoje"
+    if (data.getTime() === amanha.getTime()) return "amanha"
+    if (data < hoje) return "vencida"
+    return "futuro"
+  }
+
   const formatarData = (dataStr: string | null) => {
     if (!dataStr) return ""
-    const data = new Date(dataStr)
-    const hoje = new Date()
-    const amanha = new Date(hoje)
-    amanha.setDate(amanha.getDate() + 1)
-
-    const dataFormatada = data.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })
-
-    if (data.toDateString() === hoje.toDateString()) return "Hoje"
-    if (data.toDateString() === amanha.toDateString()) return "Amanhã"
-    if (data < hoje) return `Vencida: ${dataFormatada}`
-    return dataFormatada
+    const data = parseDateLocal(dataStr)
+    return data.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })
   }
 
-  // Verificar se tarefa está vencida
-  const estaVencida = (data: string | null) => {
-    if (!data) return false
-    const dataVencimento = new Date(data)
-    const hoje = new Date()
-    hoje.setHours(0, 0, 0, 0)
-    dataVencimento.setHours(0, 0, 0, 0)
-    return dataVencimento < hoje
+  const renderBadgeData = (dataStr: string | null) => {
+    const status = getStatusData(dataStr)
+    if (!status) return null
+    const formatted = formatarData(dataStr)
+
+    if (status === "hoje") return (
+      <div className="flex items-center gap-1 mt-1">
+        <AlertCircle className="w-3 h-3 text-yellow-400" />
+        <span className="text-xs font-bold text-yellow-400">ATENÇÃO — Hoje</span>
+      </div>
+    )
+    if (status === "vencida") return (
+      <div className="flex items-center gap-1 mt-1">
+        <AlertCircle className="w-3 h-3 text-red-400" />
+        <span className="text-xs text-red-400 font-semibold">Vencida {formatted}</span>
+      </div>
+    )
+    if (status === "amanha") return (
+      <div className="flex items-center gap-1 mt-1">
+        <Clock className="w-3 h-3 text-blue-400" />
+        <span className="text-xs text-blue-400">Amanhã</span>
+      </div>
+    )
+    return (
+      <span className="text-xs text-slate-400 mt-1 block">{formatted}</span>
+    )
   }
 
-  // Se não houver mentorado selecionado
   if (!mentoradoId) {
     return (
       <div className="mb-6 p-4 rounded-lg bg-slate-500/10 border border-slate-600/20 backdrop-blur-md">
@@ -157,9 +180,8 @@ export default function PendenciasSection({ mentoradoId, mentorId }: PendenciasS
 
   return (
     <div className="mb-6 space-y-4">
-      {/* SEÇÃO DE TAREFAS PENDENTES */}
+      {/* PENDÊNCIAS */}
       <div className="rounded-lg bg-gradient-to-br from-slate-700/40 to-slate-800/40 border border-slate-600/30 backdrop-blur-md p-5 hover:border-slate-500/50 transition-all">
-        {/* Cabeçalho */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="w-1 h-6 bg-gradient-to-b from-amber-400 to-orange-500 rounded-full" />
@@ -173,7 +195,6 @@ export default function PendenciasSection({ mentoradoId, mentorId }: PendenciasS
           <p className="text-xs text-slate-400">Clique para concluir</p>
         </div>
 
-        {/* LISTA DE PENDÊNCIAS */}
         <div className="space-y-2 mb-4">
           {loading ? (
             <p className="text-slate-400 text-sm py-2">Carregando...</p>
@@ -181,38 +202,28 @@ export default function PendenciasSection({ mentoradoId, mentorId }: PendenciasS
             <p className="text-slate-400 text-sm py-4 text-center">Nenhuma pendência! 🎉</p>
           ) : (
             tarefasPending.map((tarefa) => {
-              const vencida = estaVencida(tarefa.data_vencimento)
+              const status = getStatusData(tarefa.data_vencimento)
+              const isVencida = status === "vencida"
+              const isHoje = status === "hoje"
               return (
                 <div
                   key={tarefa.id}
-                  className="flex items-start gap-3 p-3 rounded-lg bg-slate-600/20 hover:bg-slate-600/40 transition-colors group"
+                  className={`flex items-start gap-3 p-3 rounded-lg transition-colors group ${
+                    isVencida ? "bg-red-500/10 border border-red-500/20" :
+                    isHoje ? "bg-yellow-500/10 border border-yellow-500/20" :
+                    "bg-slate-600/20 hover:bg-slate-600/40"
+                  }`}
                 >
-                  {/* Checkbox */}
                   <input
                     type="checkbox"
                     checked={false}
                     onChange={() => toggleTarefa(tarefa.id, "completed")}
                     className="mt-1 w-5 h-5 rounded border border-slate-500 bg-slate-700 cursor-pointer accent-green-500"
                   />
-
-                  {/* Texto + Data */}
                   <div className="flex-1 min-w-0">
                     <p className="text-white text-sm break-words">{tarefa.texto}</p>
-                    {tarefa.data_vencimento && (
-                      <div className="flex items-center gap-1 mt-1">
-                        {vencida ? (
-                          <>
-                            <AlertCircle className="w-3 h-3 text-red-400" />
-                            <span className="text-xs text-red-400">{formatarData(tarefa.data_vencimento)}</span>
-                          </>
-                        ) : (
-                          <span className="text-xs text-slate-400">{formatarData(tarefa.data_vencimento)}</span>
-                        )}
-                      </div>
-                    )}
+                    {renderBadgeData(tarefa.data_vencimento)}
                   </div>
-
-                  {/* Botão Deletar */}
                   <button
                     onClick={() => deletarTarefa(tarefa.id)}
                     className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-red-500/20"
@@ -226,7 +237,6 @@ export default function PendenciasSection({ mentoradoId, mentorId }: PendenciasS
           )}
         </div>
 
-        {/* FORM NOVA TAREFA */}
         <form onSubmit={criarTarefa} className="flex flex-col gap-2 pt-3 border-t border-slate-600/30">
           <input
             type="text"
@@ -235,7 +245,6 @@ export default function PendenciasSection({ mentoradoId, mentorId }: PendenciasS
             onChange={(e) => setNovoTexto(e.target.value)}
             className="w-full px-3 py-2 rounded bg-slate-700/50 border border-slate-600/30 text-white placeholder-slate-500 focus:outline-none focus:border-slate-500 transition-colors text-sm"
           />
-
           <div className="flex gap-2">
             <input
               type="date"
@@ -255,7 +264,7 @@ export default function PendenciasSection({ mentoradoId, mentorId }: PendenciasS
         </form>
       </div>
 
-      {/* SEÇÃO DE COMPLETADAS */}
+      {/* COMPLETADAS */}
       {tarefasCompleted.length > 0 && (
         <div className="rounded-lg bg-slate-700/20 border border-slate-600/20 backdrop-blur-md overflow-hidden">
           <button
@@ -269,9 +278,7 @@ export default function PendenciasSection({ mentoradoId, mentorId }: PendenciasS
                 {tarefasCompleted.length}
               </span>
             </div>
-            <ChevronDown
-              className={`w-4 h-4 text-green-400 transition-transform ${expandedCompleted ? "rotate-180" : ""}`}
-            />
+            <ChevronDown className={`w-4 h-4 text-green-400 transition-transform ${expandedCompleted ? "rotate-180" : ""}`} />
           </button>
 
           {expandedCompleted && (
@@ -287,16 +294,14 @@ export default function PendenciasSection({ mentoradoId, mentorId }: PendenciasS
                     onChange={() => toggleTarefa(tarefa.id, "pending")}
                     className="mt-1 w-5 h-5 rounded border border-slate-500 bg-slate-700 cursor-pointer accent-green-500"
                   />
-
                   <div className="flex-1 min-w-0">
                     <p className="text-slate-400 text-sm line-through break-words">{tarefa.texto}</p>
                     {tarefa.data_completada && (
                       <p className="text-xs text-slate-500 mt-1">
-                        ✓ Concluída em {new Date(tarefa.data_completada).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                        ✓ Concluída {new Date(tarefa.data_completada).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
                       </p>
                     )}
                   </div>
-
                   <button
                     onClick={() => deletarTarefa(tarefa.id)}
                     className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-red-500/20"

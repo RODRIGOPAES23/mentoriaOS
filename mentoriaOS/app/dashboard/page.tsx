@@ -2,10 +2,15 @@
 
 import { useEffect, useState, useCallback, useRef } from "react"
 import { createPortal } from "react-dom"
-import { Search, Bell, TrendingUp, TrendingDown, Minus, Target, BarChart3, Zap, CheckCircle2, AlertCircle, Clock, Link2, Copy, Check, UserPlus, X, RefreshCw, Edit2, Trash2, LogOut, User, History, ChevronRight, Calendar, Briefcase, BookOpen } from "lucide-react"
+import { Search, Bell, TrendingUp, TrendingDown, Minus, Target, BarChart3, Zap, CheckCircle2, AlertCircle, Clock, Link2, Copy, Check, UserPlus, X, RefreshCw, Edit2, Trash2, LogOut, User, History, ChevronRight, Calendar, Briefcase, BookOpen, GripVertical, DollarSign, Phone, MapPin, Filter } from "lucide-react"
 import type { CheckinRow } from "@/lib/supabase"
 import PendenciasSection from "@/components/PendenciasSection"
+import FinanceiroSection from "@/components/FinanceiroSection"
+import AnalisarCallModal from "@/components/AnalisarCallModal"
 import { getRealtimeClient } from "@/lib/supabase-realtime"
+import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core"
+import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from "@dnd-kit/sortable"
+import { CSS } from "@dnd-kit/utilities"
 
 interface Mentorado {
   id: string
@@ -14,7 +19,12 @@ interface Mentorado {
   status: string
   foco_macro: string
   data_inicio: string
+  data_fim?: string
+  cidade?: string
+  faturamento_atual?: number
+  meta_faturamento?: number
   foto_url?: string
+  ordem?: number
 }
 
 interface BriefingIA {
@@ -93,6 +103,61 @@ function Trend({ pct }: { pct: number | null }) {
   )
 }
 
+// ── Componente sortável de mentorado (dnd-kit) ───────────────────────────────
+function SortableMentorado({ m, selectedId, sidebarOpen, onClick }: {
+  m: Mentorado; selectedId: string; sidebarOpen: boolean; onClick: () => void
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: m.id })
+  const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 }
+
+  return (
+    <div ref={setNodeRef} style={style} className={`group relative rounded-lg transition-all duration-200 flex items-center gap-3 ${sidebarOpen ? "w-full p-3" : "p-2"} ${
+      selectedId === m.id
+        ? "bg-gradient-to-r from-blue-600/30 to-blue-500/20 border border-blue-500/40 shadow-lg shadow-blue-500/10"
+        : "bg-slate-800/30 border border-slate-700/30 hover:bg-slate-800/50 hover:border-slate-600/50"
+    }`}>
+      {/* Handle de drag */}
+      {sidebarOpen && (
+        <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing p-0.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+          <GripVertical className="w-3.5 h-3.5 text-slate-500" />
+        </div>
+      )}
+      {/* Avatar clicável */}
+      <button onClick={onClick} className="flex items-center gap-3 flex-1 min-w-0 text-left" title={!sidebarOpen ? m.nome : undefined}>
+        <div className={`rounded-full overflow-hidden flex-shrink-0 ${sidebarOpen ? "w-9 h-9" : "w-8 h-8"}`}>
+          {m.foto_url ? (
+            <img src={m.foto_url} alt={m.nome} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center text-xs font-bold text-white">
+              {m.nome.split(" ").map((n: string) => n[0]).join("").slice(0, 2)}
+            </div>
+          )}
+        </div>
+        {sidebarOpen && (
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-white truncate">{m.nome}</p>
+            <p className="text-[10px] text-slate-400 truncate">{m.cidade ? `${m.cidade} · ` : ""}{m.nicho}</p>
+          </div>
+        )}
+      </button>
+      {sidebarOpen && (
+        <div className={`w-2 h-2 rounded-full flex-shrink-0 ${m.status === "Ativo" ? "bg-emerald-400 shadow-lg shadow-emerald-400/50" : "bg-slate-500"}`} />
+      )}
+    </div>
+  )
+}
+
+// ── Contagem regressiva de dias ───────────────────────────────────────────────
+function CountdownDias({ dataFim }: { dataFim: string }) {
+  const hoje = new Date(); hoje.setHours(0, 0, 0, 0)
+  const [y, m, d] = dataFim.split("T")[0].split("-").map(Number)
+  const fim = new Date(y, m - 1, d)
+  const diff = Math.ceil((fim.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24))
+  if (diff < 0) return <span className="text-xs text-red-400 font-bold">Encerrada há {Math.abs(diff)} dias</span>
+  const cor = diff <= 30 ? "text-red-400" : diff <= 90 ? "text-amber-400" : "text-emerald-400"
+  return <span className={`text-xs font-bold ${cor}`}>{diff} dias restantes</span>
+}
+
 export default function DashboardPage() {
   const [mentorados, setMentorados] = useState<Mentorado[]>([])
   const [selectedId, setSelectedId] = useState<string>("")
@@ -116,7 +181,7 @@ export default function DashboardPage() {
   const [selectedMetric, setSelectedMetric] = useState<"leads" | "vendas" | "investimento" | null>(null)
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [showEditModal, setShowEditModal] = useState(false)
-  const [editData, setEditData] = useState({ nome: "", nicho: "", foco_macro: "", status: "Ativo" })
+  const [editData, setEditData] = useState({ nome: "", nicho: "", foco_macro: "", status: "Ativo", cidade: "", data_fim: "", faturamento_atual: "", meta_faturamento: "" })
   const [editando, setEditando] = useState(false)
   const [mentorId, setMentorId] = useState<string | null>(null)
   const [mentorDados, setMentorDados] = useState<{id?: string, nome: string, metodo_trabalho?: string, filosofia?: string, nicho_foco?: string, foto_url?: string} | null>(null)
@@ -127,6 +192,11 @@ export default function DashboardPage() {
   const [perfilEdit, setPerfilEdit] = useState({ nome: "", nicho_foco: "", metodo_trabalho: "", filosofia: "" })
   const [salvandoPerfil, setSalvandoPerfil] = useState(false)
   const [uploadingFoto, setUploadingFoto] = useState<string | null>(null)
+  const [showAnalisarCall, setShowAnalisarCall] = useState(false)
+  const [activeTab, setActiveTab] = useState<"pendencias" | "financeiro" | "calls">("pendencias")
+  const [filtroSidebar, setFiltroSidebar] = useState("")
+  const [tarefasVencidas, setTarefasVencidas] = useState(0)
+  const dndSensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))
   const menuPerfilRef = useRef<HTMLDivElement>(null)
 
   // Proteger dashboard: se não tiver mentor selecionado, redirecionar para home
@@ -178,6 +248,47 @@ export default function DashboardPage() {
       setUploadingFoto(null)
     }
   }, [])
+
+  // Drag & drop: reordena e persiste no banco
+  const handleDragEnd = useCallback(async (event: DragEndEvent) => {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+    setMentorados(prev => {
+      const oldIndex = prev.findIndex(m => m.id === active.id)
+      const newIndex = prev.findIndex(m => m.id === over.id)
+      const reordenado = arrayMove(prev, oldIndex, newIndex)
+      // Persistir ordem no banco
+      fetch("/api/dashboard/mentorados/reorder", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: reordenado.map((m, i) => ({ id: m.id, ordem: i })) }),
+      }).catch(() => {})
+      return reordenado
+    })
+  }, [])
+
+  // Contar tarefas vencidas de todos os mentorados (badge de notificação)
+  useEffect(() => {
+    if (!mentorId || mentorados.length === 0) return
+    const hoje = new Date(); hoje.setHours(0, 0, 0, 0)
+    let total = 0
+    Promise.all(
+      mentorados.map(m =>
+        fetch(`/api/dashboard/tarefas?mentoradoId=${m.id}&status=pending`)
+          .then(r => r.json())
+          .then(j => {
+            const vencidas = (j.tarefas || []).filter((t: any) => {
+              if (!t.data_vencimento) return false
+              const [y, mo, d] = t.data_vencimento.split("T")[0].split("-").map(Number)
+              const data = new Date(y, mo - 1, d)
+              return data < hoje
+            })
+            return vencidas.length
+          })
+          .catch(() => 0)
+      )
+    ).then(counts => setTarefasVencidas(counts.reduce((a, b) => a + b, 0)))
+  }, [mentorados, mentorId])
 
   // Salvar perfil do mentor
   const salvarPerfil = useCallback(async () => {
@@ -707,46 +818,49 @@ export default function DashboardPage() {
           </button>
         </div>
 
-        {/* Mentorados List */}
+        {/* Mentorados List com Drag & Drop */}
         <div className={`flex-1 overflow-y-auto transition-all duration-300 ${sidebarOpen ? "px-3 space-y-1.5" : "px-2 space-y-2 flex flex-col items-center"}`}>
           {sidebarOpen && (
-            <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest px-2 mt-4 mb-3">Mentorados Ativos</p>
-          )}
-          {filtered.map((m) => (
-            <button
-              key={m.id}
-              onClick={() => setSelectedId(m.id)}
-              className={`group relative rounded-lg transition-all duration-200 flex items-center gap-3 ${
-                sidebarOpen ? "w-full p-3" : "p-2"
-              } ${
-                selectedId === m.id
-                  ? "bg-gradient-to-r from-blue-600/30 to-blue-500/20 border border-blue-500/40 shadow-lg shadow-blue-500/10"
-                  : "bg-slate-800/30 border border-slate-700/30 hover:bg-slate-800/50 hover:border-slate-600/50"
-              }`}
-              title={!sidebarOpen ? m.nome : undefined}
-            >
-              <div className={`rounded-full overflow-hidden flex-shrink-0 ${sidebarOpen ? "w-10 h-10" : "w-8 h-8"}`}>
-                {m.foto_url ? (
-                  <img src={m.foto_url} alt={m.nome} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center text-xs font-bold">
-                    {m.nome.split(" ").map((n: string) => n[0]).join("")}
-                  </div>
-                )}
-              </div>
-              {sidebarOpen && (
-                <>
-                  <div className="flex-1 min-w-0 text-left">
-                    <p className="text-sm font-semibold text-white truncate">{m.nome}</p>
-                    <p className="text-[10px] text-slate-400 truncate">{m.nicho}</p>
-                  </div>
-                  <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${
-                    m.status === "Ativo" ? "bg-emerald-400 shadow-lg shadow-emerald-400/50" : "bg-slate-500"
-                  }`} />
-                </>
+            <div className="flex items-center justify-between px-2 mt-4 mb-2">
+              <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest">
+                Mentorados Ativos ({filtered.length})
+              </p>
+              {tarefasVencidas > 0 && (
+                <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/20 border border-red-500/30 text-[10px] font-bold text-red-400">
+                  <AlertCircle className="w-3 h-3" /> {tarefasVencidas} vencida{tarefasVencidas > 1 ? "s" : ""}
+                </span>
               )}
-            </button>
-          ))}
+            </div>
+          )}
+          {/* Filtro rápido */}
+          {sidebarOpen && (
+            <div className="relative mb-2">
+              <Filter className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-500" />
+              <input
+                type="text"
+                placeholder="Filtrar por cidade, nicho..."
+                value={filtroSidebar}
+                onChange={e => setFiltroSidebar(e.target.value)}
+                className="w-full pl-7 pr-3 py-1.5 bg-slate-800/40 border border-slate-700/30 rounded-lg text-xs text-white placeholder-slate-500 focus:outline-none focus:border-slate-500"
+              />
+            </div>
+          )}
+
+          <DndContext sensors={dndSensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={filtered.map(m => m.id)} strategy={verticalListSortingStrategy}>
+              {filtered
+                .filter(m => !filtroSidebar || m.nome.toLowerCase().includes(filtroSidebar.toLowerCase()) || m.nicho?.toLowerCase().includes(filtroSidebar.toLowerCase()) || m.cidade?.toLowerCase().includes(filtroSidebar.toLowerCase()))
+                .map((m) => (
+                <SortableMentorado
+                  key={m.id}
+                  m={m}
+                  selectedId={selectedId}
+                  sidebarOpen={sidebarOpen}
+                  onClick={() => setSelectedId(m.id)}
+                />
+              ))}
+            </SortableContext>
+          </DndContext>
         </div>
 
         {/* Footer */}
@@ -814,10 +928,32 @@ export default function DashboardPage() {
                         {selected.nome}
                         <span className="text-slate-400 text-sm font-normal ml-2">({selected.nicho})</span>
                       </h1>
-                      <div className="flex gap-4 text-sm text-slate-400">
+                      <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-400">
                         <span>📅 Início: <span className="text-slate-300">{selected.data_inicio}</span></span>
+                        {selected.data_fim && (
+                          <span>🏁 Término: <span className="text-slate-300">{selected.data_fim}</span>
+                            {" · "}<CountdownDias dataFim={selected.data_fim} />
+                          </span>
+                        )}
+                        {selected.cidade && (
+                          <span>📍 <span className="text-slate-300">{selected.cidade}</span></span>
+                        )}
                         <span>🎯 Foco: <span className="text-slate-300">{selected.foco_macro}</span></span>
                       </div>
+                      {(selected.faturamento_atual || selected.meta_faturamento) && (
+                        <div className="flex gap-4 mt-2">
+                          {selected.faturamento_atual && (
+                            <span className="text-xs text-slate-400">
+                              💰 Faturamento atual: <span className="text-emerald-400 font-bold">R$ {Number(selected.faturamento_atual).toLocaleString("pt-BR")}</span>
+                            </span>
+                          )}
+                          {selected.meta_faturamento && (
+                            <span className="text-xs text-slate-400">
+                              🚀 Meta 12m: <span className="text-blue-400 font-bold">R$ {Number(selected.meta_faturamento).toLocaleString("pt-BR")}</span>
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
                     <div className="flex flex-col items-end gap-2">
                       <span className="px-4 py-1.5 bg-gradient-to-r from-emerald-500/20 to-emerald-500/10 border border-emerald-500/40 text-emerald-300 text-xs font-bold rounded-full shadow-lg shadow-emerald-500/10">
@@ -842,8 +978,49 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                {/* ── PENDÊNCIAS DO MENTORADO ── */}
-                <PendenciasSection key={selectedId} mentoradoId={selectedId} mentorId={mentorId} />
+                {/* ── TABS: PENDÊNCIAS / FINANCEIRO / CALLS ── */}
+                <div className="mb-1">
+                  {/* Tab header */}
+                  <div className="flex items-center gap-1 bg-slate-800/40 rounded-xl p-1 mb-4">
+                    <button onClick={() => setActiveTab("pendencias")}
+                      className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition-all ${activeTab === "pendencias" ? "bg-amber-500/20 text-amber-400 border border-amber-500/30" : "text-slate-400 hover:text-white"}`}>
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      Pendências
+                      {tarefasVencidas > 0 && <span className="w-4 h-4 bg-red-500 rounded-full text-white text-[9px] flex items-center justify-center">{tarefasVencidas}</span>}
+                    </button>
+                    <button onClick={() => setActiveTab("financeiro")}
+                      className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition-all ${activeTab === "financeiro" ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : "text-slate-400 hover:text-white"}`}>
+                      <DollarSign className="w-3.5 h-3.5" /> Financeiro
+                    </button>
+                    <button onClick={() => setActiveTab("calls")}
+                      className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition-all ${activeTab === "calls" ? "bg-purple-500/20 text-purple-400 border border-purple-500/30" : "text-slate-400 hover:text-white"}`}>
+                      <Phone className="w-3.5 h-3.5" /> Análise de Call
+                    </button>
+                  </div>
+
+                  {/* Tab content */}
+                  {activeTab === "pendencias" && (
+                    <PendenciasSection key={selectedId} mentoradoId={selectedId} mentorId={mentorId} />
+                  )}
+                  {activeTab === "financeiro" && (
+                    <FinanceiroSection key={selectedId} mentoradoId={selectedId} mentorId={mentorId} />
+                  )}
+                  {activeTab === "calls" && (
+                    <div className="mb-6 rounded-lg bg-gradient-to-br from-slate-700/40 to-slate-800/40 border border-slate-600/30 p-5">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-1 h-6 bg-gradient-to-b from-purple-400 to-violet-600 rounded-full" />
+                          <h3 className="text-lg font-semibold text-white">Análise de Call</h3>
+                        </div>
+                        <button onClick={() => setShowAnalisarCall(true)}
+                          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white text-sm font-bold transition-all shadow-lg">
+                          <Zap className="w-4 h-4" /> Analisar Nova Call
+                        </button>
+                      </div>
+                      <p className="text-slate-400 text-sm">Cole a transcrição de uma call (Fathom, Zoom, Meet) e a IA extrai automaticamente as tarefas da mentorada e os compromissos da sua equipe.</p>
+                    </div>
+                  )}
+                </div>
 
                 {/* ── MÉTRICAS GRID 3 COLUNAS ── */}
                 <div>
@@ -1036,6 +1213,17 @@ export default function DashboardPage() {
         </div>
       </main>
 
+      {/* ── MODAL: ANALISAR CALL ── */}
+      {showAnalisarCall && selected && mentorId && (
+        <AnalisarCallModal
+          mentoradoId={selected.id}
+          mentorId={mentorId}
+          nomeMentorado={selected.nome}
+          onClose={() => setShowAnalisarCall(false)}
+          onTarefasCriadas={() => setActiveTab("pendencias")}
+        />
+      )}
+
       {/* ── DROPDOWN MENU PERFIL (Portal — fora do stacking context) ── */}
       {showMenuPerfil && typeof document !== "undefined" && createPortal(
         <div
@@ -1078,7 +1266,7 @@ export default function DashboardPage() {
               <ChevronRight className="w-3.5 h-3.5 text-slate-500" />
             </button>
             <button onClick={() => {
-                if (selected) { setEditData({ nome: selected.nome, nicho: selected.nicho, foco_macro: selected.foco_macro, status: "Ativo" }); setShowEditModal(true) }
+                if (selected) { setEditData({ nome: selected.nome, nicho: selected.nicho, foco_macro: selected.foco_macro, status: "Ativo", cidade: selected.cidade || "", data_fim: selected.data_fim || "", faturamento_atual: selected.faturamento_atual?.toString() || "", meta_faturamento: selected.meta_faturamento?.toString() || "" }); setShowEditModal(true) }
                 setShowMenuPerfil(false)
               }}
               disabled={!selected}
@@ -1472,6 +1660,33 @@ export default function DashboardPage() {
                   className="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/60 transition-colors"
                   placeholder="Foco principal"
                 />
+              </div>
+
+              {/* Novos campos */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Cidade</label>
+                <input value={editData.cidade} onChange={e => setEditData({ ...editData, cidade: e.target.value })}
+                  className="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/60 transition-colors"
+                  placeholder="Ex: São Paulo - SP" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Término da Mentoria</label>
+                <input type="date" value={editData.data_fim} onChange={e => setEditData({ ...editData, data_fim: e.target.value })}
+                  className="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500/60 transition-colors" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Faturamento Atual (R$)</label>
+                  <input type="number" value={editData.faturamento_atual} onChange={e => setEditData({ ...editData, faturamento_atual: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/60 transition-colors"
+                    placeholder="8000" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Meta 12 Meses (R$)</label>
+                  <input type="number" value={editData.meta_faturamento} onChange={e => setEditData({ ...editData, meta_faturamento: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/60 transition-colors"
+                    placeholder="50000" />
+                </div>
               </div>
 
               <div className="flex gap-3 pt-2">

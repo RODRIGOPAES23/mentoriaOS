@@ -45,15 +45,20 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   }
 
   try {
+    const update: any = {
+      nome: body.nome,
+      nicho: body.nicho,
+      foco_macro: body.foco_macro,
+      status: body.status,
+    }
+    if (body.cidade !== undefined) update.cidade = body.cidade || null
+    if (body.data_fim !== undefined) update.data_fim = body.data_fim || null
+    if (body.faturamento_atual !== undefined) update.faturamento_atual = body.faturamento_atual ? Number(body.faturamento_atual) : null
+    if (body.meta_faturamento !== undefined) update.meta_faturamento = body.meta_faturamento ? Number(body.meta_faturamento) : null
+
     const { data, error } = await supabase
       .from("mentorados")
-      .update({
-        nome: body.nome,
-        nicho: body.nicho,
-        foco_macro: body.foco_macro,
-        status: body.status,
-        updated_at: new Date().toISOString(),
-      })
+      .update(update)
       .eq("id", params.id)
       .select()
       .single()

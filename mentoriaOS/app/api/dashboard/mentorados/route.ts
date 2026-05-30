@@ -15,12 +15,12 @@ export async function GET(request: Request) {
 
   let query = supabase
     .from("mentorados")
-    .select("id, nome, nicho, status, foco_macro, data_inicio, foto_url")
+    .select("id, nome, nicho, status, foco_macro, data_inicio, data_fim, cidade, faturamento_atual, meta_faturamento, foto_url, ordem")
     .eq("status", "Ativo")
 
   if (mentorId) query = query.eq("mentor_id", mentorId)
 
-  const { data, error } = await query.order("nome")
+  const { data, error } = await query.order("ordem", { ascending: true }).order("nome")
   if (error) return Response.json({ error: error.message }, { status: 500, headers: NO_CACHE })
 
   const { data: checkRows } = await supabase.from("checkins").select("mentorado_id")
