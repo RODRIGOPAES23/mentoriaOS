@@ -215,6 +215,7 @@ export default function DashboardPage() {
   const [tarefasVencidas, setTarefasVencidas] = useState(0)
   // CKlareza v5 — estado de navegação
   const [ckView, setCkView] = useState<CkView>("visao-geral")
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [overviewData, setOverviewData] = useState<any>(null)
   const [overviewLoading, setOverviewLoading] = useState(false)
   const [showSessaoModal, setShowSessaoModal] = useState(false)
@@ -454,6 +455,8 @@ export default function DashboardPage() {
       <Sidebar
         active={ckView}
         onChange={setCkView}
+        collapsed={sidebarCollapsed}
+        onToggle={() => setSidebarCollapsed(c => !c)}
         onLogout={() => { localStorage.removeItem("mentorSelecionado"); window.location.href = "/" }}
       />
 
