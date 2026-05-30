@@ -55,6 +55,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     if (body.data_fim !== undefined) update.data_fim = body.data_fim || null
     if (body.faturamento_atual !== undefined) update.faturamento_atual = body.faturamento_atual ? Number(body.faturamento_atual) : null
     if (body.meta_faturamento !== undefined) update.meta_faturamento = body.meta_faturamento ? Number(body.meta_faturamento) : null
+    if (body.meta_atual !== undefined) update.meta_atual = body.meta_atual || null
 
     const { data, error } = await supabase
       .from("mentorados")

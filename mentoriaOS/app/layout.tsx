@@ -1,9 +1,12 @@
 import type { Metadata } from "next"
+import { Inter } from "next/font/google"
 import "./globals.css"
 
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" })
+
 export const metadata: Metadata = {
-  title: "mentoriaOS | Sistema Operacional de Mentoria",
-  description: "Centralizar jornada de mentorados, eliminar contexto perdido, gerar pautas de call ultra-precisas.",
+  title: "CKlareza | Plataforma de Mentoria Inteligente",
+  description: "Clareza total na jornada de cada mentorado. Sessões, metas e insights de IA num só lugar.",
   viewport: "width=device-width, initial-scale=1",
 }
 
@@ -13,11 +16,11 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="pt-BR" suppressHydrationWarning>
+    <html lang="pt-BR" suppressHydrationWarning className={inter.variable}>
       <head>
         <meta name="theme-color" content="#0f172a" />
       </head>
-      <body className="bg-primary text-white">
+      <body className="bg-slate-50 text-slate-900 antialiased">
         {children}
       </body>
     </html>

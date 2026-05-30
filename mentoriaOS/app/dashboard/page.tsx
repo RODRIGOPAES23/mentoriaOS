@@ -2,7 +2,12 @@
 
 import { useEffect, useState, useCallback, useRef } from "react"
 import { createPortal } from "react-dom"
-import { Search, Bell, TrendingUp, TrendingDown, Minus, Target, BarChart3, Zap, CheckCircle2, AlertCircle, Clock, Link2, Copy, Check, UserPlus, X, RefreshCw, Edit2, Trash2, LogOut, User, History, ChevronRight, Calendar, Briefcase, BookOpen, GripVertical, DollarSign, Phone, MapPin, Filter } from "lucide-react"
+import {
+  Search, Bell, TrendingUp, TrendingDown, Minus, Target, BarChart3, Zap, CheckCircle2,
+  AlertCircle, Clock, Link2, Copy, Check, UserPlus, X, RefreshCw, Edit2, Trash2,
+  LogOut, User, History, ChevronRight, Calendar, Briefcase, BookOpen, GripVertical,
+  DollarSign, Phone, MapPin, Filter, ChevronDown, Sparkles, Settings
+} from "lucide-react"
 import type { CheckinRow } from "@/lib/supabase"
 import PendenciasSection from "@/components/PendenciasSection"
 import FinanceiroSection from "@/components/FinanceiroSection"
@@ -11,154 +16,170 @@ import { getRealtimeClient } from "@/lib/supabase-realtime"
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core"
 import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
+import Sidebar, { CkView } from "@/components/ck/Sidebar"
+import VisaoGeral from "@/components/ck/VisaoGeral"
+import SessaoModal from "@/components/ck/SessaoModal"
 
+// ── INTERFACES ────────────────────────────────────────────────────────────────
 interface Mentorado {
-  id: string
-  nome: string
-  nicho: string
-  status: string
-  foco_macro: string
-  data_inicio: string
-  data_fim?: string
-  cidade?: string
-  faturamento_atual?: number
-  meta_faturamento?: number
-  foto_url?: string
-  ordem?: number
+  id: string; nome: string; nicho: string; status: string; foco_macro: string
+  data_inicio: string; data_fim?: string; cidade?: string
+  faturamento_atual?: number; meta_faturamento?: number; meta_atual?: string
+  foto_url?: string; ordem?: number
 }
+interface BriefingIA { diagnostico: string; evolucao?: string; pauta: string[] }
 
-interface BriefingIA {
-  diagnostico: string
-  evolucao?: string
-  pauta: string[]
-}
-
-// Calcula variação % entre a semana atual e a anterior (do histórico real).
-function variacao(historicoDesc: CheckinRow[], campo: keyof CheckinRow): number | null {
-  if (!historicoDesc || historicoDesc.length < 2) return null
-  const atual = Number(historicoDesc[0][campo]) || 0
-  const anterior = Number(historicoDesc[1][campo]) || 0
+function variacao(historico: CheckinRow[], campo: keyof CheckinRow): number | null {
+  if (!historico || historico.length < 2) return null
+  const atual = Number(historico[0][campo]) || 0
+  const anterior = Number(historico[1][campo]) || 0
   if (anterior === 0) return atual > 0 ? 100 : null
   return ((atual - anterior) / anterior) * 100
 }
-
 function gerarBriefing(m: Mentorado, c: CheckinRow): BriefingIA {
-  const conversao = c.vendas_reais / (c.leads_gerados || 1)
+  const conv = c.vendas_reais / (c.leads_gerados || 1)
   const roi = ((c.vendas_reais - c.investimento_trafego) / (c.investimento_trafego || 1)) * 100
-
   return {
-    diagnostico: `Volume de leads ${c.leads_gerados > 300 ? "positivo" : "abaixo do esperado"} (${c.leads_gerados} leads), mas a conversão comercial está em R$${conversao.toFixed(0)}/lead. ROI de ${roi.toFixed(0)}%. Foco em: ${m.foco_macro}.`,
+    diagnostico: `Volume de leads ${c.leads_gerados > 300 ? "positivo" : "abaixo do esperado"} (${c.leads_gerados} leads), conversão em R$${conv.toFixed(0)}/lead. ROI de ${roi.toFixed(0)}%. Foco: ${m.foco_macro}.`,
     pauta: [
-      `Auditar os últimos 5 atendimentos comerciais (0-10m)`,
-      `Revisar script e alinhar criativos com o nicho "${m.nicho}" (10-25m)`,
-      `Definir meta de conversão e próximos KPIs para destravar crescimento (25-30m)`,
-    ],
+      `Revisar as ${c.leads_gerados} captações e identificar os 20% com maior potencial de conversão`,
+      `Analisar os R$${c.investimento_trafego.toLocaleString()} de investimento — ROAS atual de ${(c.vendas_reais / (c.investimento_trafego || 1)).toFixed(1)}x`,
+      `${c.videos_postados} vídeos postados — estratégia de conteúdo que está gerando mais leads`,
+    ]
   }
 }
 
-// Sparkline real: desenha a série histórica (cronológica) escalada ao card.
-function Sparkline({ valores }: { valores: number[] }) {
-  if (!valores || valores.length === 0) {
-    return <svg width="60" height="30" viewBox="0 0 60 30" className="w-full h-auto" />
-  }
-  // Uma só semana: linha plana neutra.
-  if (valores.length === 1) {
-    return (
-      <svg width="60" height="30" viewBox="0 0 60 30" className="w-full h-auto">
-        <polyline points="0,15 60,15" fill="none" stroke="#9ca3af" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
-      </svg>
-    )
-  }
-  const min = Math.min(...valores)
-  const max = Math.max(...valores)
-  const span = max - min || 1
-  const W = 60
-  const H = 30
-  const pad = 3
-  const pts = valores.map((v, i) => {
-    const x = (i / (valores.length - 1)) * W
-    const y = H - pad - ((v - min) / span) * (H - pad * 2)
-    return `${x.toFixed(1)},${y.toFixed(1)}`
-  })
-  const subindo = valores[valores.length - 1] >= valores[0]
-  const cor = subindo ? "#10b981" : "#ef4444"
+// ── BADGE VARIAÇÃO ────────────────────────────────────────────────────────────
+function BadgeVariacao({ pct }: { pct: number | null }) {
+  if (pct === null) return null
+  const seta = pct > 0 ? "↑" : pct < 0 ? "↓" : "→"
+  const cor = pct > 0 ? "text-teal-600 bg-teal-50" : pct < 0 ? "text-red-500 bg-red-50" : "text-slate-400 bg-slate-100"
   return (
-    <svg width="60" height="30" viewBox="0 0 60 30" className="w-full h-auto">
-      <polyline points={pts.join(" ")} fill="none" stroke={cor} strokeWidth="1.5" vectorEffect="non-scaling-stroke" strokeLinejoin="round" strokeLinecap="round" />
-    </svg>
+    <span className={`inline-flex items-center gap-0.5 text-[11px] font-bold px-2 py-0.5 rounded-full ${cor}`}>
+      {seta} {pct > 0 ? "+" : ""}{pct.toFixed(0)}%
+    </span>
   )
 }
 
-// Badge de tendência (% vs semana anterior) com cor e seta.
-function Trend({ pct }: { pct: number | null }) {
-  if (pct === null) return <p className="text-xs text-slate-500 mt-1">1ª semana</p>
-  const up = pct > 0.5
-  const down = pct < -0.5
-  const cor = up ? "text-emerald-400" : down ? "text-red-400" : "text-slate-400"
-  const seta = up ? "↑" : down ? "↓" : "—"
-  return (
-    <p className={`text-xs font-semibold mt-1 ${cor}`}>
-      {seta} {pct > 0 ? "+" : ""}{pct.toFixed(0)}% vs sem.ant
-    </p>
-  )
-}
-
-// ── Componente sortável de mentorado (dnd-kit) ───────────────────────────────
-function SortableMentorado({ m, selectedId, sidebarOpen, onClick }: {
-  m: Mentorado; selectedId: string; sidebarOpen: boolean; onClick: () => void
+// ── SORTABLE MENTORADO ────────────────────────────────────────────────────────
+function SortableMentoradoItem({ m, selectedId, onClick }: {
+  m: Mentorado; selectedId: string; onClick: () => void
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: m.id })
-  const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 }
+  const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.4 : 1 }
+  const isSelected = selectedId === m.id
+  const ini = m.nome.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()
 
   return (
-    <div ref={setNodeRef} style={style} className={`group relative rounded-lg transition-all duration-200 flex items-center gap-3 ${sidebarOpen ? "w-full p-3" : "p-2"} ${
-      selectedId === m.id
-        ? "bg-gradient-to-r from-blue-600/30 to-blue-500/20 border border-blue-500/40 shadow-lg shadow-blue-500/10"
-        : "bg-slate-800/30 border border-slate-700/30 hover:bg-slate-800/50 hover:border-slate-600/50"
-    }`}>
-      {/* Handle de drag */}
-      {sidebarOpen && (
-        <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing p-0.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-          <GripVertical className="w-3.5 h-3.5 text-slate-500" />
-        </div>
-      )}
-      {/* Avatar clicável */}
-      <button onClick={onClick} className="flex items-center gap-3 flex-1 min-w-0 text-left" title={!sidebarOpen ? m.nome : undefined}>
-        <div className={`rounded-full overflow-hidden flex-shrink-0 ${sidebarOpen ? "w-9 h-9" : "w-8 h-8"}`}>
-          {m.foto_url ? (
-            <img src={m.foto_url} alt={m.nome} className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center text-xs font-bold text-white">
-              {m.nome.split(" ").map((n: string) => n[0]).join("").slice(0, 2)}
-            </div>
-          )}
-        </div>
-        {sidebarOpen && (
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-white truncate">{m.nome}</p>
-            <p className="text-[10px] text-slate-400 truncate">{m.cidade ? `${m.cidade} · ` : ""}{m.nicho}</p>
-          </div>
-        )}
-      </button>
-      {sidebarOpen && (
-        <div className={`w-2 h-2 rounded-full flex-shrink-0 ${m.status === "Ativo" ? "bg-emerald-400 shadow-lg shadow-emerald-400/50" : "bg-slate-500"}`} />
-      )}
+    <div ref={setNodeRef} style={style}
+      className={`group flex items-center gap-2.5 px-3 py-2.5 rounded-xl cursor-pointer transition-all ${
+        isSelected ? "bg-teal-600 text-white shadow-md shadow-teal-600/20" : "hover:bg-slate-100 text-slate-700"
+      }`}
+      onClick={onClick}
+    >
+      <div {...attributes} {...listeners} className="cursor-grab opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+        <GripVertical className="w-3.5 h-3.5 text-slate-400" />
+      </div>
+      <div className={`w-8 h-8 rounded-full overflow-hidden shrink-0 ring-2 ${isSelected ? "ring-white/30" : "ring-slate-200"}`}>
+        {m.foto_url
+          ? <img src={m.foto_url} alt={m.nome} className="w-full h-full object-cover" />
+          : <div className={`w-full h-full flex items-center justify-center text-xs font-bold ${isSelected ? "bg-white/20 text-white" : "bg-slate-900 text-white"}`}>{ini}</div>}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className={`text-sm font-semibold truncate ${isSelected ? "text-white" : "text-slate-800"}`}>{m.nome}</p>
+        <p className={`text-[10px] truncate ${isSelected ? "text-teal-100" : "text-slate-400"}`}>{m.nicho}</p>
+      </div>
+      <div className={`w-2 h-2 rounded-full shrink-0 ${m.status === "Ativo" ? "bg-teal-400" : "bg-slate-300"}`} />
     </div>
   )
 }
 
-// ── Contagem regressiva de dias ───────────────────────────────────────────────
+// ── COUNTDOWN DIAS ────────────────────────────────────────────────────────────
 function CountdownDias({ dataFim }: { dataFim: string }) {
   const hoje = new Date(); hoje.setHours(0, 0, 0, 0)
-  const [y, m, d] = dataFim.split("T")[0].split("-").map(Number)
-  const fim = new Date(y, m - 1, d)
-  const diff = Math.ceil((fim.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24))
-  if (diff < 0) return <span className="text-xs text-red-400 font-bold">Encerrada há {Math.abs(diff)} dias</span>
-  const cor = diff <= 30 ? "text-red-400" : diff <= 90 ? "text-amber-400" : "text-emerald-400"
-  return <span className={`text-xs font-bold ${cor}`}>{diff} dias restantes</span>
+  const [y, mo, d] = dataFim.split("T")[0].split("-").map(Number)
+  const diff = Math.ceil((new Date(y, mo - 1, d).getTime() - hoje.getTime()) / 86400000)
+  if (diff < 0) return <span className="text-xs text-red-500 font-semibold">Encerrada há {Math.abs(diff)} dias</span>
+  const cor = diff <= 30 ? "text-red-500" : diff <= 90 ? "text-amber-500" : "text-teal-600"
+  return <span className={`text-xs font-semibold ${cor}`}>{diff} dias restantes</span>
 }
 
+// ── CALENDARIO VIEW ────────────────────────────────────────────────────────────
+function CalendarioView({ mentorId, mentorados, onAgendar }: {
+  mentorId: string; mentorados: Mentorado[]; onAgendar: () => void
+}) {
+  const [sessoes, setSessoes] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch(`/api/dashboard/sessoes?mentorId=${mentorId}&proximas=1`)
+      .then(r => r.json()).then(j => { setSessoes(j.sessoes || []); setLoading(false) })
+  }, [mentorId])
+
+  const fmtDH = (iso: string) => {
+    const d = new Date(iso)
+    return d.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" }) + " · " +
+      d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-bold text-slate-900">Calendário de Sessões</h2>
+        <button onClick={onAgendar}
+          className="flex items-center gap-2 px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold rounded-xl transition-colors">
+          <Calendar className="w-4 h-4" /> Nova Sessão
+        </button>
+      </div>
+
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-100">
+          <h3 className="text-sm font-semibold text-slate-900">Próximas sessões agendadas</h3>
+        </div>
+        {loading ? (
+          <div className="p-8 text-center text-slate-400 text-sm">Carregando...</div>
+        ) : sessoes.length === 0 ? (
+          <div className="p-12 text-center">
+            <Calendar className="w-10 h-10 text-slate-200 mx-auto mb-3" />
+            <p className="text-sm text-slate-400">Nenhuma sessão agendada</p>
+            <button onClick={onAgendar} className="mt-4 text-teal-600 text-sm font-semibold hover:underline">
+              Agendar primeira sessão →
+            </button>
+          </div>
+        ) : (
+          <div className="divide-y divide-slate-100">
+            {sessoes.map(s => (
+              <div key={s.id} className="px-6 py-4 flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center shrink-0">
+                  <Calendar className="w-5 h-5 text-teal-600" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-slate-900">{s.mentorado_nome}</p>
+                  <p className="text-xs text-slate-500 mt-0.5 capitalize">{fmtDH(s.data_hora)}</p>
+                </div>
+                {s.titulo && s.titulo !== "Sessão de Mentoria" && (
+                  <span className="hidden sm:block text-xs text-slate-400 bg-slate-50 border border-slate-200 px-2 py-1 rounded-lg">{s.titulo}</span>
+                )}
+                {s.link_call && (
+                  <a href={s.link_call} target="_blank" rel="noreferrer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-teal-600 text-white text-xs font-semibold rounded-lg hover:bg-teal-700 transition-colors">
+                    <Phone className="w-3.5 h-3.5" /> Entrar
+                  </a>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ── PAGE PRINCIPAL ─────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
 export default function DashboardPage() {
+  // ── STATE PRINCIPAL ─────────────────────────────────────────────────────────
   const [mentorados, setMentorados] = useState<Mentorado[]>([])
   const [selectedId, setSelectedId] = useState<string>("")
   const [checkin, setCheckin] = useState<CheckinRow | null>(null)
@@ -167,21 +188,17 @@ export default function DashboardPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [loading, setLoading] = useState(true)
   const [linkCopiado, setLinkCopiado] = useState(false)
-  const [mentorNome, setMentorNome] = useState<string>("S.O. MENTORIA")
+  const [mentorNome, setMentorNome] = useState<string>("CKlareza")
   const [showCadastro, setShowCadastro] = useState(false)
   const [salvando, setSalvando] = useState(false)
   const [novo, setNovo] = useState({ nome: "", nicho: "", foco_macro: "", data_inicio: "" })
   const [atualizando, setAtualizando] = useState(false)
   const [ultimaAtualizacao, setUltimaAtualizacao] = useState<Date | null>(null)
-
   const [briefingLoading, setBriefingLoading] = useState(false)
   const [realtimeStatus, setRealtimeStatus] = useState<"connecting" | "connected" | "error">("connecting")
-  // briefingCache removido — persistência agora é via checkins.briefing_ia no banco
-
   const [selectedMetric, setSelectedMetric] = useState<"leads" | "vendas" | "investimento" | null>(null)
-  const [sidebarOpen, setSidebarOpen] = useState(true)
   const [showEditModal, setShowEditModal] = useState(false)
-  const [editData, setEditData] = useState({ nome: "", nicho: "", foco_macro: "", status: "Ativo", cidade: "", data_fim: "", faturamento_atual: "", meta_faturamento: "" })
+  const [editData, setEditData] = useState({ nome: "", nicho: "", foco_macro: "", status: "Ativo", cidade: "", data_fim: "", faturamento_atual: "", meta_faturamento: "", meta_atual: "" })
   const [editando, setEditando] = useState(false)
   const [mentorId, setMentorId] = useState<string | null>(null)
   const [mentorDados, setMentorDados] = useState<{id?: string, nome: string, metodo_trabalho?: string, filosofia?: string, nicho_foco?: string, foto_url?: string} | null>(null)
@@ -196,1024 +213,614 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState<"pendencias" | "financeiro" | "calls">("pendencias")
   const [filtroSidebar, setFiltroSidebar] = useState("")
   const [tarefasVencidas, setTarefasVencidas] = useState(0)
+  // CKlareza v5 — estado de navegação
+  const [ckView, setCkView] = useState<CkView>("visao-geral")
+  const [overviewData, setOverviewData] = useState<any>(null)
+  const [overviewLoading, setOverviewLoading] = useState(false)
+  const [showSessaoModal, setShowSessaoModal] = useState(false)
+
   const dndSensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))
   const menuPerfilRef = useRef<HTMLDivElement>(null)
 
-  // Proteger dashboard: se não tiver mentor selecionado, redirecionar para home
+  // ── INIT ─────────────────────────────────────────────────────────────────────
   useEffect(() => {
-    const mentorSelecionado = localStorage.getItem("mentorSelecionado")
-    if (!mentorSelecionado) {
-      if (typeof window !== "undefined") {
-        window.location.href = "/"
-      }
-    } else {
-      setMentorId(mentorSelecionado)
-    }
+    const mentorSel = localStorage.getItem("mentorSelecionado")
+    if (!mentorSel) { if (typeof window !== "undefined") window.location.href = "/"; return }
+    setMentorId(mentorSel)
   }, [])
 
-  // Fechar menu ao clicar fora (checa tanto o botão quanto o dropdown)
   useEffect(() => {
     if (!showMenuPerfil) return
-    function handleClickOutside(e: MouseEvent) {
-      const target = e.target as Node
-      // Se clicou no botão do avatar (dentro do menuPerfilRef), ignora
-      if (menuPerfilRef.current && menuPerfilRef.current.contains(target)) return
-      // Qualquer outro clique fecha o menu
+    const handler = (e: MouseEvent) => {
+      if (menuPerfilRef.current && menuPerfilRef.current.contains(e.target as Node)) return
       setShowMenuPerfil(false)
     }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
+    document.addEventListener("mousedown", handler)
+    return () => document.removeEventListener("mousedown", handler)
   }, [showMenuPerfil])
 
-  // Upload de foto (mentor ou mentorado)
+  // ── OVERVIEW DATA ─────────────────────────────────────────────────────────────
+  const carregarOverview = useCallback(async () => {
+    if (!mentorId) return
+    setOverviewLoading(true)
+    try {
+      const r = await fetch(`/api/dashboard/overview?mentorId=${mentorId}&mentoradoId=${selectedId}&t=${Date.now()}`)
+      const j = await r.json()
+      setOverviewData(j)
+    } finally {
+      setOverviewLoading(false)
+    }
+  }, [mentorId, selectedId])
+
+  useEffect(() => {
+    if (mentorId && ckView === "visao-geral") carregarOverview()
+  }, [mentorId, ckView, carregarOverview])
+
+  // ── FOTO UPLOAD ─────────────────────────────────────────────────────────────
   const uploadFoto = useCallback(async (file: File, type: "mentor" | "mentorado", id: string) => {
     setUploadingFoto(id)
     try {
       const form = new FormData()
-      form.append("file", file)
-      form.append("type", type)
-      form.append("id", id)
+      form.append("file", file); form.append("type", type); form.append("id", id)
       const res = await fetch("/api/upload/avatar", { method: "POST", body: form })
       const json = await res.json()
       if (json.url) {
-        if (type === "mentor") {
-          setMentorDados(prev => prev ? { ...prev, foto_url: json.url } : prev)
-        } else {
-          setMentorados(prev => prev.map(m => m.id === id ? { ...m, foto_url: json.url } : m))
-        }
+        if (type === "mentor") setMentorDados(prev => prev ? { ...prev, foto_url: json.url } : prev)
+        else setMentorados(prev => prev.map(m => m.id === id ? { ...m, foto_url: json.url } : m))
       }
-    } catch (e) {
-      console.error("Erro ao fazer upload:", e)
-    } finally {
-      setUploadingFoto(null)
-    }
+    } finally { setUploadingFoto(null) }
   }, [])
 
-  // Drag & drop: reordena e persiste no banco
+  // ── DRAG & DROP ─────────────────────────────────────────────────────────────
   const handleDragEnd = useCallback(async (event: DragEndEvent) => {
     const { active, over } = event
     if (!over || active.id === over.id) return
     setMentorados(prev => {
-      const oldIndex = prev.findIndex(m => m.id === active.id)
-      const newIndex = prev.findIndex(m => m.id === over.id)
-      const reordenado = arrayMove(prev, oldIndex, newIndex)
-      // Persistir ordem no banco
+      const oldIdx = prev.findIndex(m => m.id === active.id)
+      const newIdx = prev.findIndex(m => m.id === over.id)
+      const reordenado = arrayMove(prev, oldIdx, newIdx)
       fetch("/api/dashboard/mentorados/reorder", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        method: "PATCH", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ items: reordenado.map((m, i) => ({ id: m.id, ordem: i })) }),
       }).catch(() => {})
       return reordenado
     })
   }, [])
 
-  // Contar tarefas vencidas de todos os mentorados (badge de notificação)
+  // ── TAREFAS VENCIDAS (badge) ─────────────────────────────────────────────────
   useEffect(() => {
     if (!mentorId || mentorados.length === 0) return
     const hoje = new Date(); hoje.setHours(0, 0, 0, 0)
-    let total = 0
-    Promise.all(
-      mentorados.map(m =>
-        fetch(`/api/dashboard/tarefas?mentoradoId=${m.id}&status=pending`)
-          .then(r => r.json())
-          .then(j => {
-            const vencidas = (j.tarefas || []).filter((t: any) => {
-              if (!t.data_vencimento) return false
-              const [y, mo, d] = t.data_vencimento.split("T")[0].split("-").map(Number)
-              const data = new Date(y, mo - 1, d)
-              return data < hoje
-            })
-            return vencidas.length
-          })
-          .catch(() => 0)
-      )
-    ).then(counts => setTarefasVencidas(counts.reduce((a, b) => a + b, 0)))
+    Promise.all(mentorados.map(m =>
+      fetch(`/api/dashboard/tarefas?mentoradoId=${m.id}&status=pending`)
+        .then(r => r.json()).then(j =>
+          (j.tarefas || []).filter((t: any) => {
+            if (!t.data_vencimento) return false
+            const [y, mo, d] = t.data_vencimento.split("T")[0].split("-").map(Number)
+            return new Date(y, mo - 1, d) < hoje
+          }).length
+        ).catch(() => 0)
+    )).then(cs => setTarefasVencidas(cs.reduce((a, b) => a + b, 0)))
   }, [mentorados, mentorId])
 
-  // Salvar perfil do mentor
+  // ── SALVAR PERFIL MENTOR ─────────────────────────────────────────────────────
   const salvarPerfil = useCallback(async () => {
     if (!mentorId) return
     setSalvandoPerfil(true)
     try {
       const res = await fetch(`/api/mentor/info?mentorId=${mentorId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        method: "PATCH", headers: { "Content-Type": "application/json" },
         body: JSON.stringify(perfilEdit),
       })
-      const json = await res.json()
-      if (json.mentor) {
-        setMentorDados(json.mentor)
-        setMentorNome(json.mentor.nome)
-        setEditandoPerfil(false)
-      }
-    } catch (e) {
-      console.error("Erro ao salvar perfil:", e)
-    } finally {
-      setSalvandoPerfil(false)
-    }
+      if (res.ok) { setEditandoPerfil(false); recarregarMentorados() }
+    } finally { setSalvandoPerfil(false) }
   }, [mentorId, perfilEdit])
 
-  // Buscar checkin mais recente (via API server-side: ignora RLS).
-  // cache:"no-store" + cache-buster garantem dado sempre fresco (sem cache do browser/edge).
-  // Define só o checkin; o briefing IA é gerado por um effect separado (1x por check-in).
-  const buscarCheckin = useCallback(async (mentoradoId: string) => {
+  // ── RELOAD MENTORADOS ─────────────────────────────────────────────────────────
+  const recarregarMentorados = useCallback(async () => {
+    if (!mentorId) return
+    setLoading(true)
     try {
-      const res = await fetch(`/api/dashboard/checkin?mentoradoId=${mentoradoId}&t=${Date.now()}`, {
-        cache: "no-store",
-      })
-      const json = await res.json()
-      setCheckin((json.checkin as CheckinRow | null) ?? null)
-      setHistorico((json.historico as CheckinRow[]) ?? [])
+      const [resM, resMentor] = await Promise.all([
+        fetch(`/api/dashboard/mentorados?mentorId=${mentorId}&t=${Date.now()}`),
+        fetch(`/api/mentor/info?mentorId=${mentorId}&t=${Date.now()}`),
+      ])
+      const [dataM, dataMentor] = await Promise.all([resM.json(), resMentor.json()])
+      const lista: Mentorado[] = dataM.mentorados || []
+      setMentorados(lista)
+      setMentorNome(dataMentor.nome || "CKlareza")
+      setMentorDados(dataMentor)
+      if (lista.length > 0 && !selectedId) setSelectedId(lista[0].id)
       setUltimaAtualizacao(new Date())
-    } catch {
-      setCheckin(null)
-      setHistorico([])
-    }
-  }, [])
+    } finally { setLoading(false) }
+  }, [mentorId, selectedId])
 
-  // Atualização manual / sob demanda do mentorado selecionado
-  const refreshAgora = useCallback(async () => {
+  useEffect(() => { if (mentorId) recarregarMentorados() }, [mentorId])
+
+  // ── CHECKIN + BRIEFING ─────────────────────────────────────────────────────
+  const carregarCheckin = useCallback(async () => {
     if (!selectedId) return
     setAtualizando(true)
-    await buscarCheckin(selectedId)
-    setAtualizando(false)
-  }, [selectedId, buscarCheckin])
-
-  // Carrega lista de mentorados (reutilizável após cadastro)
-  const recarregarMentorados = useCallback(async (selecionarId?: string) => {
     try {
-      // Pegar mentor selecionado do localStorage
-      const mentorId = localStorage.getItem("mentorSelecionado")
-      const params = new URLSearchParams({ t: Date.now().toString() })
-      if (mentorId) {
-        params.append("mentorId", mentorId)
-      }
-
-      const res = await fetch(`/api/dashboard/mentorados?${params}`, { cache: "no-store" })
+      const res = await fetch(`/api/dashboard/checkin?mentoradoId=${selectedId}&t=${Date.now()}`)
       const json = await res.json()
-      const lista = (json.mentorados || []) as Mentorado[]
-      setMentorados(lista)
-      if (lista.length > 0) {
-        setSelectedId(selecionarId && lista.some((m) => m.id === selecionarId) ? selecionarId : lista[0].id)
-      }
-    } catch {
-      // mantém vazio
-    }
-    setLoading(false)
-  }, [])
+      if (json.checkin) {
+        setCheckin(json.checkin)
+        setHistorico(json.historico || [])
+        const selected = mentorados.find(m => m.id === selectedId)
+        if (selected) setBriefing(json.checkin.briefing_ia ?? gerarBriefing(selected, json.checkin))
+      } else { setCheckin(null); setBriefing(null) }
+    } finally { setAtualizando(false) }
+  }, [selectedId, mentorados])
 
-  // Carregar nome do mentor selecionado
+  useEffect(() => { if (selectedId) carregarCheckin() }, [selectedId])
+
+  // ── REALTIME ─────────────────────────────────────────────────────────────────
   useEffect(() => {
-    const carregarMentor = async () => {
-      try {
-        const mentorId = localStorage.getItem("mentorSelecionado")
-        if (!mentorId) return
+    if (!mentorId) return
+    const supabase = getRealtimeClient()
+    const ch = supabase.channel(`checkins-mentor-${mentorId}`)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "checkins" }, () => carregarCheckin())
+      .subscribe((s: string) => setRealtimeStatus(s === "SUBSCRIBED" ? "connected" : s === "CHANNEL_ERROR" ? "error" : "connecting"))
+    return () => { supabase.removeChannel(ch) }
+  }, [mentorId, carregarCheckin])
 
-        const res = await fetch(`/api/mentor/info?mentorId=${mentorId}`, {
-          cache: "no-store",
-        })
-        const json = await res.json()
-        if (json.mentor?.nome) {
-          setMentorNome(json.mentor.nome)
-          setMentorDados(json.mentor)
-        }
-      } catch {
-        // fallback: manter "S.O. MENTORIA"
-      }
-    }
-    carregarMentor()
-  }, [])
-
-  useEffect(() => {
-    recarregarMentorados()
-  }, [recarregarMentorados])
-
-  // Selecionar automaticamente o primeiro mentorado quando a lista carrega
-  useEffect(() => {
-    if (mentorados.length > 0 && !selectedId) {
-      setSelectedId(mentorados[0].id)
-    }
-  }, [mentorados, selectedId])
-
-  // Gerar / copiar link do formulário do mentorado selecionado
-  const copiarLink = useCallback(async () => {
-    if (!selectedId) return
-    const link = `${window.location.origin}/form/${selectedId}`
+  // ── GERAR BRIEFING IA ─────────────────────────────────────────────────────
+  const gerarBriefingIA = useCallback(async () => {
+    if (!checkin || !selectedId || !mentorId) return
+    setBriefingLoading(true)
     try {
-      await navigator.clipboard.writeText(link)
-    } catch {
-      // fallback silencioso
-    }
-    setLinkCopiado(true)
-    setTimeout(() => setLinkCopiado(false), 2500)
-  }, [selectedId])
+      const res = await fetch("/api/dashboard/briefing", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mentoradoId: selectedId, mentorId, checkinId: checkin.id }),
+      })
+      const json = await res.json()
+      if (json.briefing) setBriefing(json.briefing)
+    } finally { setBriefingLoading(false) }
+  }, [checkin, selectedId, mentorId])
 
-  // Cadastrar novo mentorado
+  // ── CADASTRAR MENTORADO ────────────────────────────────────────────────────
   const cadastrarMentorado = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("🎯 Cadastrar mentorado clicado", { novo })
-
-    if (!novo.nome.trim()) {
-      console.warn("⚠️ Nome vazio")
-      return
-    }
-
+    if (!mentorId || !novo.nome.trim()) return
     setSalvando(true)
     try {
-      // Incluir mentor_id ao cadastrar
-      const mentorId = localStorage.getItem("mentorSelecionado")
-      console.log("📝 Mentor ID:", mentorId)
-
-      const dadosMentorado = {
-        ...novo,
-        mentor_id: mentorId,
-      }
-
-      console.log("📤 Enviando dados:", dadosMentorado)
-
       const res = await fetch("/api/dashboard/mentorados", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(dadosMentorado),
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...novo, mentorId }),
       })
-
-      console.log("📥 Response status:", res.status)
-
       const json = await res.json()
-      console.log("📥 Response JSON:", json)
-
-      if (res.ok && json.mentorado) {
-        console.log("✅ Sucesso! Mentorado criado:", json.mentorado)
+      if (res.ok) {
         setShowCadastro(false)
         setNovo({ nome: "", nicho: "", foco_macro: "", data_inicio: "" })
-        await recarregarMentorados(json.mentorado.id)
-      } else {
-        console.error("❌ Erro na resposta:", json)
+        if (json.mentorado?.id) setSelectedId(json.mentorado.id)
+        recarregarMentorados()
       }
-    } catch (err) {
-      console.error("❌ Erro ao cadastrar:", err)
-    } finally {
-      setSalvando(false)
-    }
-  }, [novo, recarregarMentorados])
+    } finally { setSalvando(false) }
+  }, [novo, mentorId, recarregarMentorados])
 
-  // Editar mentorado
+  // ── EDITAR MENTORADO ──────────────────────────────────────────────────────
   const editarMentorado = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
     if (!selectedId) return
     setEditando(true)
     try {
       const res = await fetch(`/api/dashboard/mentorados/${selectedId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        method: "PUT", headers: { "Content-Type": "application/json" },
         body: JSON.stringify(editData),
       })
-      if (res.ok) {
-        setShowEditModal(false)
-        await recarregarMentorados(selectedId)
-      }
-    } finally {
-      setEditando(false)
-    }
-  }, [selectedId, editData, recarregarMentorados])
+      if (res.ok) { setShowEditModal(false); recarregarMentorados() }
+    } finally { setEditando(false) }
+  }, [editData, selectedId, recarregarMentorados])
 
-  // Deletar mentorado
-  const deletarMentorado = useCallback(async () => {
-    if (!selectedId || !window.confirm("Tem certeza que deseja deletar este mentorado? Todos os check-ins também serão deletados.")) return
-    setEditando(true)
-    try {
-      const res = await fetch(`/api/dashboard/mentorados/${selectedId}`, {
-        method: "DELETE",
-      })
-      if (res.ok) {
-        setSelectedId(null) // Reset selection
-        await recarregarMentorados()
-      }
-    } finally {
-      setEditando(false)
-    }
-  }, [selectedId, recarregarMentorados])
+  // ── DELETAR MENTORADO ─────────────────────────────────────────────────────
+  const deletarMentorado = useCallback(async (id: string) => {
+    if (!confirm("Tem certeza que deseja deletar este mentorado? Todos os dados serão perdidos.")) return
+    const res = await fetch(`/api/dashboard/mentorados/${id}`, { method: "DELETE" })
+    if (res.ok) { setSelectedId(""); recarregarMentorados() }
+  }, [recarregarMentorados])
 
-  // Buscar checkin quando mentorado muda
-  useEffect(() => {
-    if (!selectedId || mentorados.length === 0) return
-    buscarCheckin(selectedId)
-  }, [selectedId, mentorados, buscarCheckin])
-
-  // Gera o Briefing IA (Gemini Flash via OpenRouter) 1x por check-in.
-  // Briefing IA — persistência no banco (checkins.briefing_ia)
-  // Cache in-memory removido. O banco é a fonte da verdade.
-  // Na primeira chamada: gera via Gemini + persiste.
-  // Nas seguintes: API retorna o JSON salvo (cached: true, 0 tokens).
-  useEffect(() => {
-    if (!checkin || !selected) {
-      setBriefing(null)
-      return
-    }
-    const cid = checkin.id
-    setBriefing(gerarBriefing(selected, checkin)) // fallback síncrono imediato
-    setBriefingLoading(true)
-    let cancelado = false
-    fetch("/api/dashboard/briefing", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ mentoradoId: selected.id, checkinId: cid }),
-    })
-      .then((r) => r.json())
-      .then((j) => {
-        if (cancelado) return
-        if (j?.briefing && Array.isArray(j.briefing.pauta)) {
-          setBriefing(j.briefing)
-        }
-      })
-      .catch(() => {})
-      .finally(() => { if (!cancelado) setBriefingLoading(false) })
-    return () => { cancelado = true }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [checkin?.id, selectedId])
-
-  // ── REALTIME — substitui polling de 8s ───────────────────────────────────
-  // Assina mudanças em `checkins` e `tarefas` para o mentorado selecionado.
-  // Quando chega novo check-in → buscarCheckin() atualiza métricas e briefing.
-  // O componente PendenciasSection tem seu próprio refetch via prop key.
-  useEffect(() => {
+  // ── COPIAR LINK ──────────────────────────────────────────────────────────
+  const copiarLinkCheckin = useCallback(async () => {
     if (!selectedId) return
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}/checkin/${selectedId}`)
+      setLinkCopiado(true)
+      setTimeout(() => setLinkCopiado(false), 2000)
+    } catch {}
+  }, [selectedId])
 
-    const supabase = getRealtimeClient()
-    const channelName = `dashboard-${selectedId}`
-
-    const channel = supabase
-      .channel(channelName)
-      // Novo check-in do mentorado → atualiza métricas
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "checkins", filter: `mentorado_id=eq.${selectedId}` },
-        () => { buscarCheckin(selectedId) }
-      )
-      .subscribe((status) => {
-        if (status === "SUBSCRIBED") setRealtimeStatus("connected")
-        if (status === "CHANNEL_ERROR") setRealtimeStatus("error")
-      })
-
-    setRealtimeStatus("connecting")
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [selectedId, buscarCheckin])
-
-  const selected = mentorados.find((m) => m.id === selectedId)
-  const filtered = mentorados.filter((m) =>
-    m.nome.toLowerCase().includes(searchTerm.toLowerCase())
+  // ── DERIVADOS ─────────────────────────────────────────────────────────────
+  const filtered = mentorados.filter(m =>
+    !searchTerm && !filtroSidebar
+      ? true
+      : [m.nome, m.nicho, m.cidade || ""].join(" ").toLowerCase().includes((searchTerm + filtroSidebar).toLowerCase())
   )
+  const selected = mentorados.find(m => m.id === selectedId)
 
-  // Séries cronológicas (mais antiga → mais recente) para os mini-gráficos reais.
-  const cronologico = [...historico].reverse()
-  const serieLeads = cronologico.map((c) => Number(c.leads_gerados) || 0)
-  const serieVendas = cronologico.map((c) => Number(c.vendas_reais) || 0)
-  const serieInvest = cronologico.map((c) => Number(c.investimento_trafego) || 0)
-  // Variações % vs semana anterior (histórico real).
-  const varLeads = variacao(historico, "leads_gerados")
-  const varVendas = variacao(historico, "vendas_reais")
-  const varInvest = variacao(historico, "investimento_trafego")
-
-  // Componente: Modal com histórico de uma métrica específica.
-  const HistoryModal = ({ metric }: { metric: "leads" | "vendas" | "investimento" }) => {
-    const metricLabels = {
-      leads: { label: "Leads Gerados", key: "leads_gerados" as keyof CheckinRow },
-      vendas: { label: "Vendas Reais (R$)", key: "vendas_reais" as keyof CheckinRow },
-      investimento: { label: "Investimento (R$)", key: "investimento_trafego" as keyof CheckinRow },
-    }
-    const config = metricLabels[metric]
-    // Prepara dados para o gráfico (cronológico: antiga → recente)
-    const chartData = cronologico.map((c, i) => ({
-      semana: `S${i + 1}`,
-      valor: Number(c[config.key]) || 0,
-      data: new Date(c.data_envio).toLocaleDateString("pt-BR"),
-    }))
-
-    return (
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div className="bg-slate-900/95 border border-slate-700/50 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-y-auto">
-          {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-slate-700/30">
-            <div>
-              <h2 className="text-xl font-bold text-white">{config.label}</h2>
-              <p className="text-xs text-slate-400 mt-1">Histórico de {cronologico.length} semana(s)</p>
-            </div>
-            <button
-              onClick={() => setSelectedMetric(null)}
-              className="p-2 hover:bg-slate-800/50 rounded-lg transition-colors"
-            >
-              <X className="w-5 h-5 text-slate-400" />
-            </button>
-          </div>
-
-          {/* Gráfico usando recharts */}
-          <div className="p-6">
-            {chartData.length > 0 ? (
-              <>
-                <div className="mb-6">
-                  {/* Renderizar com recharts se disponível, senão SVG manual */}
-                  <svg viewBox="0 0 500 200" className="w-full h-64 bg-slate-950/30 rounded-lg p-4">
-                    {/* Eixos */}
-                    <line x1="40" y1="160" x2="480" y2="160" stroke="#475569" strokeWidth="1" />
-                    <line x1="40" y1="20" x2="40" y2="160" stroke="#475569" strokeWidth="1" />
-
-                    {/* Grid e valores */}
-                    {chartData.map((d, i) => {
-                      const x = 40 + (i / (chartData.length - 1 || 1)) * 440
-                      const maxVal = Math.max(...chartData.map((c) => c.valor), 1)
-                      const y = 160 - (d.valor / maxVal) * 120
-
-                      return (
-                        <g key={i}>
-                          {/* Ponto */}
-                          <circle
-                            cx={x}
-                            cy={y}
-                            r="4"
-                            fill={metric === "leads" ? "#10b981" : metric === "vendas" ? "#a855f7" : "#94a3b8"}
-                          />
-                          {/* Label (semana) */}
-                          <text
-                            x={x}
-                            y="175"
-                            textAnchor="middle"
-                            fontSize="12"
-                            fill="#94a3b8"
-                          >
-                            {d.semana}
-                          </text>
-                          {/* Valor acima do ponto */}
-                          <text
-                            x={x}
-                            y={y - 8}
-                            textAnchor="middle"
-                            fontSize="11"
-                            fill="#e2e8f0"
-                            fontWeight="600"
-                          >
-                            {d.valor.toLocaleString("pt-BR")}
-                          </text>
-                        </g>
-                      )
-                    })}
-
-                    {/* Linhas conectando os pontos */}
-                    {chartData.map((_, i) => {
-                      if (i === 0) return null
-                      const x1 = 40 + ((i - 1) / (chartData.length - 1 || 1)) * 440
-                      const x2 = 40 + (i / (chartData.length - 1 || 1)) * 440
-                      const maxVal = Math.max(...chartData.map((c) => c.valor), 1)
-                      const y1 = 160 - (chartData[i - 1].valor / maxVal) * 120
-                      const y2 = 160 - (chartData[i].valor / maxVal) * 120
-                      const color =
-                        metric === "leads" ? "#10b981" : metric === "vendas" ? "#a855f7" : "#94a3b8"
-                      return <line key={`line-${i}`} x1={x1} y1={y1} x2={x2} y2={y2} stroke={color} strokeWidth="2" />
-                    })}
-                  </svg>
-                </div>
-
-                {/* Tabela detalhada */}
-                <div className="mt-6">
-                  <h3 className="text-sm font-semibold text-slate-300 mb-3">Detalhes por Semana</h3>
-                  <div className="space-y-2 max-h-64 overflow-y-auto">
-                    {chartData.map((d, i) => {
-                      const anterior = i > 0 ? chartData[i - 1].valor : null
-                      const var_pct = anterior ? (((d.valor - anterior) / anterior) * 100).toFixed(0) : null
-                      return (
-                        <div
-                          key={i}
-                          className="flex items-center justify-between p-3 bg-slate-950/30 rounded-lg border border-slate-700/20 hover:border-slate-600/30 transition-colors"
-                        >
-                          <div>
-                            <p className="text-sm font-semibold text-white">{d.semana}</p>
-                            <p className="text-xs text-slate-400">{d.data}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-sm font-bold text-slate-200">
-                              {d.valor.toLocaleString("pt-BR")}
-                            </p>
-                            {var_pct && (
-                              <p
-                                className={`text-xs font-semibold ${
-                                  parseFloat(var_pct) > 0
-                                    ? "text-green-400"
-                                    : parseFloat(var_pct) < 0
-                                      ? "text-red-400"
-                                      : "text-slate-400"
-                                }`}
-                              >
-                                {parseFloat(var_pct) > 0 ? "↑" : "↓"} {var_pct}%
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              </>
-            ) : (
-              <p className="text-slate-400 text-center py-8">Sem dados disponíveis</p>
-            )}
-          </div>
-        </div>
-      </div>
-    )
+  // ── HEADER DO MÓDULO ─────────────────────────────────────────────────────
+  const MODULE_LABELS: Record<CkView, string> = {
+    "visao-geral": "Visão Geral",
+    "mentorados": "Mentorados",
+    "calendario": "Calendário",
+    "historico": "Histórico",
+    "config": "Configurações",
   }
 
-  if (loading) {
-    return (
-      <div className="h-screen w-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mx-auto mb-4">
-            <Zap className="w-6 h-6 text-blue-400 animate-pulse" />
-          </div>
-          <p className="text-slate-400 text-sm">Conectando ao banco de dados...</p>
-        </div>
-      </div>
-    )
-  }
-
+  // ── RENDER ────────────────────────────────────────────────────────────────
   return (
-    <div className="h-screen w-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white flex overflow-hidden">
-      {/* ── SIDEBAR ESQUERDA ── */}
-      <aside className={`${sidebarOpen ? "w-64" : "w-20"} flex-shrink-0 bg-gradient-to-b from-slate-900/80 to-slate-950/80 backdrop-blur-xl border-r border-slate-700/20 flex flex-col overflow-y-auto transition-all duration-300`} data-test="premium-sidebar-v2">
-        {/* Logo Section + Toggle */}
-        <div className="p-4 border-b border-slate-700/20">
-          <div className="flex items-center justify-between gap-2">
-            <div className={`flex items-center gap-3 ${sidebarOpen ? "opacity-100" : "opacity-0 hidden"} transition-opacity duration-300`}>
-              <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 shadow-lg">
-                {mentorDados?.foto_url ? (
-                  <img src={mentorDados.foto_url} alt={mentorNome} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center font-bold text-white">
-                    {mentorNome.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
-                  </div>
-                )}
-              </div>
-              <div>
-                <h1 className="text-lg font-bold bg-gradient-to-r from-yellow-400 to-amber-500 bg-clip-text text-transparent">{mentorNome}</h1>
-                <p className="text-[10px] text-slate-400">S.O. MENTORIA</p>
-              </div>
-            </div>
-            {/* Logo Compacto (quando recolhido) */}
-            {!sidebarOpen && (
-              <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 shadow-lg">
-                {mentorDados?.foto_url ? (
-                  <img src={mentorDados.foto_url} alt={mentorNome} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center font-bold text-white">
-                    {mentorNome.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
-                  </div>
-                )}
+    <div className="flex h-screen overflow-hidden bg-slate-50">
+      {/* ── SIDEBAR CKlareza ─────────────────────────────────────────── */}
+      <Sidebar
+        active={ckView}
+        onChange={setCkView}
+        onLogout={() => { localStorage.removeItem("mentorSelecionado"); window.location.href = "/" }}
+      />
+
+      {/* ── MAIN AREA ──────────────────────────────────────────────────── */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* ── HEADER BAR ─────────────────────────────────────────────── */}
+        <header className="bg-white border-b border-slate-200 px-6 py-3.5 flex items-center justify-between shrink-0 shadow-sm">
+          <div className="flex items-center gap-3">
+            <h2 className="text-base font-semibold text-slate-900">{MODULE_LABELS[ckView]}</h2>
+            {realtimeStatus === "connected" && (
+              <span className="flex items-center gap-1 text-[10px] text-teal-600 font-medium">
+                <span className="w-1.5 h-1.5 bg-teal-500 rounded-full animate-pulse" /> Ao vivo
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-3">
+            {/* Badge notificações */}
+            {tarefasVencidas > 0 && (
+              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-red-50 border border-red-200 rounded-full">
+                <AlertCircle className="w-3.5 h-3.5 text-red-500" />
+                <span className="text-xs font-bold text-red-600">{tarefasVencidas} vencida{tarefasVencidas > 1 ? "s" : ""}</span>
               </div>
             )}
-            {/* Toggle Button */}
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-1.5 hover:bg-slate-800/50 rounded-lg transition-colors"
-              title={sidebarOpen ? "Recolher" : "Expandir"}
-            >
-              {sidebarOpen ? (
-                <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              ) : (
-                <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              )}
-            </button>
-          </div>
-        </div>
-
-        {/* Search */}
-        {sidebarOpen && (
-          <div className="px-4 pt-4 pb-3 transition-all duration-300">
-            <div className="relative">
-              <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-500" />
-              <input
-                type="text"
-                placeholder="Buscar mentorado..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 bg-slate-800/50 border border-slate-700/50 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/50 transition-colors"
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Botão Cadastrar Mentorado */}
-        <div className={`px-4 pb-2 transition-all duration-300 ${!sidebarOpen && "flex justify-center"}`}>
-          <button
-            onClick={() => setShowCadastro(true)}
-            className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-sm font-semibold bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white shadow-lg shadow-blue-500/20 transition-all duration-200 ${sidebarOpen ? "w-full" : "p-2"}`}
-            title={!sidebarOpen ? "Cadastrar Mentorado" : undefined}
-          >
-            <UserPlus className="w-4 h-4" />
-            {sidebarOpen && "Cadastrar Mentorado"}
-          </button>
-        </div>
-
-        {/* Mentorados List com Drag & Drop */}
-        <div className={`flex-1 overflow-y-auto transition-all duration-300 ${sidebarOpen ? "px-3 space-y-1.5" : "px-2 space-y-2 flex flex-col items-center"}`}>
-          {sidebarOpen && (
-            <div className="flex items-center justify-between px-2 mt-4 mb-2">
-              <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest">
-                Mentorados Ativos ({filtered.length})
-              </p>
-              {tarefasVencidas > 0 && (
-                <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/20 border border-red-500/30 text-[10px] font-bold text-red-400">
-                  <AlertCircle className="w-3 h-3" /> {tarefasVencidas} vencida{tarefasVencidas > 1 ? "s" : ""}
-                </span>
-              )}
-            </div>
-          )}
-          {/* Filtro rápido */}
-          {sidebarOpen && (
-            <div className="relative mb-2">
-              <Filter className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-500" />
-              <input
-                type="text"
-                placeholder="Filtrar por cidade, nicho..."
-                value={filtroSidebar}
-                onChange={e => setFiltroSidebar(e.target.value)}
-                className="w-full pl-7 pr-3 py-1.5 bg-slate-800/40 border border-slate-700/30 rounded-lg text-xs text-white placeholder-slate-500 focus:outline-none focus:border-slate-500"
-              />
-            </div>
-          )}
-
-          <DndContext sensors={dndSensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-            <SortableContext items={filtered.map(m => m.id)} strategy={verticalListSortingStrategy}>
-              {filtered
-                .filter(m => !filtroSidebar || m.nome.toLowerCase().includes(filtroSidebar.toLowerCase()) || m.nicho?.toLowerCase().includes(filtroSidebar.toLowerCase()) || m.cidade?.toLowerCase().includes(filtroSidebar.toLowerCase()))
-                .map((m) => (
-                <SortableMentorado
-                  key={m.id}
-                  m={m}
-                  selectedId={selectedId}
-                  sidebarOpen={sidebarOpen}
-                  onClick={() => setSelectedId(m.id)}
-                />
-              ))}
-            </SortableContext>
-          </DndContext>
-        </div>
-
-        {/* Footer */}
-        {sidebarOpen && (
-          <div className="p-4 border-t border-slate-700/20 transition-all duration-300">
-            <div className="text-[10px] text-slate-500 text-center space-y-1">
-              <p>Dashboard v2.0</p>
-              <div className="flex items-center justify-center gap-1.5">
-                <span className={`w-1.5 h-1.5 rounded-full ${
-                  realtimeStatus === "connected" ? "bg-emerald-400 animate-pulse" :
-                  realtimeStatus === "error" ? "bg-red-400" : "bg-yellow-400 animate-pulse"
-                }`} />
-                <span className={
-                  realtimeStatus === "connected" ? "text-emerald-500" :
-                  realtimeStatus === "error" ? "text-red-500" : "text-yellow-500"
-                }>
-                  {realtimeStatus === "connected" ? "Realtime ativo" :
-                   realtimeStatus === "error" ? "Realtime erro" : "Conectando..."}
-                </span>
-              </div>
-            </div>
-          </div>
-        )}
-      </aside>
-
-      {/* ── MAIN CONTENT ── */}
-      <main className="flex-1 flex flex-col overflow-hidden">
-        {/* NAVBAR TOPO */}
-        <nav className="flex-shrink-0 bg-gradient-to-r from-slate-900/40 via-slate-900/20 to-transparent backdrop-blur-xl border-b border-slate-700/20 px-8 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4 flex-1">
-            <h2 className="text-lg font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-              {selected?.nome || "Dashboard"}
-            </h2>
-            <div className="hidden md:block text-sm text-slate-500">
-              {selected?.nicho && `• ${selected.nicho}`}
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            {/* Menu Perfil */}
+            {/* Avatar do mentor */}
             <div className="relative" ref={menuPerfilRef}>
-              <button
-                onClick={() => setShowMenuPerfil(!showMenuPerfil)}
-                className="w-9 h-9 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-xs font-bold shadow-lg hover:scale-105 hover:shadow-blue-500/30 transition-all cursor-pointer"
-                title="Menu do mentor"
-              >
-                {mentorNome.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+              <button onClick={() => setShowMenuPerfil(!showMenuPerfil)}
+                className="flex items-center gap-2.5 pl-1 pr-3 py-1 rounded-full hover:bg-slate-100 transition-colors">
+                <div className="w-8 h-8 rounded-full overflow-hidden ring-2 ring-slate-200">
+                  {mentorDados?.foto_url
+                    ? <img src={mentorDados.foto_url} alt={mentorNome} className="w-full h-full object-cover" />
+                    : <div className="w-full h-full bg-slate-900 flex items-center justify-center text-xs font-bold text-white">
+                        {mentorNome.slice(0, 2).toUpperCase()}
+                      </div>}
+                </div>
+                <span className="text-sm font-semibold text-slate-700 hidden sm:block">{mentorNome}</span>
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
               </button>
 
-              {/* Dropdown renderizado via Portal no body — evita z-index/stacking context */}
+              {showMenuPerfil && (
+                <div className="absolute right-0 top-full mt-2 w-52 bg-white border border-slate-200 rounded-xl shadow-lg py-1.5 z-50">
+                  <button onClick={() => { setShowPerfilModal(true); setShowMenuPerfil(false) }}
+                    className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                    <User className="w-4 h-4" /> Meu Perfil
+                  </button>
+                  <button onClick={() => { if (selected) { setEditData({ nome: selected.nome, nicho: selected.nicho, foco_macro: selected.foco_macro, status: "Ativo", cidade: selected.cidade || "", data_fim: selected.data_fim || "", faturamento_atual: selected.faturamento_atual?.toString() || "", meta_faturamento: selected.meta_faturamento?.toString() || "", meta_atual: selected.meta_atual || "" }); setShowEditModal(true) }; setShowMenuPerfil(false) }}
+                    className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                    <Edit2 className="w-4 h-4" /> Editar Mentorado
+                  </button>
+                  <button onClick={() => { setShowHistoricoModal(true); setShowMenuPerfil(false) }}
+                    className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50">
+                    <History className="w-4 h-4" /> Histórico
+                  </button>
+                  <div className="my-1 border-t border-slate-100" />
+                  <button onClick={() => { localStorage.removeItem("mentorSelecionado"); window.location.href = "/" }}
+                    className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                    <LogOut className="w-4 h-4" /> Sair
+                  </button>
+                </div>
+              )}
             </div>
           </div>
-        </nav>
+        </header>
 
-        {/* CONTENT SCROLL */}
-        <div className="flex-1 overflow-y-auto p-8">
-          <div className="max-w-6xl mx-auto space-y-6">
-            {selected ? (
-              <>
-                {/* ── HEADER INFO CARD ── */}
-                <div className="group bg-gradient-to-br from-slate-800/50 via-slate-800/30 to-slate-900/50 backdrop-blur-xl border border-slate-700/30 rounded-2xl p-6 shadow-2xl hover:border-slate-700/50 transition-all duration-300">
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <h1 className="text-2xl font-bold text-white mb-1">
-                        {selected.nome}
-                        <span className="text-slate-400 text-sm font-normal ml-2">({selected.nicho})</span>
-                      </h1>
-                      <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-400">
-                        <span>📅 Início: <span className="text-slate-300">{selected.data_inicio}</span></span>
-                        {selected.data_fim && (
-                          <span>🏁 Término: <span className="text-slate-300">{selected.data_fim}</span>
-                            {" · "}<CountdownDias dataFim={selected.data_fim} />
-                          </span>
-                        )}
-                        {selected.cidade && (
-                          <span>📍 <span className="text-slate-300">{selected.cidade}</span></span>
-                        )}
-                        <span>🎯 Foco: <span className="text-slate-300">{selected.foco_macro}</span></span>
-                      </div>
-                      {(selected.faturamento_atual || selected.meta_faturamento) && (
-                        <div className="flex gap-4 mt-2">
-                          {selected.faturamento_atual && (
-                            <span className="text-xs text-slate-400">
-                              💰 Faturamento atual: <span className="text-emerald-400 font-bold">R$ {Number(selected.faturamento_atual).toLocaleString("pt-BR")}</span>
-                            </span>
-                          )}
-                          {selected.meta_faturamento && (
-                            <span className="text-xs text-slate-400">
-                              🚀 Meta 12m: <span className="text-blue-400 font-bold">R$ {Number(selected.meta_faturamento).toLocaleString("pt-BR")}</span>
-                            </span>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex flex-col items-end gap-2">
-                      <span className="px-4 py-1.5 bg-gradient-to-r from-emerald-500/20 to-emerald-500/10 border border-emerald-500/40 text-emerald-300 text-xs font-bold rounded-full shadow-lg shadow-emerald-500/10">
-                        ATIVO
-                      </span>
-                      <button
-                        onClick={copiarLink}
-                        title="Copiar link do formulário para enviar ao mentorado"
-                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all duration-200 ${
-                          linkCopiado
-                            ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-300"
-                            : "bg-blue-500/15 border-blue-500/30 text-blue-300 hover:bg-blue-500/25 hover:border-blue-500/50"
-                        }`}
-                      >
-                        {linkCopiado ? (
-                          <><Check className="w-3.5 h-3.5" /> Link copiado!</>
-                        ) : (
-                          <><Link2 className="w-3.5 h-3.5" /> Gerar Link do Formulário</>
-                        )}
-                      </button>
-                    </div>
+        {/* ── CONTENT AREA ───────────────────────────────────────────── */}
+        <main className="flex-1 overflow-y-auto">
+
+          {/* ══ VISÃO GERAL ══════════════════════════════════════════════ */}
+          {ckView === "visao-geral" && (
+            <div className="p-6">
+              <VisaoGeral
+                data={overviewData}
+                loading={overviewLoading}
+                onAbrirMentorado={(id) => { setSelectedId(id); setCkView("mentorados") }}
+                onAgendar={() => setShowSessaoModal(true)}
+              />
+            </div>
+          )}
+
+          {/* ══ MENTORADOS ════════════════════════════════════════════════ */}
+          {ckView === "mentorados" && (
+            <div className="flex h-full">
+              {/* Lista lateral (light) */}
+              <div className="w-72 shrink-0 border-r border-slate-200 bg-white flex flex-col h-full">
+                <div className="p-4 border-b border-slate-100">
+                  <div className="relative mb-3">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <input value={filtroSidebar} onChange={e => setFiltroSidebar(e.target.value)}
+                      placeholder="Buscar mentorado..."
+                      className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:border-teal-500" />
                   </div>
+                  <button onClick={() => setShowCadastro(true)}
+                    className="w-full flex items-center justify-center gap-2 py-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold rounded-xl transition-colors">
+                    <UserPlus className="w-4 h-4" /> Novo Mentorado
+                  </button>
                 </div>
+                <div className="flex-1 overflow-y-auto p-3 space-y-1">
+                  <DndContext sensors={dndSensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                    <SortableContext items={filtered.map(m => m.id)} strategy={verticalListSortingStrategy}>
+                      {filtered.map(m => (
+                        <SortableMentoradoItem key={m.id} m={m} selectedId={selectedId}
+                          onClick={() => setSelectedId(m.id)} />
+                      ))}
+                    </SortableContext>
+                  </DndContext>
+                </div>
+              </div>
 
-                {/* ── TABS: PENDÊNCIAS / FINANCEIRO / CALLS ── */}
-                <div className="mb-1">
-                  {/* Tab header */}
-                  <div className="flex items-center gap-1 bg-slate-800/40 rounded-xl p-1 mb-4">
-                    <button onClick={() => setActiveTab("pendencias")}
-                      className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition-all ${activeTab === "pendencias" ? "bg-amber-500/20 text-amber-400 border border-amber-500/30" : "text-slate-400 hover:text-white"}`}>
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      Pendências
-                      {tarefasVencidas > 0 && <span className="w-4 h-4 bg-red-500 rounded-full text-white text-[9px] flex items-center justify-center">{tarefasVencidas}</span>}
-                    </button>
-                    <button onClick={() => setActiveTab("financeiro")}
-                      className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition-all ${activeTab === "financeiro" ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : "text-slate-400 hover:text-white"}`}>
-                      <DollarSign className="w-3.5 h-3.5" /> Financeiro
-                    </button>
-                    <button onClick={() => setActiveTab("calls")}
-                      className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition-all ${activeTab === "calls" ? "bg-purple-500/20 text-purple-400 border border-purple-500/30" : "text-slate-400 hover:text-white"}`}>
-                      <Phone className="w-3.5 h-3.5" /> Análise de Call
-                    </button>
+              {/* Detail panel */}
+              <div className="flex-1 overflow-y-auto p-6">
+                {!selected ? (
+                  <div className="h-full flex items-center justify-center text-slate-400">
+                    <div className="text-center">
+                      <Users className="w-12 h-12 text-slate-200 mx-auto mb-3" />
+                      <p className="text-sm">Selecione um mentorado</p>
+                    </div>
                   </div>
-
-                  {/* Tab content */}
-                  {activeTab === "pendencias" && (
-                    <PendenciasSection key={selectedId} mentoradoId={selectedId} mentorId={mentorId} />
-                  )}
-                  {activeTab === "financeiro" && (
-                    <FinanceiroSection key={selectedId} mentoradoId={selectedId} mentorId={mentorId} />
-                  )}
-                  {activeTab === "calls" && (
-                    <div className="mb-6 rounded-lg bg-gradient-to-br from-slate-700/40 to-slate-800/40 border border-slate-600/30 p-5">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-1 h-6 bg-gradient-to-b from-purple-400 to-violet-600 rounded-full" />
-                          <h3 className="text-lg font-semibold text-white">Análise de Call</h3>
+                ) : (
+                  <div className="space-y-6">
+                    {/* ── Info Card ──────────────────────────────────────── */}
+                    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+                      <div className="flex items-start gap-5">
+                        <label className="cursor-pointer">
+                          <div className="w-16 h-16 rounded-2xl overflow-hidden ring-2 ring-slate-200 hover:ring-teal-500 transition-all">
+                            {selected.foto_url
+                              ? <img src={selected.foto_url} alt={selected.nome} className="w-full h-full object-cover" />
+                              : <div className="w-full h-full bg-slate-900 flex items-center justify-center text-xl font-bold text-white">
+                                  {selected.nome.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+                                </div>}
+                          </div>
+                          <input type="file" accept="image/*" className="hidden" onChange={e => {
+                            const file = e.target.files?.[0]
+                            if (file) uploadFoto(file, "mentorado", selected.id)
+                          }} />
+                        </label>
+                        <div className="flex-1">
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <h1 className="text-xl font-bold text-slate-900">{selected.nome}</h1>
+                              <p className="text-sm text-slate-500 mt-0.5">{selected.nicho}</p>
+                            </div>
+                            <span className="px-3 py-1 bg-teal-50 text-teal-700 text-xs font-bold rounded-full border border-teal-200 shrink-0">
+                              {selected.status}
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap gap-x-5 gap-y-1 mt-3 text-xs text-slate-500">
+                            <span>📅 Início: <span className="text-slate-700 font-medium">{selected.data_inicio}</span></span>
+                            {selected.data_fim && (
+                              <span>🏁 Término: <span className="text-slate-700 font-medium">{selected.data_fim}</span> · <CountdownDias dataFim={selected.data_fim} /></span>
+                            )}
+                            {selected.cidade && <span>📍 <span className="text-slate-700 font-medium">{selected.cidade}</span></span>}
+                            <span>🎯 <span className="text-slate-700 font-medium">{selected.foco_macro}</span></span>
+                          </div>
+                          {(selected.faturamento_atual || selected.meta_faturamento) && (
+                            <div className="flex gap-4 mt-2">
+                              {selected.faturamento_atual && (
+                                <span className="text-xs text-slate-500">💰 Atual: <span className="text-teal-700 font-bold">R$ {Number(selected.faturamento_atual).toLocaleString("pt-BR")}</span></span>
+                              )}
+                              {selected.meta_faturamento && (
+                                <span className="text-xs text-slate-500">🚀 Meta: <span className="text-blue-700 font-bold">R$ {Number(selected.meta_faturamento).toLocaleString("pt-BR")}</span></span>
+                              )}
+                            </div>
+                          )}
                         </div>
-                        <button onClick={() => setShowAnalisarCall(true)}
-                          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white text-sm font-bold transition-all shadow-lg">
-                          <Zap className="w-4 h-4" /> Analisar Nova Call
+                      </div>
+
+                      {/* Ações rápidas */}
+                      <div className="flex gap-2 mt-5 pt-5 border-t border-slate-100">
+                        <button onClick={copiarLinkCheckin}
+                          className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-600 bg-slate-50 border border-slate-200 rounded-xl hover:border-slate-300 transition-all">
+                          {linkCopiado ? <Check className="w-3.5 h-3.5 text-teal-600" /> : <Link2 className="w-3.5 h-3.5" />}
+                          {linkCopiado ? "Copiado!" : "Link Check-in"}
+                        </button>
+                        <button onClick={() => carregarCheckin()}
+                          className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-600 bg-slate-50 border border-slate-200 rounded-xl hover:border-slate-300 transition-all">
+                          <RefreshCw className={`w-3.5 h-3.5 ${atualizando ? "animate-spin" : ""}`} />
+                          Atualizar
+                        </button>
+                        <button onClick={() => setShowSessaoModal(true)}
+                          className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-teal-700 bg-teal-50 border border-teal-200 rounded-xl hover:bg-teal-100 transition-all">
+                          <Calendar className="w-3.5 h-3.5" /> Agendar Sessão
                         </button>
                       </div>
-                      <p className="text-slate-400 text-sm">Cole a transcrição de uma call (Fathom, Zoom, Meet) e a IA extrai automaticamente as tarefas da mentorada e os compromissos da sua equipe.</p>
-                    </div>
-                  )}
-                </div>
-
-                {/* ── MÉTRICAS GRID 3 COLUNAS ── */}
-                <div>
-                  <div className="flex items-center justify-between mb-4 px-1">
-                    <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">📊 Métricas da Semana</p>
-                    <div className="flex items-center gap-3">
-                      {ultimaAtualizacao && (
-                        <span className="text-[10px] text-slate-500">
-                          Atualizado {ultimaAtualizacao.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
-                        </span>
-                      )}
-                      <button
-                        onClick={refreshAgora}
-                        disabled={atualizando}
-                        title="Atualizar agora"
-                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800/60 border border-slate-700/50 text-slate-300 hover:bg-slate-700/60 hover:text-white transition-all disabled:opacity-60"
-                      >
-                        <RefreshCw className={`w-3 h-3 ${atualizando ? "animate-spin" : ""}`} />
-                        {atualizando ? "Atualizando" : "Atualizar"}
-                      </button>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-4">
-                    {/* LEADS */}
-                    <div
-                      onClick={() => historico.length > 0 && setSelectedMetric("leads")}
-                      className="group bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent border border-emerald-500/30 rounded-xl p-5 shadow-xl hover:shadow-2xl hover:border-emerald-500/50 transition-all duration-300 cursor-pointer"
-                    >
-                      <div className="flex items-center justify-between mb-3">
-                        <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Leads Gerados</p>
-                        <Target className="w-4 h-4 text-emerald-400" />
-                      </div>
-                      <div className="mb-3">
-                        <p className="text-3xl font-bold text-white">{checkin?.leads_gerados ?? "—"}</p>
-                        {checkin ? <Trend pct={varLeads} /> : <p className="text-xs text-slate-500 mt-1">Sem dados</p>}
-                      </div>
-                      {checkin && <Sparkline valores={serieLeads} />}
                     </div>
 
-                    {/* VENDAS */}
-                    <div
-                      onClick={() => historico.length > 0 && setSelectedMetric("vendas")}
-                      className="group bg-gradient-to-br from-purple-500/10 via-purple-500/5 to-transparent border border-purple-500/30 rounded-xl p-5 shadow-xl hover:shadow-2xl hover:border-purple-500/50 transition-all duration-300 cursor-pointer"
-                    >
-                      <div className="flex items-center justify-between mb-3">
-                        <p className="text-[10px] font-bold text-purple-400 uppercase tracking-widest">Vendas Reais</p>
-                        <BarChart3 className="w-4 h-4 text-purple-400" />
+                    {/* ── MÉTRICAS ────────────────────────────────────────── */}
+                    {checkin && (
+                      <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
+                        {([
+                          { key: "leads", label: "Leads Gerados", valor: checkin.leads_gerados, prefixo: "", icon: Target, cor: "teal" },
+                          { key: "vendas", label: "Vendas Reais", valor: checkin.vendas_reais, prefixo: "R$", icon: BarChart3, cor: "blue" },
+                          { key: "investimento", label: "Investimento", valor: checkin.investimento_trafego, prefixo: "R$", icon: TrendingUp, cor: "amber" },
+                          { key: "videos", label: "Vídeos Postados", valor: checkin.videos_postados, prefixo: "", icon: BookOpen, cor: "violet" },
+                        ] as any[]).map(card => {
+                          const pct = variacao(historico, card.key === "videos" ? "videos_postados" : card.key === "leads" ? "leads_gerados" : card.key === "vendas" ? "vendas_reais" : "investimento_trafego")
+                          const Icon = card.icon
+                          const bg: Record<string, string> = { teal: "bg-teal-50 text-teal-600", blue: "bg-blue-50 text-blue-600", amber: "bg-amber-50 text-amber-600", violet: "bg-violet-50 text-violet-600" }
+                          return (
+                            <div key={card.key} className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 hover:shadow-md transition-shadow">
+                              <div className={`w-9 h-9 rounded-xl flex items-center justify-center mb-3 ${bg[card.cor]}`}>
+                                <Icon className="w-4.5 h-4.5" />
+                              </div>
+                              <p className="text-2xl font-bold text-slate-900">{card.prefixo}{card.valor?.toLocaleString("pt-BR")}</p>
+                              <p className="text-xs text-slate-500 mt-0.5 mb-2">{card.label}</p>
+                              <BadgeVariacao pct={pct} />
+                            </div>
+                          )
+                        })}
                       </div>
-                      <div className="mb-3">
-                        <p className="text-3xl font-bold text-white">
-                          {checkin ? `R$ ${checkin.vendas_reais.toLocaleString("pt-BR")}` : "—"}
-                        </p>
-                        {checkin ? <Trend pct={varVendas} /> : <p className="text-xs text-slate-500 mt-1">Sem dados</p>}
-                      </div>
-                      {checkin && <Sparkline valores={serieVendas} />}
-                    </div>
+                    )}
 
-                    {/* INVESTIDO */}
-                    <div
-                      onClick={() => historico.length > 0 && setSelectedMetric("investimento")}
-                      className="group bg-gradient-to-br from-slate-500/10 via-slate-500/5 to-transparent border border-slate-600/30 rounded-xl p-5 shadow-xl hover:shadow-2xl hover:border-slate-600/50 transition-all duration-300 cursor-pointer"
-                    >
-                      <div className="flex items-center justify-between mb-3">
-                        <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Investido</p>
-                        <Zap className="w-4 h-4 text-slate-400" />
-                      </div>
-                      <div className="mb-3">
-                        <p className="text-3xl font-bold text-white">
-                          {checkin ? `R$ ${checkin.investimento_trafego.toLocaleString("pt-BR")}` : "—"}
-                        </p>
-                        {checkin ? <Trend pct={varInvest} /> : <p className="text-xs text-slate-500 mt-1">Sem dados</p>}
-                      </div>
-                      {checkin && <Sparkline valores={serieInvest} />}
-                    </div>
-                  </div>
-                </div>
-
-                {/* ── BRIEFING IA ── */}
-                <div className="bg-gradient-to-br from-slate-800/50 via-slate-800/30 to-slate-900/50 backdrop-blur-xl border border-slate-700/30 rounded-2xl p-6 shadow-2xl overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-transparent to-purple-500/5 pointer-events-none" />
-                  <div className="relative">
-                    <div className="flex items-center justify-between mb-5">
-                      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">🤖 Briefing da IA (Gemini Flash)</p>
-                      {briefingLoading && (
-                        <span className="flex items-center gap-1.5 text-[10px] text-blue-300">
-                          <Zap className="w-3 h-3 animate-pulse" /> Gerando análise inteligente…
-                        </span>
-                      )}
-                    </div>
-
-                    {briefing ? (
-                      <div className="space-y-5">
-                        <div className="flex gap-4">
-                          <div className="w-10 h-10 rounded-lg bg-red-500/20 border border-red-500/30 flex items-center justify-center flex-shrink-0">
-                            <AlertCircle className="w-5 h-5 text-red-400" />
+                    {/* ── BRIEFING IA ─────────────────────────────────────── */}
+                    {checkin && (
+                      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+                        <div className="flex items-center justify-between mb-5">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center">
+                              <Sparkles className="w-4 h-4 text-violet-600" />
+                            </div>
+                            <h3 className="text-sm font-semibold text-slate-900">Briefing da IA</h3>
                           </div>
-                          <div>
-                            <p className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Diagnóstico do Gargalo</p>
-                            <p className="text-sm text-slate-300 leading-relaxed">{briefing.diagnostico}</p>
-                          </div>
+                          <button onClick={gerarBriefingIA} disabled={briefingLoading}
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-violet-700 bg-violet-50 border border-violet-200 rounded-lg hover:bg-violet-100 disabled:opacity-50 transition-colors">
+                            <Zap className={`w-3.5 h-3.5 ${briefingLoading ? "animate-pulse" : ""}`} />
+                            {briefingLoading ? "Gerando..." : "Gerar com IA"}
+                          </button>
                         </div>
 
-                        {briefing.evolucao && (
-                          <>
-                            <div className="h-px bg-gradient-to-r from-transparent via-slate-700/50 to-transparent" />
-                            <div className="flex gap-4">
-                              <div className="w-10 h-10 rounded-lg bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center flex-shrink-0">
-                                <TrendingUp className="w-5 h-5 text-emerald-400" />
-                              </div>
-                              <div>
-                                <p className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Evolução vs Semanas Anteriores</p>
-                                <p className="text-sm text-slate-300 leading-relaxed">{briefing.evolucao}</p>
-                              </div>
+                        {briefing ? (
+                          <div className="space-y-5">
+                            <div className="bg-slate-50 rounded-xl p-4">
+                              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">📊 Diagnóstico</p>
+                              <p className="text-sm text-slate-700 leading-relaxed">{briefing.diagnostico}</p>
                             </div>
-                          </>
+                            <div>
+                              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">🎯 Pauta da Call</p>
+                              <ol className="space-y-2">
+                                {briefing.pauta.map((item, i) => (
+                                  <li key={i} className="flex items-start gap-3">
+                                    <span className="w-5 h-5 rounded-full bg-teal-600 text-white text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">{i + 1}</span>
+                                    <p className="text-sm text-slate-700">{item}</p>
+                                  </li>
+                                ))}
+                              </ol>
+                            </div>
+                          </div>
+                        ) : (
+                          <p className="text-sm text-slate-400 text-center py-6">
+                            {checkin ? "Clique em 'Gerar com IA' para criar o briefing desta sessão." : "Aguardando check-in do mentorado."}
+                          </p>
                         )}
-
-                        <div className="h-px bg-gradient-to-r from-transparent via-slate-700/50 to-transparent" />
-
-                        <div>
-                          <div className="flex items-center gap-3 mb-4">
-                            <div className="w-10 h-10 rounded-lg bg-blue-500/20 border border-blue-500/30 flex items-center justify-center">
-                              <Clock className="w-5 h-5 text-blue-400" />
-                            </div>
-                            <p className="text-xs font-bold text-slate-300 uppercase tracking-wider">Pauta da Call (30-60 min)</p>
-                          </div>
-                          <ol className="space-y-2 ml-14">
-                            {briefing.pauta.map((item, i) => (
-                              <li key={i} className="text-sm text-slate-300 flex gap-2">
-                                <span className="font-semibold text-slate-500 flex-shrink-0">{i + 1}.</span>
-                                <span>{item}</span>
-                              </li>
-                            ))}
-                          </ol>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="text-slate-500 text-sm italic">
-                        Aguardando dados do formulário semanal para gerar briefing...
                       </div>
                     )}
-                  </div>
-                </div>
 
-                {/* ── BLOCOS INFERIORES GRID 2 ── */}
-                <div className="grid grid-cols-2 gap-6">
-                  {/* DIFICULDADES */}
-                  <div className="bg-gradient-to-br from-slate-800/50 via-slate-800/30 to-slate-900/50 backdrop-blur-xl border border-slate-700/30 rounded-2xl p-6 shadow-xl hover:shadow-2xl hover:border-slate-700/50 transition-all duration-300">
-                    <div className="flex items-center gap-3 mb-4">
-                      <AlertCircle className="w-5 h-5 text-orange-400" />
-                      <p className="text-sm font-bold text-white">Entrada Bruta - Aluno</p>
-                    </div>
-                    {checkin?.dificuldades_texto ? (
-                      <p className="text-sm text-slate-300 leading-relaxed">
-                        <span className="text-slate-500 text-xs uppercase tracking-widest block mb-2 font-semibold">Dificuldades</span>
-                        "{checkin.dificuldades_texto}"
-                      </p>
-                    ) : (
-                      <p className="text-slate-500 text-sm italic">Sem dificuldades registradas.</p>
-                    )}
-                  </div>
-
-                  {/* TAREFAS */}
-                  <div className="bg-gradient-to-br from-slate-800/50 via-slate-800/30 to-slate-900/50 backdrop-blur-xl border border-slate-700/30 rounded-2xl p-6 shadow-xl hover:shadow-2xl hover:border-slate-700/50 transition-all duration-300">
-                    <div className="flex items-center gap-3 mb-4">
-                      <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                      <p className="text-sm font-bold text-white">Tarefas Executadas</p>
-                    </div>
-                    {checkin?.tarefas_executadas?.length ? (
-                      <ul className="space-y-2.5">
-                        {(checkin.tarefas_executadas as string[]).map((task, i) => (
-                          <li key={i} className="flex gap-3 text-sm">
-                            <span className="text-emerald-400 font-bold flex-shrink-0 mt-0.5">✓</span>
-                            <span className="text-slate-300">{task}</span>
-                          </li>
+                    {/* ── TABS: Pendências / Financeiro / Calls ─────────── */}
+                    <div>
+                      <div className="flex gap-1 bg-slate-100 rounded-xl p-1 mb-4">
+                        {([
+                          { id: "pendencias", label: "Pendências", icon: CheckCircle2 },
+                          { id: "financeiro", label: "Financeiro", icon: DollarSign },
+                          { id: "calls", label: "Análise de Call", icon: Phone },
+                        ] as const).map(tab => (
+                          <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition-all ${
+                              activeTab === tab.id ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                            }`}>
+                            <tab.icon className="w-3.5 h-3.5" />
+                            {tab.label}
+                            {tab.id === "pendencias" && tarefasVencidas > 0 && (
+                              <span className="w-4 h-4 bg-red-500 rounded-full text-white text-[9px] flex items-center justify-center">{tarefasVencidas}</span>
+                            )}
+                          </button>
                         ))}
-                      </ul>
-                    ) : (
-                      <p className="text-slate-500 text-sm italic">Nenhuma tarefa registrada.</p>
+                      </div>
+
+                      {activeTab === "pendencias" && <PendenciasSection key={selectedId} mentoradoId={selectedId} mentorId={mentorId} />}
+                      {activeTab === "financeiro" && <FinanceiroSection key={selectedId} mentoradoId={selectedId} mentorId={mentorId} />}
+                      {activeTab === "calls" && (
+                        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center">
+                                <Sparkles className="w-4 h-4 text-purple-600" />
+                              </div>
+                              <h3 className="text-sm font-semibold text-slate-900">Análise de Call com IA</h3>
+                            </div>
+                            <button onClick={() => setShowAnalisarCall(true)}
+                              className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-xl transition-colors">
+                              <Zap className="w-3.5 h-3.5" /> Analisar Call
+                            </button>
+                          </div>
+                          <p className="text-sm text-slate-400">Cole a transcrição de uma call e a IA extrai automaticamente as tarefas da mentorada e os compromissos da equipe.</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {!checkin && (
+                      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 text-center">
+                        <BarChart3 className="w-10 h-10 text-slate-200 mx-auto mb-3" />
+                        <p className="text-sm text-slate-500 mb-4">Nenhum check-in recebido ainda.</p>
+                        <button onClick={copiarLinkCheckin}
+                          className="inline-flex items-center gap-2 px-4 py-2.5 bg-teal-600 text-white text-sm font-semibold rounded-xl hover:bg-teal-700 transition-colors">
+                          <Link2 className="w-4 h-4" /> Copiar Link de Check-in
+                        </button>
+                      </div>
                     )}
                   </div>
-                </div>
-              </>
-            ) : (
-              <div className="flex items-center justify-center h-96">
-                <p className="text-slate-500">Selecione um mentorado na sidebar.</p>
+                )}
               </div>
-            )}
-          </div>
-        </div>
-      </main>
+            </div>
+          )}
 
-      {/* ── MODAL: ANALISAR CALL ── */}
+          {/* ══ CALENDÁRIO ════════════════════════════════════════════════ */}
+          {ckView === "calendario" && mentorId && (
+            <div className="p-6">
+              <CalendarioView mentorId={mentorId} mentorados={mentorados} onAgendar={() => setShowSessaoModal(true)} />
+            </div>
+          )}
+
+          {/* ══ HISTÓRICO ═════════════════════════════════════════════════ */}
+          {ckView === "historico" && (
+            <div className="p-6">
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 text-center">
+                <History className="w-10 h-10 text-slate-200 mx-auto mb-3" />
+                <p className="text-slate-500 text-sm">Selecione um mentorado na aba Mentorados e clique em "Histórico" no menu do perfil.</p>
+              </div>
+            </div>
+          )}
+
+          {/* ══ CONFIGURAÇÕES ═════════════════════════════════════════════ */}
+          {ckView === "config" && (
+            <div className="p-6 max-w-lg">
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
+                <h3 className="font-semibold text-slate-900">Perfil do Mentor</h3>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Nome</label>
+                  <input value={perfilEdit.nome || mentorNome} onChange={e => setPerfilEdit(p => ({ ...p, nome: e.target.value }))}
+                    className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm text-slate-900 focus:outline-none focus:border-teal-500" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Nicho Foco</label>
+                  <input value={perfilEdit.nicho_foco} onChange={e => setPerfilEdit(p => ({ ...p, nicho_foco: e.target.value }))}
+                    className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm text-slate-900 focus:outline-none focus:border-teal-500" />
+                </div>
+                <button onClick={salvarPerfil} disabled={salvandoPerfil}
+                  className="w-full py-2.5 bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold rounded-xl disabled:opacity-50 transition-colors">
+                  {salvandoPerfil ? "Salvando..." : "Salvar"}
+                </button>
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
+
+      {/* ══ MODAIS ════════════════════════════════════════════════════════ */}
+
+      {/* Modal: Sessão */}
+      {showSessaoModal && mentorId && (
+        <SessaoModal
+          mentorId={mentorId}
+          mentorados={mentorados.map(m => ({ id: m.id, nome: m.nome }))}
+          mentoradoIdInicial={selectedId}
+          onClose={() => setShowSessaoModal(false)}
+          onCriado={() => { setShowSessaoModal(false); carregarOverview() }}
+        />
+      )}
+
+      {/* Modal: Analisar Call */}
       {showAnalisarCall && selected && mentorId && (
         <AnalisarCallModal
           mentoradoId={selected.id}
@@ -1224,364 +831,42 @@ export default function DashboardPage() {
         />
       )}
 
-      {/* ── DROPDOWN MENU PERFIL (Portal — fora do stacking context) ── */}
-      {showMenuPerfil && typeof document !== "undefined" && createPortal(
-        <div
-          className="fixed right-4 top-16 w-72 bg-slate-900 border border-slate-700/60 rounded-xl shadow-2xl shadow-black/80 overflow-hidden"
-          style={{ zIndex: 99999 }}
-          ref={menuPerfilRef}
-        >
-          {/* Header */}
-          <div className="px-4 py-3 border-b border-slate-700/30 bg-gradient-to-r from-blue-600/10 to-purple-600/10">
-            <p className="text-sm font-bold text-white">{mentorNome}</p>
-            <p className="text-xs text-slate-400 mt-0.5">Mentor ativo</p>
-          </div>
-          {/* Mentorado atual */}
-          {selected && (
-            <div className="px-4 py-3 border-b border-slate-700/30 bg-slate-800/40">
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Mentorado Atual</p>
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-xs font-bold flex-shrink-0">
-                  {selected.nome.split(" ").map((n: string) => n[0]).join("").slice(0, 2)}
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-white">{selected.nome}</p>
-                  <p className="text-[10px] text-slate-400">{selected.nicho} · desde {selected.data_inicio}</p>
-                </div>
-              </div>
-            </div>
-          )}
-          {/* Ações */}
-          <div className="p-2">
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-2 mb-1">Mentorado</p>
-            <button onClick={() => { setShowHistoricoModal(true); setShowMenuPerfil(false) }}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 transition-colors text-left group">
-              <div className="w-7 h-7 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                <History className="w-3.5 h-3.5 text-blue-400" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm text-white font-medium">Histórico Completo</p>
-                <p className="text-[10px] text-slate-400">{historico.length} semanas de dados</p>
-              </div>
-              <ChevronRight className="w-3.5 h-3.5 text-slate-500" />
-            </button>
-            <button onClick={() => {
-                if (selected) { setEditData({ nome: selected.nome, nicho: selected.nicho, foco_macro: selected.foco_macro, status: "Ativo", cidade: selected.cidade || "", data_fim: selected.data_fim || "", faturamento_atual: selected.faturamento_atual?.toString() || "", meta_faturamento: selected.meta_faturamento?.toString() || "" }); setShowEditModal(true) }
-                setShowMenuPerfil(false)
-              }}
-              disabled={!selected}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 transition-colors text-left group disabled:opacity-40">
-              <div className="w-7 h-7 rounded-lg bg-amber-500/20 flex items-center justify-center">
-                <Edit2 className="w-3.5 h-3.5 text-amber-400" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm text-white font-medium">Editar Mentorado</p>
-                <p className="text-[10px] text-slate-400">Alterar dados e foco</p>
-              </div>
-              <ChevronRight className="w-3.5 h-3.5 text-slate-500" />
-            </button>
-            <div className="border-t border-slate-700/30 my-2" />
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-2 mb-1">Conta</p>
-            <button onClick={() => { setShowPerfilModal(true); setShowMenuPerfil(false) }}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 transition-colors text-left group">
-              <div className="w-7 h-7 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                <User className="w-3.5 h-3.5 text-purple-400" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm text-white font-medium">Meu Perfil</p>
-                <p className="text-[10px] text-slate-400">Método, filosofia e nicho</p>
-              </div>
-              <ChevronRight className="w-3.5 h-3.5 text-slate-500" />
-            </button>
-            <button onClick={() => { localStorage.removeItem("mentorSelecionado"); window.location.href = "/" }}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-red-500/10 transition-colors text-left">
-              <div className="w-7 h-7 rounded-lg bg-red-500/20 flex items-center justify-center">
-                <LogOut className="w-3.5 h-3.5 text-red-400" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm text-red-300 font-medium">Trocar Mentor</p>
-                <p className="text-[10px] text-slate-400">Voltar para seleção</p>
-              </div>
-            </button>
-          </div>
-        </div>,
-        document.body
-      )}
-
-      {/* ── MODAL: PERFIL DO MENTOR ── */}
-      {showPerfilModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => { setShowPerfilModal(false); setEditandoPerfil(false) }}>
-          <div className="bg-slate-900 border border-slate-700/50 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-            {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-slate-700/30">
-              <div className="flex items-center gap-4">
-                {/* Avatar com upload */}
-                <label className="relative cursor-pointer group">
-                  <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-slate-600 group-hover:border-blue-500 transition-colors">
-                    {mentorDados?.foto_url ? (
-                      <img src={mentorDados.foto_url} alt={mentorNome} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-lg font-bold">
-                        {mentorNome.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      {uploadingFoto === mentorId ? (
-                        <RefreshCw className="w-5 h-5 text-white animate-spin" />
-                      ) : (
-                        <span className="text-white text-xs font-bold">FOTO</span>
-                      )}
-                    </div>
-                  </div>
-                  <input type="file" accept="image/*" className="hidden" onChange={e => {
-                    const file = e.target.files?.[0]
-                    if (file && mentorId) uploadFoto(file, "mentor", mentorId)
-                  }} />
-                </label>
-                <div>
-                  <h2 className="text-xl font-bold text-white">{mentorNome}</h2>
-                  <p className="text-xs text-slate-400">Clique na foto para alterar</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                {!editandoPerfil ? (
-                  <button onClick={() => { setEditandoPerfil(true); setPerfilEdit({ nome: mentorDados?.nome || mentorNome, nicho_foco: mentorDados?.nicho_foco || "", metodo_trabalho: mentorDados?.metodo_trabalho || "", filosofia: mentorDados?.filosofia || "" }) }}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-500/15 border border-blue-500/30 text-blue-300 hover:bg-blue-500/25 transition-all">
-                    <Edit2 className="w-3.5 h-3.5" /> Editar
-                  </button>
-                ) : (
-                  <button onClick={() => { setEditandoPerfil(false) }}
-                    className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition-colors">
-                    Cancelar
-                  </button>
-                )}
-                <button onClick={() => { setShowPerfilModal(false); setEditandoPerfil(false) }} className="p-2 hover:bg-slate-800/50 rounded-lg transition-colors">
-                  <X className="w-5 h-5 text-slate-400" />
-                </button>
-              </div>
-            </div>
-
-            <div className="p-6 space-y-4">
-              {!editandoPerfil ? (
-                /* VIEW MODE */
-                <>
-                  <div className="bg-slate-800/40 border border-slate-700/30 rounded-xl p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Briefcase className="w-4 h-4 text-blue-400" />
-                      <p className="text-xs font-bold text-blue-400 uppercase tracking-widest">Método de Trabalho</p>
-                    </div>
-                    <p className="text-sm text-slate-300 leading-relaxed">{mentorDados?.metodo_trabalho || "—"}</p>
-                  </div>
-                  <div className="bg-slate-800/40 border border-slate-700/30 rounded-xl p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                      <BookOpen className="w-4 h-4 text-purple-400" />
-                      <p className="text-xs font-bold text-purple-400 uppercase tracking-widest">Filosofia</p>
-                    </div>
-                    <p className="text-sm text-slate-300 leading-relaxed">{mentorDados?.filosofia || "—"}</p>
-                  </div>
-                  <div className="bg-slate-800/40 border border-slate-700/30 rounded-xl p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Target className="w-4 h-4 text-emerald-400" />
-                      <p className="text-xs font-bold text-emerald-400 uppercase tracking-widest">Nicho Foco</p>
-                    </div>
-                    <p className="text-sm text-slate-300">{mentorDados?.nicho_foco || "—"}</p>
-                  </div>
-                </>
-              ) : (
-                /* EDIT MODE */
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1.5">Nome</label>
-                    <input value={perfilEdit.nome} onChange={e => setPerfilEdit(p => ({ ...p, nome: e.target.value }))}
-                      className="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors text-sm" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1.5">Nicho Foco</label>
-                    <input value={perfilEdit.nicho_foco} onChange={e => setPerfilEdit(p => ({ ...p, nicho_foco: e.target.value }))}
-                      className="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors text-sm" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-blue-400 uppercase tracking-widest mb-1.5">Método de Trabalho</label>
-                    <textarea value={perfilEdit.metodo_trabalho} onChange={e => setPerfilEdit(p => ({ ...p, metodo_trabalho: e.target.value }))} rows={6}
-                      className="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors text-sm resize-none" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-purple-400 uppercase tracking-widest mb-1.5">Filosofia</label>
-                    <textarea value={perfilEdit.filosofia} onChange={e => setPerfilEdit(p => ({ ...p, filosofia: e.target.value }))} rows={5}
-                      className="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-purple-500 transition-colors text-sm resize-none" />
-                  </div>
-                  <button onClick={salvarPerfil} disabled={salvandoPerfil}
-                    className="w-full py-2.5 rounded-lg text-sm font-bold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white disabled:opacity-50 transition-all">
-                    {salvandoPerfil ? "Salvando..." : "Salvar Perfil"}
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── MODAL: HISTÓRICO DO MENTORADO ── */}
-      {showHistoricoModal && selected && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setShowHistoricoModal(false)}>
-          <div className="bg-slate-900/98 border border-slate-700/50 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-6 border-b border-slate-700/30">
-              <div>
-                <h2 className="text-xl font-bold text-white">Histórico — {selected.nome}</h2>
-                <p className="text-xs text-slate-400 mt-1">{historico.length} semanas de dados · {selected.nicho}</p>
-              </div>
-              <button onClick={() => setShowHistoricoModal(false)} className="p-2 hover:bg-slate-800/50 rounded-lg transition-colors">
-                <X className="w-5 h-5 text-slate-400" />
-              </button>
-            </div>
-            <div className="p-6">
-              {historico.length === 0 ? (
-                <p className="text-slate-400 text-center py-8">Nenhum check-in registrado ainda.</p>
-              ) : (
-                <div className="space-y-3">
-                  {/* Resumo do mentorado */}
-                  <div className="grid grid-cols-3 gap-3 mb-6">
-                    <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 text-center">
-                      <p className="text-2xl font-bold text-emerald-400">{historico[0]?.leads_gerados ?? "—"}</p>
-                      <p className="text-[10px] text-emerald-400/70 uppercase tracking-widest mt-1">Leads (última sem.)</p>
-                    </div>
-                    <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-3 text-center">
-                      <p className="text-2xl font-bold text-purple-400">R$ {historico[0]?.vendas_reais?.toLocaleString("pt-BR") ?? "—"}</p>
-                      <p className="text-[10px] text-purple-400/70 uppercase tracking-widest mt-1">Vendas (última sem.)</p>
-                    </div>
-                    <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-3 text-center">
-                      <p className="text-2xl font-bold text-blue-400">{historico.length}</p>
-                      <p className="text-[10px] text-blue-400/70 uppercase tracking-widest mt-1">Semanas de dados</p>
-                    </div>
-                  </div>
-
-                  {/* Tabela histórico */}
-                  <div className="overflow-x-auto rounded-xl border border-slate-700/30">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="bg-slate-800/50">
-                          <th className="text-left px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Data</th>
-                          <th className="text-right px-4 py-3 text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Leads</th>
-                          <th className="text-right px-4 py-3 text-[10px] font-bold text-purple-500 uppercase tracking-widest">Vendas</th>
-                          <th className="text-right px-4 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Invest.</th>
-                          <th className="text-right px-4 py-3 text-[10px] font-bold text-amber-500 uppercase tracking-widest">ROI%</th>
-                          <th className="text-right px-4 py-3 text-[10px] font-bold text-cyan-500 uppercase tracking-widest">Vídeos</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {[...historico].reverse().map((c, i) => {
-                          const roi = c.investimento_trafego > 0
-                            ? (((c.vendas_reais - c.investimento_trafego) / c.investimento_trafego) * 100).toFixed(0)
-                            : "—"
-                          const isLast = i === historico.length - 1
-                          return (
-                            <tr key={c.id} className={`border-t border-slate-700/20 ${isLast ? "bg-blue-500/5" : "hover:bg-slate-800/30"} transition-colors`}>
-                              <td className="px-4 py-3 text-slate-300">
-                                <div className="flex items-center gap-2">
-                                  {isLast && <span className="w-1.5 h-1.5 rounded-full bg-blue-400 inline-block" />}
-                                  {new Date(c.data_envio).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "2-digit" })}
-                                </div>
-                              </td>
-                              <td className="px-4 py-3 text-right font-semibold text-emerald-400">{c.leads_gerados}</td>
-                              <td className="px-4 py-3 text-right font-semibold text-purple-400">R$ {c.vendas_reais?.toLocaleString("pt-BR")}</td>
-                              <td className="px-4 py-3 text-right text-slate-400">R$ {c.investimento_trafego?.toLocaleString("pt-BR")}</td>
-                              <td className={`px-4 py-3 text-right font-bold ${Number(roi) > 0 ? "text-emerald-400" : "text-red-400"}`}>{roi}%</td>
-                              <td className="px-4 py-3 text-right text-cyan-400">{c.videos_postados ?? "—"}</td>
-                            </tr>
-                          )
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  {/* Dificuldades do último checkin */}
-                  {historico[0]?.dificuldades_texto && (
-                    <div className="mt-4 bg-amber-500/10 border border-amber-500/20 rounded-xl p-4">
-                      <p className="text-[10px] font-bold text-amber-400 uppercase tracking-widest mb-2">Última dificuldade relatada</p>
-                      <p className="text-sm text-slate-300">{historico[0].dificuldades_texto}</p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── MODAL: CADASTRAR MENTORADO ── */}
+      {/* Modal: Cadastrar Mentorado */}
       {showCadastro && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-          onClick={() => setShowCadastro(false)}
-        >
-          <div
-            className="w-full max-w-md bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700/50 rounded-2xl p-6 shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between mb-5">
-              <div className="flex items-center gap-2">
-                <div className="w-9 h-9 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                  <UserPlus className="w-5 h-5 text-blue-400" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4" onClick={() => setShowCadastro(false)}>
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-teal-50 flex items-center justify-center">
+                  <UserPlus className="w-5 h-5 text-teal-600" />
                 </div>
-                <h2 className="text-lg font-bold text-white">Cadastrar Mentorado</h2>
+                <h2 className="text-base font-semibold text-slate-900">Novo Mentorado</h2>
               </div>
-              <button onClick={() => setShowCadastro(false)} className="text-slate-400 hover:text-white transition-colors">
-                <X className="w-5 h-5" />
-              </button>
+              <button onClick={() => setShowCadastro(false)} className="p-2 hover:bg-slate-100 rounded-lg"><X className="w-5 h-5 text-slate-400" /></button>
             </div>
-
-            <form onSubmit={cadastrarMentorado} className="space-y-4">
+            <form onSubmit={cadastrarMentorado} className="p-6 space-y-4">
+              {[
+                { label: "Nome Completo", key: "nome", placeholder: "Ex: Ana Silva" },
+                { label: "Nicho de Atuação", key: "nicho", placeholder: "Ex: Marketing Digital" },
+                { label: "Foco Macro", key: "foco_macro", placeholder: "Ex: Estruturação Comercial" },
+              ].map(f => (
+                <div key={f.key}>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">{f.label}</label>
+                  <input required value={(novo as any)[f.key]} onChange={e => setNovo(n => ({ ...n, [f.key]: e.target.value }))}
+                    placeholder={f.placeholder}
+                    className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-lg text-sm text-slate-900 focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20" />
+                </div>
+              ))}
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Nome *</label>
-                <input
-                  autoFocus required
-                  value={novo.nome}
-                  onChange={(e) => setNovo({ ...novo, nome: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/60 transition-colors"
-                  placeholder="Ex: João Silva"
-                />
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Data de Início</label>
+                <input type="date" required value={novo.data_inicio} onChange={e => setNovo(n => ({ ...n, data_inicio: e.target.value }))}
+                  className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-lg text-sm text-slate-900 focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20" />
               </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Nicho</label>
-                <input
-                  value={novo.nicho}
-                  onChange={(e) => setNovo({ ...novo, nicho: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/60 transition-colors"
-                  placeholder="Ex: Tráfego Local"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Foco Macro</label>
-                <input
-                  value={novo.foco_macro}
-                  onChange={(e) => setNovo({ ...novo, foco_macro: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/60 transition-colors"
-                  placeholder="Ex: Estruturação Comercial"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Data de Início</label>
-                <input
-                  type="date"
-                  value={novo.data_inicio}
-                  onChange={(e) => setNovo({ ...novo, data_inicio: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500/60 transition-colors [color-scheme:dark]"
-                />
-              </div>
-
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowCadastro(false)}
-                  className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold bg-slate-700/50 hover:bg-slate-700 text-slate-300 transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={salvando || !novo.nome.trim()}
-                  className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                >
+              <div className="flex gap-3 pt-1">
+                <button type="button" onClick={() => setShowCadastro(false)}
+                  className="flex-1 py-2.5 rounded-lg text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">Cancelar</button>
+                <button type="submit" disabled={salvando}
+                  className="flex-1 py-2.5 rounded-lg text-sm font-semibold text-white bg-teal-600 hover:bg-teal-700 disabled:opacity-50 transition-colors">
                   {salvando ? "Salvando..." : "Cadastrar"}
                 </button>
               </div>
@@ -1590,133 +875,70 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* ── MODAL: EDITAR MENTORADO ── */}
-      {showEditModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-          onClick={() => setShowEditModal(false)}
-        >
-          <div
-            className="w-full max-w-md bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700/50 rounded-2xl p-6 shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between mb-5">
+      {/* Modal: Editar Mentorado */}
+      {showEditModal && selected && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 overflow-y-auto" onClick={() => setShowEditModal(false)}>
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg my-4" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
               <div className="flex items-center gap-3">
-                {/* Avatar mentorado com upload */}
-                <label className="relative cursor-pointer group">
-                  <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-slate-600 group-hover:border-amber-500 transition-colors">
-                    {selected?.foto_url ? (
-                      <img src={selected.foto_url} alt={selected?.nome} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-sm font-bold">
-                        {selected?.nome.split(" ").map((n: string) => n[0]).join("").slice(0, 2)}
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      {uploadingFoto === selectedId ? (
-                        <RefreshCw className="w-4 h-4 text-white animate-spin" />
-                      ) : (
-                        <span className="text-white text-[10px] font-bold">FOTO</span>
-                      )}
-                    </div>
+                <label className="cursor-pointer">
+                  <div className="w-9 h-9 rounded-full overflow-hidden ring-2 ring-slate-200 hover:ring-teal-500 transition-all">
+                    {selected.foto_url
+                      ? <img src={selected.foto_url} alt={selected.nome} className="w-full h-full object-cover" />
+                      : <div className="w-full h-full bg-slate-900 flex items-center justify-center text-xs font-bold text-white">{selected.nome.slice(0, 2).toUpperCase()}</div>}
                   </div>
                   <input type="file" accept="image/*" className="hidden" onChange={e => {
                     const file = e.target.files?.[0]
                     if (file && selectedId) uploadFoto(file, "mentorado", selectedId)
                   }} />
                 </label>
-                <h2 className="text-lg font-bold text-white">Editar Mentorado</h2>
+                <h2 className="text-base font-semibold text-slate-900">Editar Mentorado</h2>
               </div>
-              <button onClick={() => setShowEditModal(false)} className="text-slate-400 hover:text-white transition-colors">
-                <X className="w-5 h-5" />
-              </button>
+              <button onClick={() => setShowEditModal(false)} className="p-2 hover:bg-slate-100 rounded-lg"><X className="w-5 h-5 text-slate-400" /></button>
             </div>
-
-            <form onSubmit={editarMentorado} className="space-y-4">
+            <form onSubmit={editarMentorado} className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+              {[
+                { label: "Nome", key: "nome" }, { label: "Nicho", key: "nicho" },
+                { label: "Foco Macro", key: "foco_macro" }, { label: "Cidade", key: "cidade" },
+                { label: "Meta/Ação da Semana", key: "meta_atual" },
+              ].map(f => (
+                <div key={f.key}>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">{f.label}</label>
+                  <input value={(editData as any)[f.key]} onChange={e => setEditData(d => ({ ...d, [f.key]: e.target.value }))}
+                    className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm text-slate-900 focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20" />
+                </div>
+              ))}
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Nome *</label>
-                <input
-                  autoFocus required
-                  value={editData.nome}
-                  onChange={(e) => setEditData({ ...editData, nome: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/60 transition-colors"
-                  placeholder="Nome do mentorado"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Nicho</label>
-                <input
-                  value={editData.nicho}
-                  onChange={(e) => setEditData({ ...editData, nicho: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/60 transition-colors"
-                  placeholder="Nicho de atuação"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Foco Macro</label>
-                <input
-                  value={editData.foco_macro}
-                  onChange={(e) => setEditData({ ...editData, foco_macro: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/60 transition-colors"
-                  placeholder="Foco principal"
-                />
-              </div>
-
-              {/* Novos campos */}
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Cidade</label>
-                <input value={editData.cidade} onChange={e => setEditData({ ...editData, cidade: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/60 transition-colors"
-                  placeholder="Ex: São Paulo - SP" />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Término da Mentoria</label>
-                <input type="date" value={editData.data_fim} onChange={e => setEditData({ ...editData, data_fim: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-blue-500/60 transition-colors" />
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Término da Mentoria</label>
+                <input type="date" value={editData.data_fim} onChange={e => setEditData(d => ({ ...d, data_fim: e.target.value }))}
+                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm text-slate-900 focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20" />
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Faturamento Atual (R$)</label>
-                  <input type="number" value={editData.faturamento_atual} onChange={e => setEditData({ ...editData, faturamento_atual: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/60 transition-colors"
-                    placeholder="8000" />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Meta 12 Meses (R$)</label>
-                  <input type="number" value={editData.meta_faturamento} onChange={e => setEditData({ ...editData, meta_faturamento: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/60 transition-colors"
-                    placeholder="50000" />
-                </div>
+                {[
+                  { label: "Faturamento Atual (R$)", key: "faturamento_atual", ph: "8000" },
+                  { label: "Meta 12 Meses (R$)", key: "meta_faturamento", ph: "50000" },
+                ].map(f => (
+                  <div key={f.key}>
+                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">{f.label}</label>
+                    <input type="number" value={(editData as any)[f.key]} placeholder={f.ph}
+                      onChange={e => setEditData(d => ({ ...d, [f.key]: e.target.value }))}
+                      className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm text-slate-900 focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20" />
+                  </div>
+                ))}
               </div>
-
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowEditModal(false)}
-                  className="px-4 py-2.5 rounded-lg text-sm font-semibold bg-slate-700/50 hover:bg-slate-700 text-slate-300 transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={editando || !editData.nome.trim()}
-                  className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white shadow-lg shadow-amber-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                >
+              <div className="flex gap-3 pt-1">
+                <button type="button" onClick={() => setShowEditModal(false)}
+                  className="flex-1 py-2.5 rounded-lg text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">Cancelar</button>
+                <button type="submit" disabled={editando}
+                  className="flex-1 py-2.5 rounded-lg text-sm font-semibold text-white bg-teal-600 hover:bg-teal-700 disabled:opacity-50 transition-colors">
                   {editando ? "Salvando..." : "Salvar Mudanças"}
                 </button>
               </div>
-
-              {/* Zona de perigo */}
-              <div className="border-t border-slate-700/40 pt-4 mt-2">
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Zona de Perigo</p>
-                <button
-                  type="button"
-                  onClick={() => { setShowEditModal(false); deletarMentorado() }}
-                  disabled={editando}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 hover:border-red-500/50 hover:text-red-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  Deletar Mentorado permanentemente
+              <div className="border-t border-slate-100 pt-4 mt-2">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Zona de Perigo</p>
+                <button type="button" onClick={() => { if (selectedId) deletarMentorado(selectedId) }}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 transition-colors">
+                  <Trash2 className="w-4 h-4" /> Deletar Mentorado
                 </button>
               </div>
             </form>
@@ -1724,9 +946,105 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Modal de Histórico */}
-      {selectedMetric && <HistoryModal metric={selectedMetric} />}
+      {/* Modal: Histórico */}
+      {showHistoricoModal && selected && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4" onClick={() => setShowHistoricoModal(false)}>
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[80vh] overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
+              <h2 className="text-base font-semibold text-slate-900">Histórico — {selected.nome}</h2>
+              <button onClick={() => setShowHistoricoModal(false)} className="p-2 hover:bg-slate-100 rounded-lg"><X className="w-5 h-5 text-slate-400" /></button>
+            </div>
+            <div className="overflow-y-auto max-h-[60vh] p-6">
+              {historico.length === 0 ? (
+                <p className="text-slate-400 text-sm text-center py-8">Nenhum histórico disponível.</p>
+              ) : (
+                <div className="space-y-4">
+                  {historico.map((h, i) => (
+                    <div key={h.id} className={`p-4 rounded-xl border ${i === 0 ? "border-teal-200 bg-teal-50" : "border-slate-200 bg-slate-50"}`}>
+                      <p className="text-xs font-bold text-slate-500 mb-2">{i === 0 ? "✓ Atual" : `Semana -${i}`} · {h.data_envio?.slice(0, 10)}</p>
+                      <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
+                        <span className="text-slate-500">Leads: <span className="font-bold text-slate-800">{h.leads_gerados}</span></span>
+                        <span className="text-slate-500">Vendas: <span className="font-bold text-teal-700">R${h.vendas_reais?.toLocaleString("pt-BR")}</span></span>
+                        <span className="text-slate-500">Investimento: <span className="font-bold text-slate-800">R${h.investimento_trafego?.toLocaleString("pt-BR")}</span></span>
+                        <span className="text-slate-500">Vídeos: <span className="font-bold text-slate-800">{h.videos_postados}</span></span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Perfil do Mentor */}
+      {showPerfilModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4" onClick={() => setShowPerfilModal(false)}>
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
+              <h2 className="text-base font-semibold text-slate-900">Meu Perfil</h2>
+              <button onClick={() => setShowPerfilModal(false)} className="p-2 hover:bg-slate-100 rounded-lg"><X className="w-5 h-5 text-slate-400" /></button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="flex justify-center mb-2">
+                <label className="cursor-pointer">
+                  <div className="w-20 h-20 rounded-2xl overflow-hidden ring-4 ring-slate-100 hover:ring-teal-300 transition-all">
+                    {mentorDados?.foto_url
+                      ? <img src={mentorDados.foto_url} alt={mentorNome} className="w-full h-full object-cover" />
+                      : <div className="w-full h-full bg-slate-900 flex items-center justify-center text-2xl font-bold text-white">{mentorNome.slice(0, 2).toUpperCase()}</div>}
+                  </div>
+                  <input type="file" accept="image/*" className="hidden" onChange={e => {
+                    const file = e.target.files?.[0]
+                    if (file && mentorId) uploadFoto(file, "mentor", mentorId)
+                  }} />
+                </label>
+              </div>
+              {!editandoPerfil ? (
+                <>
+                  <div className="text-center">
+                    <p className="text-lg font-bold text-slate-900">{mentorDados?.nome || mentorNome}</p>
+                    <p className="text-sm text-teal-600 font-medium mt-0.5">{mentorDados?.nicho_foco || "—"}</p>
+                  </div>
+                  <button onClick={() => { setPerfilEdit({ nome: mentorDados?.nome || "", nicho_foco: mentorDados?.nicho_foco || "", metodo_trabalho: mentorDados?.metodo_trabalho || "", filosofia: mentorDados?.filosofia || "" }); setEditandoPerfil(true) }}
+                    className="w-full py-2.5 rounded-lg text-sm font-semibold text-white bg-teal-600 hover:bg-teal-700 transition-colors">
+                    Editar Perfil
+                  </button>
+                </>
+              ) : (
+                <>
+                  {[
+                    { label: "Nome", key: "nome" }, { label: "Nicho Foco", key: "nicho_foco" },
+                    { label: "Método de Trabalho", key: "metodo_trabalho" }, { label: "Filosofia", key: "filosofia" },
+                  ].map(f => (
+                    <div key={f.key}>
+                      <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">{f.label}</label>
+                      <input value={(perfilEdit as any)[f.key]} onChange={e => setPerfilEdit(p => ({ ...p, [f.key]: e.target.value }))}
+                        className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm text-slate-900 focus:outline-none focus:border-teal-500" />
+                    </div>
+                  ))}
+                  <div className="flex gap-3">
+                    <button onClick={() => setEditandoPerfil(false)}
+                      className="flex-1 py-2.5 rounded-lg text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">Cancelar</button>
+                    <button onClick={salvarPerfil} disabled={salvandoPerfil}
+                      className="flex-1 py-2.5 rounded-lg text-sm font-semibold text-white bg-teal-600 hover:bg-teal-700 disabled:opacity-50 transition-colors">
+                      {salvandoPerfil ? "Salvando..." : "Salvar"}
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
-// Force rebuild sex, 29 de mai de 2026 14:54:36
+
+// Componente auxiliar Users (não importado do lucide por conflito)
+function Users({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+    </svg>
+  )
+}
