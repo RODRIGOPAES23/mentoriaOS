@@ -19,20 +19,8 @@ import { CSS } from "@dnd-kit/utilities"
 import Sidebar, { CkView } from "@/components/ck/Sidebar"
 import VisaoGeral from "@/components/ck/VisaoGeral"
 import SessaoModal from "@/components/ck/SessaoModal"
-
-// ── CORES PLECTO NAVY ─────────────────────────────────────────────────────────
-const C = {
-  bg:     "#0c1c2c",
-  card:   "#0f2540",
-  card2:  "#112a4a",
-  border: "#1e3a5f",
-  muted:  "#4d7fa8",
-  green:  "#00d68f",
-  blue:   "#4c9aff",
-  amber:  "#f59e0b",
-  red:    "#f05252",
-  violet: "#a78bfa",
-}
+import { useLocalStorage } from "@/hooks/useLocalStorage"
+import { C } from "@/utils/theme"
 
 // ── INTERFACES ────────────────────────────────────────────────────────────────
 interface Mentorado {
@@ -67,9 +55,10 @@ function gerarBriefing(m: Mentorado, c: CheckinRow): BriefingIA {
 function BadgeVariacao({ pct }: { pct: number | null }) {
   if (pct === null) return null
   const seta = pct > 0 ? "↑" : pct < 0 ? "↓" : "→"
-  const cor = pct > 0 ? "text-teal-600 bg-teal-50" : pct < 0 ? "text-red-500 bg-red-50" : "text-slate-400 bg-slate-100"
+  const color = pct > 0 ? C.green : pct < 0 ? C.red : C.muted
   return (
-    <span className={`inline-flex items-center gap-0.5 text-[11px] font-bold px-2 py-0.5 rounded-full ${cor}`}>
+    <span className="inline-flex items-center gap-0.5 text-[11px] font-bold px-2 py-0.5 rounded-full"
+      style={{ background: `${color}18`, color }}>
       {seta} {pct > 0 ? "+" : ""}{pct.toFixed(0)}%
     </span>
   )
@@ -85,25 +74,26 @@ function SortableMentoradoItem({ m, selectedId, onClick }: {
   const ini = m.nome.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()
 
   return (
-    <div ref={setNodeRef} style={style}
-      className={`group flex items-center gap-2.5 px-3 py-2.5 rounded-xl cursor-pointer transition-all ${
-        isSelected ? "bg-teal-600 text-white shadow-md shadow-teal-600/20" : "hover:bg-slate-100 text-slate-700"
-      }`}
+    <div ref={setNodeRef}
+      style={{ ...style, background: isSelected ? C.green : "transparent", border: `1px solid ${isSelected ? C.green : "transparent"}` }}
+      className="group flex items-center gap-2.5 px-3 py-2.5 rounded-xl cursor-pointer transition-all"
       onClick={onClick}
+      onMouseEnter={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.background = C.card2 }}
+      onMouseLeave={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.background = "transparent" }}
     >
       <div {...attributes} {...listeners} className="cursor-grab opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-        <GripVertical className="w-3.5 h-3.5 text-slate-400" />
+        <GripVertical className="w-3.5 h-3.5" style={{ color: isSelected ? "#0a1628" : C.muted }} />
       </div>
-      <div className={`w-8 h-8 rounded-full overflow-hidden shrink-0 ring-2 ${isSelected ? "ring-white/30" : "ring-slate-200"}`}>
+      <div className="w-8 h-8 rounded-full overflow-hidden shrink-0" style={{ border: `2px solid ${isSelected ? "#ffffff33" : C.border}` }}>
         {m.foto_url
           ? <img src={m.foto_url} alt={m.nome} className="w-full h-full object-cover" />
-          : <div className={`w-full h-full flex items-center justify-center text-xs font-bold ${isSelected ? "bg-white/20 text-white" : "bg-slate-900 text-white"}`}>{ini}</div>}
+          : <div className="w-full h-full flex items-center justify-center text-xs font-bold text-white" style={{ background: isSelected ? "#ffffff22" : "#0a1628" }}>{ini}</div>}
       </div>
       <div className="flex-1 min-w-0">
-        <p className={`text-sm font-semibold truncate ${isSelected ? "text-white" : "text-slate-800"}`}>{m.nome}</p>
-        <p className={`text-[10px] truncate ${isSelected ? "text-teal-100" : "text-slate-400"}`}>{m.nicho}</p>
+        <p className="text-sm font-semibold truncate" style={{ color: isSelected ? "#0a1628" : "#fff" }}>{m.nome}</p>
+        <p className="text-[10px] truncate" style={{ color: isSelected ? "#0a162899" : C.muted }}>{m.nicho}</p>
       </div>
-      <div className={`w-2 h-2 rounded-full shrink-0 ${m.status === "Ativo" ? "bg-teal-400" : "bg-slate-300"}`} />
+      <div className="w-2 h-2 rounded-full shrink-0" style={{ background: m.status === "Ativo" ? (isSelected ? "#0a1628" : C.green) : C.border }} />
     </div>
   )
 }
@@ -113,9 +103,9 @@ function CountdownDias({ dataFim }: { dataFim: string }) {
   const hoje = new Date(); hoje.setHours(0, 0, 0, 0)
   const [y, mo, d] = dataFim.split("T")[0].split("-").map(Number)
   const diff = Math.ceil((new Date(y, mo - 1, d).getTime() - hoje.getTime()) / 86400000)
-  if (diff < 0) return <span className="text-xs text-red-500 font-semibold">Encerrada há {Math.abs(diff)} dias</span>
-  const cor = diff <= 30 ? "text-red-500" : diff <= 90 ? "text-amber-500" : "text-teal-600"
-  return <span className={`text-xs font-semibold ${cor}`}>{diff} dias restantes</span>
+  if (diff < 0) return <span className="text-xs font-semibold" style={{ color: C.red }}>Encerrada há {Math.abs(diff)} dias</span>
+  const cor = diff <= 30 ? C.red : diff <= 90 ? C.amber : C.green
+  return <span className="text-xs font-semibold" style={{ color: cor }}>{diff} dias restantes</span>
 }
 
 // ── CALENDARIO VIEW ────────────────────────────────────────────────────────────
@@ -139,44 +129,46 @@ function CalendarioView({ mentorId, mentorados, onAgendar }: {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-slate-900">Calendário de Sessões</h2>
+        <h2 className="text-xl font-bold text-white">Calendário de Sessões</h2>
         <button onClick={onAgendar}
-          className="flex items-center gap-2 px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold rounded-xl transition-colors">
+          className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl transition-all"
+          style={{ background: `${C.green}18`, border: `1px solid ${C.green}44`, color: C.green }}>
           <Calendar className="w-4 h-4" /> Nova Sessão
         </button>
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100">
-          <h3 className="text-sm font-semibold text-slate-900">Próximas sessões agendadas</h3>
+      <div className="rounded-2xl overflow-hidden" style={{ background: C.card, border: `1px solid ${C.border}` }}>
+        <div className="px-6 py-4" style={{ borderBottom: `1px solid ${C.border}` }}>
+          <h3 className="text-sm font-semibold text-white">Próximas sessões agendadas</h3>
         </div>
         {loading ? (
-          <div className="p-8 text-center text-slate-400 text-sm">Carregando...</div>
+          <div className="p-8 text-center text-sm" style={{ color: C.muted }}>Carregando...</div>
         ) : sessoes.length === 0 ? (
           <div className="p-12 text-center">
-            <Calendar className="w-10 h-10 text-slate-200 mx-auto mb-3" />
-            <p className="text-sm text-slate-400">Nenhuma sessão agendada</p>
-            <button onClick={onAgendar} className="mt-4 text-teal-600 text-sm font-semibold hover:underline">
+            <Calendar className="w-10 h-10 mx-auto mb-3" style={{ color: C.border }} />
+            <p className="text-sm" style={{ color: C.muted }}>Nenhuma sessão agendada</p>
+            <button onClick={onAgendar} className="mt-4 text-sm font-semibold hover:underline" style={{ color: C.green }}>
               Agendar primeira sessão →
             </button>
           </div>
         ) : (
-          <div className="divide-y divide-slate-100">
+          <div>
             {sessoes.map(s => (
-              <div key={s.id} className="px-6 py-4 flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center shrink-0">
-                  <Calendar className="w-5 h-5 text-teal-600" />
+              <div key={s.id} className="px-6 py-4 flex items-center gap-4" style={{ borderBottom: `1px solid ${C.border}40` }}>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${C.green}18`, border: `1px solid ${C.green}30` }}>
+                  <Calendar className="w-5 h-5" style={{ color: C.green }} />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-semibold text-slate-900">{s.mentorado_nome}</p>
-                  <p className="text-xs text-slate-500 mt-0.5 capitalize">{fmtDH(s.data_hora)}</p>
+                  <p className="text-sm font-semibold text-white">{s.mentorado_nome}</p>
+                  <p className="text-xs mt-0.5 capitalize" style={{ color: C.muted }}>{fmtDH(s.data_hora)}</p>
                 </div>
                 {s.titulo && s.titulo !== "Sessão de Mentoria" && (
-                  <span className="hidden sm:block text-xs text-slate-400 bg-slate-50 border border-slate-200 px-2 py-1 rounded-lg">{s.titulo}</span>
+                  <span className="hidden sm:block text-xs px-2 py-1 rounded-lg" style={{ color: C.muted, background: C.bg, border: `1px solid ${C.border}` }}>{s.titulo}</span>
                 )}
                 {s.link_call && (
                   <a href={s.link_call} target="_blank" rel="noreferrer"
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-teal-600 text-white text-xs font-semibold rounded-lg hover:bg-teal-700 transition-colors">
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all"
+                    style={{ background: `${C.green}18`, border: `1px solid ${C.green}44`, color: C.green }}>
                     <Phone className="w-3.5 h-3.5" /> Entrar
                   </a>
                 )}
@@ -199,7 +191,6 @@ export default function DashboardPage() {
   const [checkin, setCheckin] = useState<CheckinRow | null>(null)
   const [historico, setHistorico] = useState<CheckinRow[]>([])
   const [briefing, setBriefing] = useState<BriefingIA | null>(null)
-  const [searchTerm, setSearchTerm] = useState("")
   const [loading, setLoading] = useState(true)
   const [linkCopiado, setLinkCopiado] = useState(false)
   const [mentorNome, setMentorNome] = useState<string>("CKlareza")
@@ -229,7 +220,7 @@ export default function DashboardPage() {
   const [tarefasVencidas, setTarefasVencidas] = useState(0)
   // CKlareza v5 — estado de navegação
   const [ckView, setCkView] = useState<CkView>("visao-geral")
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useLocalStorage("ck:sidebar-collapsed", false)
   const [overviewData, setOverviewData] = useState<any>(null)
   const [overviewLoading, setOverviewLoading] = useState(false)
   const [showSessaoModal, setShowSessaoModal] = useState(false)
@@ -269,7 +260,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (mentorId && ckView === "visao-geral") carregarOverview()
-  }, [mentorId, ckView, carregarOverview])
+  }, [mentorId, ckView, selectedId, carregarOverview])
 
   // ── FOTO UPLOAD ─────────────────────────────────────────────────────────────
   const uploadFoto = useCallback(async (file: File, type: "mentor" | "mentorado", id: string) => {
@@ -303,11 +294,11 @@ export default function DashboardPage() {
   }, [])
 
   // ── TAREFAS VENCIDAS (badge) ─────────────────────────────────────────────────
-  useEffect(() => {
-    if (!mentorId || mentorados.length === 0) return
+  const contarVencidas = useCallback(async () => {
+    if (!mentorId || mentorados.length === 0) { setTarefasVencidas(0); return }
     const hoje = new Date(); hoje.setHours(0, 0, 0, 0)
-    Promise.all(mentorados.map(m =>
-      fetch(`/api/dashboard/tarefas?mentoradoId=${m.id}&status=pending`)
+    const cs = await Promise.all(mentorados.map(m =>
+      fetch(`/api/dashboard/tarefas?mentoradoId=${m.id}&status=pending&t=${Date.now()}`)
         .then(r => r.json()).then(j =>
           (j.tarefas || []).filter((t: any) => {
             if (!t.data_vencimento) return false
@@ -315,8 +306,11 @@ export default function DashboardPage() {
             return new Date(y, mo - 1, d) < hoje
           }).length
         ).catch(() => 0)
-    )).then(cs => setTarefasVencidas(cs.reduce((a, b) => a + b, 0)))
+    ))
+    setTarefasVencidas(cs.reduce((a, b) => a + b, 0))
   }, [mentorados, mentorId])
+
+  useEffect(() => { contarVencidas() }, [contarVencidas])
 
   // ── SALVAR PERFIL MENTOR ─────────────────────────────────────────────────────
   const salvarPerfil = useCallback(async () => {
@@ -368,17 +362,33 @@ export default function DashboardPage() {
     } finally { setAtualizando(false) }
   }, [selectedId, mentorados])
 
-  useEffect(() => { if (selectedId) carregarCheckin() }, [selectedId])
+  // Limpa dados do mentorado anterior IMEDIATAMENTE (zero delay visual) e recarrega
+  useEffect(() => {
+    if (!selectedId) return
+    setCheckin(null); setBriefing(null); setHistorico([])
+    carregarCheckin()
+  }, [selectedId])
 
-  // ── REALTIME ─────────────────────────────────────────────────────────────────
+  // ── REALTIME ONIPRESENTE (checkins + sessoes + tarefas) ──────────────────────
   useEffect(() => {
     if (!mentorId) return
     const supabase = getRealtimeClient()
-    const ch = supabase.channel(`checkins-mentor-${mentorId}`)
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "checkins" }, () => carregarCheckin())
+    const ch = supabase.channel(`ck-dashboard-${mentorId}`)
+      // Check-in novo/atualizado → recarrega métricas + overview
+      .on("postgres_changes", { event: "*", schema: "public", table: "checkins" }, () => {
+        carregarCheckin(); carregarOverview()
+      })
+      // Sessão agendada/cancelada → atualiza próxima sessão na Visão Geral
+      .on("postgres_changes", { event: "*", schema: "public", table: "sessoes" }, () => {
+        carregarOverview()
+      })
+      // Tarefa criada/concluída/vencida → atualiza badge do header + overview
+      .on("postgres_changes", { event: "*", schema: "public", table: "tarefas" }, () => {
+        contarVencidas(); carregarOverview()
+      })
       .subscribe((s: string) => setRealtimeStatus(s === "SUBSCRIBED" ? "connected" : s === "CHANNEL_ERROR" ? "error" : "connecting"))
     return () => { supabase.removeChannel(ch) }
-  }, [mentorId, carregarCheckin])
+  }, [mentorId, carregarCheckin, carregarOverview, contarVencidas])
 
   // ── GERAR BRIEFING IA ─────────────────────────────────────────────────────
   const gerarBriefingIA = useCallback(async () => {
@@ -446,11 +456,10 @@ export default function DashboardPage() {
   }, [selectedId])
 
   // ── DERIVADOS ─────────────────────────────────────────────────────────────
-  const filtered = mentorados.filter(m =>
-    !searchTerm && !filtroSidebar
-      ? true
-      : [m.nome, m.nicho, m.cidade || ""].join(" ").toLowerCase().includes((searchTerm + filtroSidebar).toLowerCase())
-  )
+  const termoBusca = filtroSidebar.trim().toLowerCase()
+  const filtered = !termoBusca
+    ? mentorados
+    : mentorados.filter(m => [m.nome, m.nicho, m.cidade || ""].join(" ").toLowerCase().includes(termoBusca))
   const selected = mentorados.find(m => m.id === selectedId)
 
   // ── HEADER DO MÓDULO ─────────────────────────────────────────────────────
