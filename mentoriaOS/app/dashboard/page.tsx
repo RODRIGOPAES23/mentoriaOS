@@ -19,6 +19,7 @@ import { CSS } from "@dnd-kit/utilities"
 import Sidebar, { CkView } from "@/components/ck/Sidebar"
 import VisaoGeral from "@/components/ck/VisaoGeral"
 import SessaoModal from "@/components/ck/SessaoModal"
+import CallRoom from "@/components/ck/CallRoom"
 import { useLocalStorage } from "@/hooks/useLocalStorage"
 import { C } from "@/utils/theme"
 
@@ -224,6 +225,7 @@ export default function DashboardPage() {
   const [overviewData, setOverviewData] = useState<any>(null)
   const [overviewLoading, setOverviewLoading] = useState(false)
   const [showSessaoModal, setShowSessaoModal] = useState(false)
+  const [showCallRoom, setShowCallRoom] = useState(false)
 
   const dndSensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))
   const menuPerfilRef = useRef<HTMLDivElement>(null)
@@ -449,7 +451,7 @@ export default function DashboardPage() {
   const copiarLinkCheckin = useCallback(async () => {
     if (!selectedId) return
     try {
-      await navigator.clipboard.writeText(`${window.location.origin}/checkin/${selectedId}`)
+      await navigator.clipboard.writeText(`${window.location.origin}/form/${selectedId}`)
       setLinkCopiado(true)
       setTimeout(() => setLinkCopiado(false), 2000)
     } catch {}
@@ -657,10 +659,15 @@ export default function DashboardPage() {
 
                       {/* Ações rápidas */}
                       <div className="flex gap-2 mt-5 pt-5" style={{ borderTop: `1px solid ${C.border}` }}>
+                        <button onClick={() => setShowCallRoom(true)}
+                          className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-xl transition-all"
+                          style={{ background: C.green, color: "#0a1628" }}>
+                          <Phone className="w-3.5 h-3.5" /> Iniciar Chamada
+                        </button>
                         {[
                           { icon: linkCopiado ? Check : Link2, label: linkCopiado ? "Copiado!" : "Link Check-in", onClick: copiarLinkCheckin, color: C.muted },
                           { icon: RefreshCw, label: "Atualizar", onClick: () => carregarCheckin(), color: C.muted },
-                          { icon: Calendar, label: "Agendar Sessão", onClick: () => setShowSessaoModal(true), color: C.green },
+                          { icon: Calendar, label: "Agendar Sessão", onClick: () => setShowSessaoModal(true), color: C.blue },
                         ].map(btn => (
                           <button key={btn.label} onClick={btn.onClick}
                             className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl transition-all"
@@ -854,6 +861,18 @@ export default function DashboardPage() {
           mentoradoIdInicial={selectedId}
           onClose={() => setShowSessaoModal(false)}
           onCriado={() => { setShowSessaoModal(false); carregarOverview() }}
+        />
+      )}
+
+      {/* Sala de Chamada — Split Screen + Copiloto */}
+      {showCallRoom && selected && mentorId && (
+        <CallRoom
+          mentoradoId={selected.id}
+          mentorId={mentorId}
+          nomeMentorado={selected.nome}
+          nomeMentor={mentorNome}
+          briefing={briefing}
+          onClose={() => setShowCallRoom(false)}
         />
       )}
 
