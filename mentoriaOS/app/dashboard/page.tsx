@@ -6,7 +6,7 @@ import {
   Search, Bell, TrendingUp, TrendingDown, Minus, Target, BarChart3, Zap, CheckCircle2,
   AlertCircle, Clock, Link2, Copy, Check, UserPlus, X, RefreshCw, Edit2, Trash2,
   LogOut, User, History, ChevronRight, Calendar, Briefcase, BookOpen, GripVertical,
-  DollarSign, Phone, MapPin, Filter, ChevronDown, Sparkles, Settings
+  DollarSign, Phone, MapPin, Filter, ChevronDown, Sparkles, Settings, MessageCircle
 } from "lucide-react"
 import type { CheckinRow } from "@/lib/supabase"
 import PendenciasSection from "@/components/PendenciasSection"
@@ -20,6 +20,7 @@ import Sidebar, { CkView } from "@/components/ck/Sidebar"
 import VisaoGeral from "@/components/ck/VisaoGeral"
 import SessaoModal from "@/components/ck/SessaoModal"
 import CallRoom from "@/components/ck/CallRoom"
+import ChatMentor from "@/components/ck/ChatMentor"
 import { useLocalStorage } from "@/hooks/useLocalStorage"
 import { C } from "@/utils/theme"
 
@@ -28,7 +29,7 @@ interface Mentorado {
   id: string; nome: string; nicho: string; status: string; foco_macro: string
   data_inicio: string; data_fim?: string; cidade?: string
   faturamento_atual?: number; meta_faturamento?: number; meta_atual?: string
-  foto_url?: string; ordem?: number
+  foto_url?: string; ordem?: number; codigo_acesso?: string
 }
 interface BriefingIA { diagnostico: string; evolucao?: string; pauta: string[] }
 
@@ -216,7 +217,7 @@ export default function DashboardPage() {
   const [salvandoPerfil, setSalvandoPerfil] = useState(false)
   const [uploadingFoto, setUploadingFoto] = useState<string | null>(null)
   const [showAnalisarCall, setShowAnalisarCall] = useState(false)
-  const [activeTab, setActiveTab] = useState<"pendencias" | "financeiro" | "calls">("pendencias")
+  const [activeTab, setActiveTab] = useState<"pendencias" | "financeiro" | "calls" | "chat">("pendencias")
   const [filtroSidebar, setFiltroSidebar] = useState("")
   const [tarefasVencidas, setTarefasVencidas] = useState(0)
   // CKlareza v5 — estado de navegação
@@ -449,13 +450,14 @@ export default function DashboardPage() {
 
   // ── COPIAR LINK ──────────────────────────────────────────────────────────
   const copiarLinkCheckin = useCallback(async () => {
-    if (!selectedId) return
+    const codigo = mentorados.find(m => m.id === selectedId)?.codigo_acesso
+    if (!codigo) return
     try {
-      await navigator.clipboard.writeText(`${window.location.origin}/form/${selectedId}`)
+      await navigator.clipboard.writeText(`${window.location.origin}/m/${codigo}`)
       setLinkCopiado(true)
       setTimeout(() => setLinkCopiado(false), 2000)
     } catch {}
-  }, [selectedId])
+  }, [selectedId, mentorados])
 
   // ── DERIVADOS ─────────────────────────────────────────────────────────────
   const termoBusca = filtroSidebar.trim().toLowerCase()
@@ -665,7 +667,7 @@ export default function DashboardPage() {
                           <Phone className="w-3.5 h-3.5" /> Iniciar Chamada
                         </button>
                         {[
-                          { icon: linkCopiado ? Check : Link2, label: linkCopiado ? "Copiado!" : "Link Check-in", onClick: copiarLinkCheckin, color: C.muted },
+                          { icon: linkCopiado ? Check : Link2, label: linkCopiado ? "Copiado!" : "Copiar Convite", onClick: copiarLinkCheckin, color: C.muted },
                           { icon: RefreshCw, label: "Atualizar", onClick: () => carregarCheckin(), color: C.muted },
                           { icon: Calendar, label: "Agendar Sessão", onClick: () => setShowSessaoModal(true), color: C.blue },
                         ].map(btn => (
@@ -754,6 +756,7 @@ export default function DashboardPage() {
                         {([
                           { id: "pendencias", label: "Pendências", icon: CheckCircle2 },
                           { id: "financeiro", label: "Financeiro", icon: DollarSign },
+                          { id: "chat", label: "Chat", icon: MessageCircle },
                           { id: "calls", label: "Análise de Call", icon: Phone },
                         ] as const).map(tab => (
                           <button key={tab.id} onClick={() => setActiveTab(tab.id)}
@@ -772,6 +775,7 @@ export default function DashboardPage() {
 
                       {activeTab === "pendencias" && <PendenciasSection key={selectedId} mentoradoId={selectedId} mentorId={mentorId} />}
                       {activeTab === "financeiro" && <FinanceiroSection key={selectedId} mentoradoId={selectedId} mentorId={mentorId} />}
+                      {activeTab === "chat" && selected && <ChatMentor key={selectedId} mentoradoId={selectedId} mentorId={mentorId} nomeMentorado={selected.nome} />}
                       {activeTab === "calls" && (
                         <div className="rounded-2xl p-6" style={{ background: C.card, border: `1px solid ${C.border}` }}>
                           <div className="flex items-center justify-between mb-4">

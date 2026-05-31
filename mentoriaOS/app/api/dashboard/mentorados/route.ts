@@ -15,7 +15,7 @@ export async function GET(request: Request) {
 
   let query = supabase
     .from("mentorados")
-    .select("id, nome, nicho, status, foco_macro, data_inicio, data_fim, cidade, faturamento_atual, meta_faturamento, foto_url, ordem")
+    .select("id, nome, nicho, status, foco_macro, data_inicio, data_fim, cidade, faturamento_atual, meta_faturamento, foto_url, ordem, codigo_acesso")
     .eq("status", "Ativo")
 
   if (mentorId) query = query.eq("mentor_id", mentorId)
@@ -56,19 +56,27 @@ export async function POST(request: Request) {
   const mentorId = body.mentor_id || url.searchParams.get("mentorId")
 
   const supabase = admin()
+  // Código de acesso único do portal do mentorado (8 chars, sem ambíguos)
+  const gerarCodigo = () => {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+    let c = ""
+    for (let i = 0; i < 8; i++) c += chars[Math.floor(Math.random() * chars.length)]
+    return c
+  }
   const insertData: any = {
     nome,
     nicho: String(body.nicho || "").trim() || "Geral",
     foco_macro: String(body.foco_macro || "").trim() || "Definir foco",
     status: "Ativo",
     data_inicio: body.data_inicio || new Date().toISOString().slice(0, 10),
+    codigo_acesso: gerarCodigo(),
   }
   if (mentorId) insertData.mentor_id = mentorId
 
   const { data, error } = await supabase
     .from("mentorados")
     .insert(insertData)
-    .select("id, nome, nicho, status, foco_macro, data_inicio")
+    .select("id, nome, nicho, status, foco_macro, data_inicio, codigo_acesso")
     .single()
 
   if (error) return Response.json({ error: error.message }, { status: 500 })
