@@ -51,13 +51,13 @@ export default function FormPage({ params }: { params: { mentoradoId: string } }
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white flex items-center justify-center p-4">
-        <div className="bg-slate-800/50 backdrop-blur-xl border border-emerald-500/40 rounded-2xl p-10 max-w-md text-center">
-          <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: "#0c1c2c", color: "#fff" }}>
+        <div className="rounded-2xl p-10 max-w-md text-center" style={{ background: "#0f2540", border: "1px solid #00d68f44" }}>
+          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl" style={{ background: "#00d68f20" }}>
             ✅
           </div>
-          <h1 className="text-2xl font-bold mb-2">Check-in enviado!</h1>
-          <p className="text-slate-400">
+          <h1 className="text-2xl font-bold mb-2 text-white">Check-in enviado!</h1>
+          <p style={{ color: "#4d7fa8" }}>
             Obrigado{mentorado ? `, ${mentorado.nome.split(" ")[0]}` : ""}! Seus dados já
             estão no painel do seu mentor.
           </p>
@@ -67,26 +67,30 @@ export default function FormPage({ params }: { params: { mentoradoId: string } }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-4">
+    <div className="min-h-screen p-4" style={{ background: "#0c1c2c", color: "#fff" }}>
       <div className="max-w-2xl mx-auto pt-10">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent mb-2">
-            mentoriaOS
-          </h1>
-          <p className="text-slate-400">
+          <div className="inline-flex items-center gap-2.5 mb-3">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "#00d68f20", border: "1px solid #00d68f44" }}>
+              <span style={{ color: "#00d68f", fontSize: 18 }}>✦</span>
+            </div>
+            <h1 className="text-2xl font-bold text-white tracking-tight">CKlareza</h1>
+          </div>
+          <p style={{ color: "#4d7fa8" }}>
             Check-in Semanal{mentorado ? ` · ${mentorado.nome}` : ""}
           </p>
           {mentorado?.nicho && (
-            <p className="text-slate-500 text-sm">{mentorado.nicho}</p>
+            <p className="text-sm" style={{ color: "#4d7fa8" }}>{mentorado.nicho}</p>
           )}
         </div>
 
         <form
           onSubmit={handleSubmit}
-          className="bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-8 space-y-8"
+          className="rounded-2xl p-8 space-y-8"
+          style={{ background: "#0f2540", border: "1px solid #1e3a5f" }}
         >
           <div>
-            <h2 className="text-xl font-semibold mb-6 text-blue-400">📊 Métricas da Semana</h2>
+            <h2 className="text-xl font-semibold mb-6" style={{ color: "#00d68f" }}>📊 Métricas da Semana</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">💰 Vendas Reais (R$)</label>
@@ -94,7 +98,7 @@ export default function FormPage({ params }: { params: { mentoradoId: string } }
                   type="number" step="0.01" required
                   value={formData.vendas_reais}
                   onChange={(e) => setFormData({ ...formData, vendas_reais: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg focus:outline-none focus:border-blue-500 text-white"
+                  className="w-full px-4 py-3 bg-[#0a1628] border border-[#1e3a5f] rounded-lg focus:outline-none focus:border-[#00d68f] text-white"
                   placeholder="0.00"
                 />
               </div>
@@ -104,7 +108,7 @@ export default function FormPage({ params }: { params: { mentoradoId: string } }
                   type="number" required
                   value={formData.leads_gerados}
                   onChange={(e) => setFormData({ ...formData, leads_gerados: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg focus:outline-none focus:border-blue-500 text-white"
+                  className="w-full px-4 py-3 bg-[#0a1628] border border-[#1e3a5f] rounded-lg focus:outline-none focus:border-[#00d68f] text-white"
                   placeholder="0"
                 />
               </div>
@@ -114,7 +118,7 @@ export default function FormPage({ params }: { params: { mentoradoId: string } }
                   type="number" step="0.01" required
                   value={formData.investimento_trafego}
                   onChange={(e) => setFormData({ ...formData, investimento_trafego: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg focus:outline-none focus:border-blue-500 text-white"
+                  className="w-full px-4 py-3 bg-[#0a1628] border border-[#1e3a5f] rounded-lg focus:outline-none focus:border-[#00d68f] text-white"
                   placeholder="0.00"
                 />
               </div>
@@ -124,7 +128,7 @@ export default function FormPage({ params }: { params: { mentoradoId: string } }
                   type="number"
                   value={formData.videos_postados}
                   onChange={(e) => setFormData({ ...formData, videos_postados: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg focus:outline-none focus:border-blue-500 text-white"
+                  className="w-full px-4 py-3 bg-[#0a1628] border border-[#1e3a5f] rounded-lg focus:outline-none focus:border-[#00d68f] text-white"
                   placeholder="0"
                 />
               </div>
@@ -132,13 +136,13 @@ export default function FormPage({ params }: { params: { mentoradoId: string } }
           </div>
 
           <div>
-            <h2 className="text-xl font-semibold mb-6 text-purple-400">📝 Contexto</h2>
+            <h2 className="text-xl font-semibold mb-6" style={{ color: "#4c9aff" }}>📝 Contexto</h2>
             <div className="mb-6">
               <label className="block text-sm font-medium text-slate-300 mb-2">❌ Suas maiores dificuldades essa semana?</label>
               <textarea
                 value={formData.dificuldades_texto}
                 onChange={(e) => setFormData({ ...formData, dificuldades_texto: e.target.value })}
-                className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg focus:outline-none focus:border-purple-500 text-white min-h-24 resize-none"
+                className="w-full px-4 py-3 bg-[#0a1628] border border-[#1e3a5f] rounded-lg focus:outline-none focus:border-[#00d68f] text-white min-h-24 resize-none"
                 placeholder="Descreva os principais desafios..."
               />
             </div>
@@ -147,7 +151,7 @@ export default function FormPage({ params }: { params: { mentoradoId: string } }
               <textarea
                 value={formData.tarefas_executadas}
                 onChange={(e) => setFormData({ ...formData, tarefas_executadas: e.target.value })}
-                className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg focus:outline-none focus:border-purple-500 text-white min-h-24 resize-none"
+                className="w-full px-4 py-3 bg-[#0a1628] border border-[#1e3a5f] rounded-lg focus:outline-none focus:border-[#00d68f] text-white min-h-24 resize-none"
                 placeholder="Liste as tarefas completadas..."
               />
             </div>
@@ -160,13 +164,14 @@ export default function FormPage({ params }: { params: { mentoradoId: string } }
           <button
             type="submit"
             disabled={loading || !mentorado}
-            className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed font-bold py-3 px-6 rounded-lg transition-all duration-300 text-white"
+            className="w-full font-bold py-3 px-6 rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ background: "#00d68f", color: "#0a1628" }}
           >
             {loading ? "Enviando..." : "🚀 Enviar Check-in"}
           </button>
         </form>
 
-        <p className="text-center text-slate-500 text-sm mt-8">
+        <p className="text-center text-sm mt-8" style={{ color: "#4d7fa8" }}>
           Os dados aparecem em tempo real no painel do seu mentor
         </p>
       </div>
