@@ -30,15 +30,11 @@ export default function HomePage() {
   const marca = empresa.slug ? empresa.nome : "CKlareza"
   const [showSplash, setShowSplash] = useState(false)
 
-  // Splash de abertura — 1x por sessão, só quando há empresa white label resolvida
+  // Splash de abertura — SEMPRE que carregar o site da empresa (toda vez)
   useEffect(() => {
     if (empresaLoading) return
     if (!empresa.slug) return
-    try {
-      if (sessionStorage.getItem("ck:splash-" + empresa.slug)) return
-      sessionStorage.setItem("ck:splash-" + empresa.slug, "1")
-      setShowSplash(true)
-    } catch {}
+    setShowSplash(true)
   }, [empresaLoading, empresa.slug])
   const [mentores, setMentores] = useState<Mentor[]>([])
   const [carregando, setCarregando] = useState(true)

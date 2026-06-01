@@ -507,7 +507,7 @@ export default function DashboardPage() {
       {/* ── MAIN AREA ──────────────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* ── HEADER BAR ─────────────────────────────────────────────── */}
-        <header className="px-6 py-3.5 flex items-center justify-between shrink-0" style={{ background: C.card, borderBottom: `1px solid ${C.border}` }}>
+        <header className="relative px-6 py-3.5 flex items-center justify-between shrink-0" style={{ background: C.card, borderBottom: `1px solid ${C.border}` }}>
           <div className="flex items-center gap-3">
             <h2 className="text-base font-semibold text-white">{MODULE_LABELS[ckView]}</h2>
             {realtimeStatus === "connected" && (
@@ -515,6 +515,23 @@ export default function DashboardPage() {
                 <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: C.green }} /> Ao vivo
               </span>
             )}
+          </div>
+
+          {/* Logo CKlareza — centralizada no topo (assinatura da plataforma) */}
+          <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1.5 pointer-events-none">
+            <Sparkles className="w-4 h-4" style={{ color: "#d4af37" }} />
+            <span
+              className="text-lg font-bold tracking-tight"
+              style={{
+                fontFamily: "Georgia, 'Times New Roman', serif",
+                background: "linear-gradient(180deg, #f0d97d 0%, #d4af37 55%, #9c7d2e 100%)",
+                WebkitBackgroundClip: "text",
+                backgroundClip: "text",
+                color: "transparent",
+              }}
+            >
+              CKlareza
+            </span>
           </div>
           <div className="flex items-center gap-3">
             {/* Badge notificações */}
