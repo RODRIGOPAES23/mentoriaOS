@@ -22,6 +22,8 @@ import CallRoom from "@/components/ck/CallRoom"
 import ChatMentor from "@/components/ck/ChatMentor"
 import AdminView from "@/components/ck/AdminView"
 import { DashboardMentor } from "@/components/mentor/DashboardMentor"
+import MaterialEntregas from "@/components/mentor/MaterialEntregas"
+import TarefasPontuaisMentor from "@/components/mentor/TarefasPontuaisMentor"
 import { useLocalStorage } from "@/hooks/useLocalStorage"
 import { useEmpresa } from "@/hooks/useEmpresa"
 import { C } from "@/utils/theme"
@@ -89,7 +91,7 @@ export default function DashboardPage() {
   const [salvandoPerfil, setSalvandoPerfil] = useState(false)
   const [uploadingFoto, setUploadingFoto] = useState<string | null>(null)
   const [showAnalisarCall, setShowAnalisarCall] = useState(false)
-  const [activeTab, setActiveTab] = useState<"pendencias" | "financeiro" | "calls" | "chat">("pendencias")
+  const [activeTab, setActiveTab] = useState<"pendencias" | "financeiro" | "calls" | "chat" | "materiais">("pendencias")
   const [filtroSidebar, setFiltroSidebar] = useState("")
   const [tarefasVencidas, setTarefasVencidas] = useState(0)
   // CKlareza v5 — estado de navegação
@@ -666,6 +668,7 @@ export default function DashboardPage() {
                       <div className="flex gap-1 rounded-xl p-1 mb-4" style={{ background: C.card }}>
                         {([
                           { id: "pendencias", label: "Pendências", icon: CheckCircle2 },
+                          { id: "materiais", label: "Tarefas & Materiais", icon: Briefcase },
                           { id: "financeiro", label: "Financeiro", icon: DollarSign },
                           { id: "chat", label: "Chat", icon: MessageCircle },
                           { id: "calls", label: "Análise de Call", icon: Phone },
@@ -685,6 +688,12 @@ export default function DashboardPage() {
                       </div>
 
                       {activeTab === "pendencias" && <PendenciasSection key={selectedId} mentoradoId={selectedId} mentorId={mentorId} />}
+                      {activeTab === "materiais" && (
+                        <div className="space-y-6">
+                          <TarefasPontuaisMentor key={`tp-${selectedId}`} mentoradoId={selectedId} mentorId={mentorId} />
+                          <MaterialEntregas key={`me-${selectedId}`} mentoradoId={selectedId} mentorId={mentorId} />
+                        </div>
+                      )}
                       {activeTab === "financeiro" && <FinanceiroSection key={selectedId} mentoradoId={selectedId} mentorId={mentorId} />}
                       {activeTab === "chat" && selected && <ChatMentor key={selectedId} mentoradoId={selectedId} mentorId={mentorId} nomeMentorado={selected.nome} />}
                       {activeTab === "calls" && (
