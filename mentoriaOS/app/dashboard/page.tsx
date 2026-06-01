@@ -342,8 +342,10 @@ export default function DashboardPage() {
         fetch(`/api/dashboard/mentorados?mentorId=${mentorId}&t=${Date.now()}`),
         fetch(`/api/mentor/info?mentorId=${mentorId}&t=${Date.now()}`),
       ])
-      const [dataM, dataMentor] = await Promise.all([resM.json(), resMentor.json()])
+      const [dataM, dataMentorResp] = await Promise.all([resM.json(), resMentor.json()])
       const lista: Mentorado[] = dataM.mentorados || []
+      // /api/mentor/info retorna { mentor: {...} }
+      const dataMentor = dataMentorResp.mentor || dataMentorResp
       setMentorados(lista)
       setMentorNome(dataMentor.nome || "CKlareza")
       setMentorDados(dataMentor)
