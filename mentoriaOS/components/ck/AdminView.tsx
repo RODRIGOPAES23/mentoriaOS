@@ -65,24 +65,30 @@ export default function AdminView({ mentorId, accent }: Props) {
     // Áudio costuma passar do limite de 4.5MB do Vercel → sobe DIRETO pro Supabase
     setEnviandoMusica(true)
     try {
-      const { getRealtimeClient } = await import("@/lib/supabase-realtime")
-      const supabase = getRealtimeClient()
       const ext = file.name.split(".").pop()?.toLowerCase() || "mp3"
       const path = `empresa-musica-${empresaId}.${ext}`
 
+      // 1) backend (service role) gera signed upload URL
+      const sigRes = await fetch("/api/upload/signed", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ path }),
+      })
+      const sig = await sigRes.json()
+      if (!sigRes.ok || !sig.token) { setErroMusica("Não foi possível preparar o upload: " + (sig.error || "")); setEnviandoMusica(false); return }
+
+      // 2) navegador sobe o arquivo DIRETO pro Supabase (sem limite do Vercel)
+      const { getRealtimeClient } = await import("@/lib/supabase-realtime")
+      const supabase = getRealtimeClient()
       const { error: upErr } = await supabase.storage
         .from("avatars")
-        .upload(path, file, { upsert: true, contentType: file.type || "audio/mpeg" })
+        .uploadToSignedUrl(path, sig.token, file, { contentType: file.type || "audio/mpeg" })
 
       if (upErr) { setErroMusica("Falha no upload: " + upErr.message); setEnviandoMusica(false); return }
 
-      const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path)
-      const url = pub.publicUrl
-
-      // Salva só a URL no banco (payload minúsculo, não estoura limite)
+      // 3) salva só a URL no banco
       const res = await fetch("/api/empresa/admin", {
         method: "PATCH", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mentorId, musica_url: url }),
+        body: JSON.stringify({ mentorId, musica_url: sig.publicUrl }),
       })
       if (!res.ok) { setErroMusica("Áudio subiu mas não salvou no banco."); setEnviandoMusica(false); return }
 
