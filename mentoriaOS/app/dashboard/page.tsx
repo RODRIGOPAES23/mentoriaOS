@@ -5,7 +5,7 @@ import { createPortal } from "react-dom"
 import {
   Search, Bell, TrendingUp, TrendingDown, Minus, Target, BarChart3, Zap, CheckCircle2,
   AlertCircle, Clock, Link2, Copy, Check, UserPlus, X, RefreshCw, Edit2, Trash2,
-  LogOut, User, History, ChevronRight, Calendar, Briefcase, BookOpen, GripVertical,
+  LogOut, User, History, ChevronRight, Calendar, Briefcase, BookOpen,
   DollarSign, Phone, MapPin, Filter, ChevronDown, Sparkles, Settings, MessageCircle
 } from "lucide-react"
 import type { CheckinRow } from "@/lib/supabase"
@@ -14,8 +14,7 @@ import FinanceiroSection from "@/components/FinanceiroSection"
 import AnalisarCallModal from "@/components/AnalisarCallModal"
 import { getRealtimeClient } from "@/lib/supabase-realtime"
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core"
-import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from "@dnd-kit/sortable"
-import { CSS } from "@dnd-kit/utilities"
+import { SortableContext, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable"
 import Sidebar, { CkView } from "@/components/ck/Sidebar"
 import VisaoGeral from "@/components/ck/VisaoGeral"
 import SessaoModal from "@/components/ck/SessaoModal"
@@ -26,15 +25,11 @@ import { DashboardMentor } from "@/components/mentor/DashboardMentor"
 import { useLocalStorage } from "@/hooks/useLocalStorage"
 import { useEmpresa } from "@/hooks/useEmpresa"
 import { C } from "@/utils/theme"
-
-// ── INTERFACES ────────────────────────────────────────────────────────────────
-interface Mentorado {
-  id: string; nome: string; nicho: string; status: string; foco_macro: string
-  data_inicio: string; data_fim?: string; cidade?: string
-  faturamento_atual?: number; meta_faturamento?: number; meta_atual?: string
-  foto_url?: string; ordem?: number; codigo_acesso?: string
-}
-interface BriefingIA { diagnostico: string; evolucao?: string; pauta: string[] }
+import type { Mentorado, BriefingIA } from "@/components/ck/types"
+import BadgeVariacao from "@/components/ck/BadgeVariacao"
+import CountdownDias from "@/components/ck/CountdownDias"
+import SortableMentoradoItem from "@/components/ck/SortableMentoradoItem"
+import CalendarioView from "@/components/ck/CalendarioView"
 
 function variacao(historico: CheckinRow[], campo: keyof CheckinRow): number | null {
   if (!historico || historico.length < 2) return null
@@ -54,136 +49,6 @@ function gerarBriefing(m: Mentorado, c: CheckinRow): BriefingIA {
       `${c.videos_postados} vídeos postados — estratégia de conteúdo que está gerando mais leads`,
     ]
   }
-}
-
-// ── BADGE VARIAÇÃO ────────────────────────────────────────────────────────────
-function BadgeVariacao({ pct }: { pct: number | null }) {
-  if (pct === null) return null
-  const seta = pct > 0 ? "↑" : pct < 0 ? "↓" : "→"
-  const color = pct > 0 ? C.green : pct < 0 ? C.red : C.muted
-  return (
-    <span className="inline-flex items-center gap-0.5 text-[11px] font-bold px-2 py-0.5 rounded-full"
-      style={{ background: `${color}18`, color }}>
-      {seta} {pct > 0 ? "+" : ""}{pct.toFixed(0)}%
-    </span>
-  )
-}
-
-// ── SORTABLE MENTORADO ────────────────────────────────────────────────────────
-function SortableMentoradoItem({ m, selectedId, onClick }: {
-  m: Mentorado; selectedId: string; onClick: () => void
-}) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: m.id })
-  const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.4 : 1 }
-  const isSelected = selectedId === m.id
-  const ini = m.nome.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()
-
-  return (
-    <div ref={setNodeRef}
-      style={{ ...style, background: isSelected ? C.green : "transparent", border: `1px solid ${isSelected ? C.green : "transparent"}` }}
-      className="group flex items-center gap-2.5 px-3 py-2.5 rounded-xl cursor-pointer transition-all"
-      onClick={onClick}
-      onMouseEnter={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.background = C.card2 }}
-      onMouseLeave={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.background = "transparent" }}
-    >
-      <div {...attributes} {...listeners} className="cursor-grab opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-        <GripVertical className="w-3.5 h-3.5" style={{ color: isSelected ? "#0a1628" : C.muted }} />
-      </div>
-      <div className="w-8 h-8 rounded-full overflow-hidden shrink-0" style={{ border: `2px solid ${isSelected ? "#ffffff33" : C.border}` }}>
-        {m.foto_url
-          ? <img src={m.foto_url} alt={m.nome} className="w-full h-full object-cover" />
-          : <div className="w-full h-full flex items-center justify-center text-xs font-bold text-white" style={{ background: isSelected ? "#ffffff22" : "#0a1628" }}>{ini}</div>}
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold truncate" style={{ color: isSelected ? "#0a1628" : "#fff" }}>{m.nome}</p>
-        <p className="text-[10px] truncate" style={{ color: isSelected ? "#0a162899" : C.muted }}>{m.nicho}</p>
-      </div>
-      <div className="w-2 h-2 rounded-full shrink-0" style={{ background: m.status === "Ativo" ? (isSelected ? "#0a1628" : C.green) : C.border }} />
-    </div>
-  )
-}
-
-// ── COUNTDOWN DIAS ────────────────────────────────────────────────────────────
-function CountdownDias({ dataFim }: { dataFim: string }) {
-  const hoje = new Date(); hoje.setHours(0, 0, 0, 0)
-  const [y, mo, d] = dataFim.split("T")[0].split("-").map(Number)
-  const diff = Math.ceil((new Date(y, mo - 1, d).getTime() - hoje.getTime()) / 86400000)
-  if (diff < 0) return <span className="text-xs font-semibold" style={{ color: C.red }}>Encerrada há {Math.abs(diff)} dias</span>
-  const cor = diff <= 30 ? C.red : diff <= 90 ? C.amber : C.green
-  return <span className="text-xs font-semibold" style={{ color: cor }}>{diff} dias restantes</span>
-}
-
-// ── CALENDARIO VIEW ────────────────────────────────────────────────────────────
-function CalendarioView({ mentorId, mentorados, onAgendar }: {
-  mentorId: string; mentorados: Mentorado[]; onAgendar: () => void
-}) {
-  const [sessoes, setSessoes] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    fetch(`/api/dashboard/sessoes?mentorId=${mentorId}&proximas=1`)
-      .then(r => r.json()).then(j => { setSessoes(j.sessoes || []); setLoading(false) })
-  }, [mentorId])
-
-  const fmtDH = (iso: string) => {
-    const d = new Date(iso)
-    return d.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" }) + " · " +
-      d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
-  }
-
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-white">Calendário de Sessões</h2>
-        <button onClick={onAgendar}
-          className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl transition-all"
-          style={{ background: `${C.green}18`, border: `1px solid ${C.green}44`, color: C.green }}>
-          <Calendar className="w-4 h-4" /> Nova Sessão
-        </button>
-      </div>
-
-      <div className="rounded-2xl overflow-hidden" style={{ background: C.card, border: `1px solid ${C.border}` }}>
-        <div className="px-6 py-4" style={{ borderBottom: `1px solid ${C.border}` }}>
-          <h3 className="text-sm font-semibold text-white">Próximas sessões agendadas</h3>
-        </div>
-        {loading ? (
-          <div className="p-8 text-center text-sm" style={{ color: C.muted }}>Carregando...</div>
-        ) : sessoes.length === 0 ? (
-          <div className="p-12 text-center">
-            <Calendar className="w-10 h-10 mx-auto mb-3" style={{ color: C.border }} />
-            <p className="text-sm" style={{ color: C.muted }}>Nenhuma sessão agendada</p>
-            <button onClick={onAgendar} className="mt-4 text-sm font-semibold hover:underline" style={{ color: C.green }}>
-              Agendar primeira sessão →
-            </button>
-          </div>
-        ) : (
-          <div>
-            {sessoes.map(s => (
-              <div key={s.id} className="px-6 py-4 flex items-center gap-4" style={{ borderBottom: `1px solid ${C.border}40` }}>
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${C.green}18`, border: `1px solid ${C.green}30` }}>
-                  <Calendar className="w-5 h-5" style={{ color: C.green }} />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-semibold text-white">{s.mentorado_nome}</p>
-                  <p className="text-xs mt-0.5 capitalize" style={{ color: C.muted }}>{fmtDH(s.data_hora)}</p>
-                </div>
-                {s.titulo && s.titulo !== "Sessão de Mentoria" && (
-                  <span className="hidden sm:block text-xs px-2 py-1 rounded-lg" style={{ color: C.muted, background: C.bg, border: `1px solid ${C.border}` }}>{s.titulo}</span>
-                )}
-                {s.link_call && (
-                  <a href={s.link_call} target="_blank" rel="noreferrer"
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all"
-                    style={{ background: `${C.green}18`, border: `1px solid ${C.green}44`, color: C.green }}>
-                    <Phone className="w-3.5 h-3.5" /> Entrar
-                  </a>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  )
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
