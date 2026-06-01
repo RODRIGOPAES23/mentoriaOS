@@ -1,14 +1,14 @@
 "use client"
 
 import { useState, useEffect, useCallback, memo } from "react"
-import { Building2, Users, GraduationCap, AlertTriangle, Sparkles, Target, BookOpen, Edit2, Check, X, Loader2, Crown } from "lucide-react"
+import { Building2, Users, GraduationCap, AlertTriangle, Sparkles, Target, BookOpen, Edit2, Check, X, Loader2, Crown, ChevronRight } from "lucide-react"
 import { C } from "@/utils/theme"
 
-interface Props { mentorId: string; accent: string }
+interface Props { mentorId: string; accent: string; onAbrirMentorado?: (id: string) => void }
 
 function iniciais(n: string) { return n.split(" ").map(x => x[0]).join("").slice(0,2).toUpperCase() }
 
-function AdminViewBase({ mentorId, accent }: Props) {
+function AdminViewBase({ mentorId, accent, onAbrirMentorado }: Props) {
   const [data, setData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [negado, setNegado] = useState(false)
@@ -213,7 +213,12 @@ function AdminViewBase({ mentorId, accent }: Props) {
         ) : (
           <div>
             {mentorados.map((mo: any) => (
-              <div key={mo.id} className="px-6 py-3.5 flex items-center gap-3" style={{ borderBottom: `1px solid ${C.border}40` }}>
+              <div key={mo.id} onClick={() => onAbrirMentorado?.(mo.id)}
+                title={onAbrirMentorado ? `Abrir ${mo.nome}` : undefined}
+                className="px-6 py-3.5 flex items-center gap-3 transition-colors"
+                style={{ borderBottom: `1px solid ${C.border}40`, cursor: onAbrirMentorado ? "pointer" : "default" }}
+                onMouseEnter={e => { if (onAbrirMentorado) (e.currentTarget as HTMLElement).style.background = C.card2 }}
+                onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}>
                 <div className="w-9 h-9 rounded-full overflow-hidden shrink-0" style={{ border: `1px solid ${C.border}` }}>
                   {mo.foto_url ? <img src={mo.foto_url} alt={mo.nome} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-xs font-bold" style={{ background: C.input, color: accent }}>{iniciais(mo.nome)}</div>}
                 </div>
@@ -233,12 +238,13 @@ function AdminViewBase({ mentorId, accent }: Props) {
                   </span>
                 )}
                 {mo.codigo_acesso && (
-                  <button onClick={() => copiarConvite(mo.codigo_acesso)} title="Copiar link de convite"
+                  <button onClick={e => { e.stopPropagation(); copiarConvite(mo.codigo_acesso) }} title="Copiar link de convite"
                     className="text-[10px] font-bold px-2 py-1 rounded-lg shrink-0 transition-all"
                     style={{ background: C.input, color: C.muted, border: `1px solid ${C.border}` }}>
                     {mo.codigo_acesso}
                   </button>
                 )}
+                {onAbrirMentorado && <ChevronRight className="w-4 h-4 shrink-0" style={{ color: C.muted }} />}
               </div>
             ))}
           </div>

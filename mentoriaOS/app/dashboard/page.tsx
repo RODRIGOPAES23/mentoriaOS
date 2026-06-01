@@ -477,7 +477,8 @@ export default function DashboardPage() {
           {/* ══ EMPRESA (ADMIN) ══════════════════════════════════════════ */}
           {ckView === "empresa" && mentorId && (
             <div className="p-6">
-              <AdminView mentorId={mentorId} accent={accent} />
+              <AdminView mentorId={mentorId} accent={accent}
+                onAbrirMentorado={(id) => { setSelectedId(id); setCkView("mentorados") }} />
             </div>
           )}
 
