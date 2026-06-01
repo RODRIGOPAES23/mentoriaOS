@@ -1,18 +1,16 @@
 "use client"
 
-import { LayoutDashboard, Users, Calendar, FolderArchive, Settings, Sparkles, LogOut, ChevronLeft, ChevronRight, Building2 } from "lucide-react"
+import { LayoutDashboard, Users, Calendar, Sparkles, LogOut, ChevronLeft, ChevronRight, Building2 } from "lucide-react"
 import { C } from "@/utils/theme"
 import PoweredBy from "./PoweredBy"
 
-export type CkView = "visao-geral" | "mentorados" | "calendario" | "historico" | "config" | "empresa"
+export type CkView = "visao-geral" | "mentorados" | "calendario" | "config" | "empresa"
 
 const ITENS: { id: CkView; label: string; icon: typeof LayoutDashboard; adminOnly?: boolean }[] = [
   { id: "visao-geral", label: "Dashboard", icon: LayoutDashboard },
   { id: "empresa", label: "Empresa", icon: Building2, adminOnly: true },
   { id: "mentorados", label: "Mentorados", icon: Users },
   { id: "calendario", label: "Calendário", icon: Calendar },
-  { id: "historico", label: "Histórico", icon: FolderArchive },
-  { id: "config", label: "Configurações", icon: Settings },
 ]
 
 interface Props {

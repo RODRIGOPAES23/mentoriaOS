@@ -21,6 +21,7 @@ import SessaoModal from "@/components/ck/SessaoModal"
 import CallRoom from "@/components/ck/CallRoom"
 import ChatMentor from "@/components/ck/ChatMentor"
 import AdminView from "@/components/ck/AdminView"
+import DashboardAcao from "@/components/ck/DashboardAcao"
 import { DashboardMentor } from "@/components/mentor/DashboardMentor"
 import MaterialEntregas from "@/components/mentor/MaterialEntregas"
 import TarefasPontuaisMentor from "@/components/mentor/TarefasPontuaisMentor"
@@ -352,7 +353,6 @@ export default function DashboardPage() {
     "empresa": "Empresa",
     "mentorados": "Mentorados",
     "calendario": "Calendário",
-    "historico": "Histórico",
     "config": "Configurações",
   }
 
@@ -435,6 +435,7 @@ export default function DashboardPage() {
                     { label: "Meu Perfil", icon: User, onClick: () => { setShowPerfilModal(true); setShowMenuPerfil(false) } },
                     { label: "Editar Mentorado", icon: Edit2, onClick: () => { if (selected) { setEditData({ nome: selected.nome, nicho: selected.nicho, foco_macro: selected.foco_macro, status: "Ativo", cidade: selected.cidade || "", data_fim: selected.data_fim || "", faturamento_atual: selected.faturamento_atual?.toString() || "", meta_faturamento: selected.meta_faturamento?.toString() || "", meta_atual: selected.meta_atual || "" }); setShowEditModal(true) }; setShowMenuPerfil(false) } },
                     { label: "Histórico", icon: History, onClick: () => { setShowHistoricoModal(true); setShowMenuPerfil(false) } },
+                    { label: "Configurações", icon: Settings, onClick: () => { setCkView("config"); setShowMenuPerfil(false) } },
                   ].map(item => (
                     <button key={item.label} onClick={item.onClick}
                       className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-white transition-colors"
@@ -461,15 +462,14 @@ export default function DashboardPage() {
         <main className="flex-1 overflow-y-auto">
 
           {/* ══ VISÃO GERAL ══════════════════════════════════════════════ */}
-          {ckView === "visao-geral" && (
-            <div className="p-6 space-y-6">
-              {/* BLOCOS v7: financeiro / mentorados / progresso / calls */}
-              {mentorId && <DashboardMentor mentorId={mentorId} accent={accent} />}
-              <VisaoGeral
-                data={overviewData}
-                loading={overviewLoading}
+          {ckView === "visao-geral" && mentorId && (
+            <div className="p-6">
+              <DashboardAcao
+                mentorId={mentorId}
+                accent={accent}
                 onAbrirMentorado={(id) => { setSelectedId(id); setCkView("mentorados") }}
                 onAgendar={() => setShowSessaoModal(true)}
+                onIrCalendario={() => setCkView("calendario")}
               />
             </div>
           )}
@@ -740,33 +740,28 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* ══ HISTÓRICO ═════════════════════════════════════════════════ */}
-          {ckView === "historico" && (
-            <div className="p-6">
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 text-center">
-                <History className="w-10 h-10 text-slate-200 mx-auto mb-3" />
-                <p className="text-slate-500 text-sm">Selecione um mentorado na aba Mentorados e clique em "Histórico" no menu do perfil.</p>
-              </div>
-            </div>
-          )}
-
-          {/* ══ CONFIGURAÇÕES ═════════════════════════════════════════════ */}
+          {/* ══ CONFIGURAÇÕES (acessível pelo menu do avatar) ══════════════ */}
           {ckView === "config" && (
             <div className="p-6 max-w-lg">
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
-                <h3 className="font-semibold text-slate-900">Perfil do Mentor</h3>
+              <div className="rounded-2xl p-6 space-y-4" style={{ background: C.card, border: `1px solid ${C.border}` }}>
+                <h3 className="font-semibold text-white">Perfil do Mentor</h3>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Nome</label>
+                  <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: C.muted }}>Nome</label>
                   <input value={perfilEdit.nome || mentorNome} onChange={e => setPerfilEdit(p => ({ ...p, nome: e.target.value }))}
-                    className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm text-slate-900 focus:outline-none focus:border-teal-500" />
+                    className="w-full px-3.5 py-2.5 rounded-lg text-sm text-white focus:outline-none transition-all"
+                    style={{ background: C.input, border: `1px solid ${C.border}` }}
+                    onFocus={e => e.target.style.borderColor = C.green} onBlur={e => e.target.style.borderColor = C.border} />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Nicho Foco</label>
+                  <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: C.muted }}>Nicho Foco</label>
                   <input value={perfilEdit.nicho_foco} onChange={e => setPerfilEdit(p => ({ ...p, nicho_foco: e.target.value }))}
-                    className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm text-slate-900 focus:outline-none focus:border-teal-500" />
+                    className="w-full px-3.5 py-2.5 rounded-lg text-sm text-white focus:outline-none transition-all"
+                    style={{ background: C.input, border: `1px solid ${C.border}` }}
+                    onFocus={e => e.target.style.borderColor = C.green} onBlur={e => e.target.style.borderColor = C.border} />
                 </div>
                 <button onClick={salvarPerfil} disabled={salvandoPerfil}
-                  className="w-full py-2.5 bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold rounded-xl disabled:opacity-50 transition-colors">
+                  className="w-full py-2.5 text-sm font-semibold rounded-xl disabled:opacity-50 transition-colors"
+                  style={{ background: C.green, color: C.input }}>
                   {salvandoPerfil ? "Salvando..." : "Salvar"}
                 </button>
               </div>
