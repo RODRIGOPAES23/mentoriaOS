@@ -41,3 +41,7 @@ Thumbs.db
 
 .vercel
 .env*
+
+# Screenshots de teste e scripts de captura
+*.png
+screenshot*.mjs
