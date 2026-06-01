@@ -30,6 +30,10 @@ import BadgeVariacao from "@/components/ck/BadgeVariacao"
 import CountdownDias from "@/components/ck/CountdownDias"
 import SortableMentoradoItem from "@/components/ck/SortableMentoradoItem"
 import CalendarioView from "@/components/ck/CalendarioView"
+import CadastroMentoradoModal from "@/components/ck/modals/CadastroMentoradoModal"
+import EditarMentoradoModal from "@/components/ck/modals/EditarMentoradoModal"
+import HistoricoModal from "@/components/ck/modals/HistoricoModal"
+import PerfilMentorModal from "@/components/ck/modals/PerfilMentorModal"
 
 function variacao(historico: CheckinRow[], campo: keyof CheckinRow): number | null {
   if (!historico || historico.length < 2) return null
@@ -800,212 +804,32 @@ export default function DashboardPage() {
 
       {/* Modal: Cadastrar Mentorado */}
       {showCadastro && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm p-4" style={{ background: "#00000070" }} onClick={() => setShowCadastro(false)}>
-          <div className="rounded-2xl shadow-2xl w-full max-w-lg" style={{ background: C.card2, border: `1px solid ${C.border}` }} onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-6 py-5" style={{ borderBottom: `1px solid ${C.border}` }}>
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: `${C.green}18`, border: `1px solid ${C.green}33` }}>
-                  <UserPlus className="w-5 h-5" style={{ color: C.green }} />
-                </div>
-                <h2 className="text-base font-semibold text-white">Novo Mentorado</h2>
-              </div>
-              <button onClick={() => setShowCadastro(false)} className="p-2 rounded-lg transition-colors" style={{ color: C.muted }}><X className="w-5 h-5" /></button>
-            </div>
-            <form onSubmit={cadastrarMentorado} className="p-6 space-y-4">
-              {[
-                { label: "Nome Completo", key: "nome", placeholder: "Ex: Ana Silva" },
-                { label: "Nicho de Atuação", key: "nicho", placeholder: "Ex: Marketing Digital" },
-                { label: "Foco Macro", key: "foco_macro", placeholder: "Ex: Estruturação Comercial" },
-              ].map(f => (
-                <div key={f.key}>
-                  <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: C.muted }}>{f.label}</label>
-                  <input required value={(novo as any)[f.key]} onChange={e => setNovo(n => ({ ...n, [f.key]: e.target.value }))}
-                    placeholder={f.placeholder}
-                    className="w-full px-3.5 py-2.5 rounded-lg text-sm text-white placeholder-slate-600 focus:outline-none transition-all"
-                    style={{ background: C.bg, border: `1px solid ${C.border}` }}
-                    onFocus={e => e.target.style.borderColor = C.green} onBlur={e => e.target.style.borderColor = C.border} />
-                </div>
-              ))}
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: C.muted }}>Data de Início</label>
-                <input type="date" required value={novo.data_inicio} onChange={e => setNovo(n => ({ ...n, data_inicio: e.target.value }))}
-                  className="w-full px-3.5 py-2.5 rounded-lg text-sm text-white focus:outline-none transition-all"
-                  style={{ background: C.bg, border: `1px solid ${C.border}` }} />
-              </div>
-              <div className="flex gap-3 pt-1">
-                <button type="button" onClick={() => setShowCadastro(false)}
-                  className="flex-1 py-2.5 rounded-lg text-sm font-semibold transition-colors" style={{ background: C.card, color: C.muted, border: `1px solid ${C.border}` }}>Cancelar</button>
-                <button type="submit" disabled={salvando}
-                  className="flex-1 py-2.5 rounded-lg text-sm font-semibold text-white disabled:opacity-50 transition-all"
-                  style={{ background: `${C.green}22`, border: `1px solid ${C.green}55`, color: C.green }}>
-                  {salvando ? "Salvando..." : "Cadastrar"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <CadastroMentoradoModal
+          novo={novo} setNovo={setNovo} salvando={salvando}
+          onSubmit={cadastrarMentorado} onClose={() => setShowCadastro(false)}
+        />
       )}
 
-      {/* Modal: Editar Mentorado */}
       {showEditModal && selected && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 overflow-y-auto" onClick={() => setShowEditModal(false)}>
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg my-4" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
-              <div className="flex items-center gap-3">
-                <label className="cursor-pointer">
-                  <div className="w-9 h-9 rounded-full overflow-hidden ring-2 ring-slate-200 hover:ring-teal-500 transition-all">
-                    {selected.foto_url
-                      ? <img src={selected.foto_url} alt={selected.nome} className="w-full h-full object-cover" />
-                      : <div className="w-full h-full bg-slate-900 flex items-center justify-center text-xs font-bold text-white">{selected.nome.slice(0, 2).toUpperCase()}</div>}
-                  </div>
-                  <input type="file" accept="image/*" className="hidden" onChange={e => {
-                    const file = e.target.files?.[0]
-                    if (file && selectedId) uploadFoto(file, "mentorado", selectedId)
-                  }} />
-                </label>
-                <h2 className="text-base font-semibold text-slate-900">Editar Mentorado</h2>
-              </div>
-              <button onClick={() => setShowEditModal(false)} className="p-2 hover:bg-slate-100 rounded-lg"><X className="w-5 h-5 text-slate-400" /></button>
-            </div>
-            <form onSubmit={editarMentorado} className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
-              {[
-                { label: "Nome", key: "nome" }, { label: "Nicho", key: "nicho" },
-                { label: "Foco Macro", key: "foco_macro" }, { label: "Cidade", key: "cidade" },
-                { label: "Meta/Ação da Semana", key: "meta_atual" },
-              ].map(f => (
-                <div key={f.key}>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">{f.label}</label>
-                  <input value={(editData as any)[f.key]} onChange={e => setEditData(d => ({ ...d, [f.key]: e.target.value }))}
-                    className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm text-slate-900 focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20" />
-                </div>
-              ))}
-              <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Término da Mentoria</label>
-                <input type="date" value={editData.data_fim} onChange={e => setEditData(d => ({ ...d, data_fim: e.target.value }))}
-                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm text-slate-900 focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20" />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  { label: "Faturamento Atual (R$)", key: "faturamento_atual", ph: "8000" },
-                  { label: "Meta 12 Meses (R$)", key: "meta_faturamento", ph: "50000" },
-                ].map(f => (
-                  <div key={f.key}>
-                    <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">{f.label}</label>
-                    <input type="number" value={(editData as any)[f.key]} placeholder={f.ph}
-                      onChange={e => setEditData(d => ({ ...d, [f.key]: e.target.value }))}
-                      className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm text-slate-900 focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20" />
-                  </div>
-                ))}
-              </div>
-              <div className="flex gap-3 pt-1">
-                <button type="button" onClick={() => setShowEditModal(false)}
-                  className="flex-1 py-2.5 rounded-lg text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">Cancelar</button>
-                <button type="submit" disabled={editando}
-                  className="flex-1 py-2.5 rounded-lg text-sm font-semibold text-white bg-teal-600 hover:bg-teal-700 disabled:opacity-50 transition-colors">
-                  {editando ? "Salvando..." : "Salvar Mudanças"}
-                </button>
-              </div>
-              <div className="border-t border-slate-100 pt-4 mt-2">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Zona de Perigo</p>
-                <button type="button" onClick={() => { if (selectedId) deletarMentorado(selectedId) }}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 transition-colors">
-                  <Trash2 className="w-4 h-4" /> Deletar Mentorado
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <EditarMentoradoModal
+          selected={selected} selectedId={selectedId}
+          editData={editData} setEditData={setEditData} editando={editando}
+          onSubmit={editarMentorado} onDelete={deletarMentorado}
+          onUploadFoto={uploadFoto} onClose={() => setShowEditModal(false)}
+        />
       )}
 
-      {/* Modal: Histórico */}
       {showHistoricoModal && selected && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4" onClick={() => setShowHistoricoModal(false)}>
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[80vh] overflow-hidden" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
-              <h2 className="text-base font-semibold text-slate-900">Histórico — {selected.nome}</h2>
-              <button onClick={() => setShowHistoricoModal(false)} className="p-2 hover:bg-slate-100 rounded-lg"><X className="w-5 h-5 text-slate-400" /></button>
-            </div>
-            <div className="overflow-y-auto max-h-[60vh] p-6">
-              {historico.length === 0 ? (
-                <p className="text-slate-400 text-sm text-center py-8">Nenhum histórico disponível.</p>
-              ) : (
-                <div className="space-y-4">
-                  {historico.map((h, i) => (
-                    <div key={h.id} className={`p-4 rounded-xl border ${i === 0 ? "border-teal-200 bg-teal-50" : "border-slate-200 bg-slate-50"}`}>
-                      <p className="text-xs font-bold text-slate-500 mb-2">{i === 0 ? "✓ Atual" : `Semana -${i}`} · {h.data_envio?.slice(0, 10)}</p>
-                      <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
-                        <span className="text-slate-500">Leads: <span className="font-bold text-slate-800">{h.leads_gerados}</span></span>
-                        <span className="text-slate-500">Vendas: <span className="font-bold text-teal-700">R${h.vendas_reais?.toLocaleString("pt-BR")}</span></span>
-                        <span className="text-slate-500">Investimento: <span className="font-bold text-slate-800">R${h.investimento_trafego?.toLocaleString("pt-BR")}</span></span>
-                        <span className="text-slate-500">Vídeos: <span className="font-bold text-slate-800">{h.videos_postados}</span></span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+        <HistoricoModal selected={selected} historico={historico} onClose={() => setShowHistoricoModal(false)} />
       )}
 
-      {/* Modal: Perfil do Mentor */}
       {showPerfilModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4" onClick={() => setShowPerfilModal(false)}>
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
-              <h2 className="text-base font-semibold text-slate-900">Meu Perfil</h2>
-              <button onClick={() => setShowPerfilModal(false)} className="p-2 hover:bg-slate-100 rounded-lg"><X className="w-5 h-5 text-slate-400" /></button>
-            </div>
-            <div className="p-6 space-y-4">
-              <div className="flex justify-center mb-2">
-                <label className="cursor-pointer">
-                  <div className="w-20 h-20 rounded-2xl overflow-hidden ring-4 ring-slate-100 hover:ring-teal-300 transition-all">
-                    {mentorDados?.foto_url
-                      ? <img src={mentorDados.foto_url} alt={mentorNome} className="w-full h-full object-cover" />
-                      : <div className="w-full h-full bg-slate-900 flex items-center justify-center text-2xl font-bold text-white">{mentorNome.slice(0, 2).toUpperCase()}</div>}
-                  </div>
-                  <input type="file" accept="image/*" className="hidden" onChange={e => {
-                    const file = e.target.files?.[0]
-                    if (file && mentorId) uploadFoto(file, "mentor", mentorId)
-                  }} />
-                </label>
-              </div>
-              {!editandoPerfil ? (
-                <>
-                  <div className="text-center">
-                    <p className="text-lg font-bold text-slate-900">{mentorDados?.nome || mentorNome}</p>
-                    <p className="text-sm text-teal-600 font-medium mt-0.5">{mentorDados?.nicho_foco || "—"}</p>
-                  </div>
-                  <button onClick={() => { setPerfilEdit({ nome: mentorDados?.nome || "", nicho_foco: mentorDados?.nicho_foco || "", metodo_trabalho: mentorDados?.metodo_trabalho || "", filosofia: mentorDados?.filosofia || "" }); setEditandoPerfil(true) }}
-                    className="w-full py-2.5 rounded-lg text-sm font-semibold text-white bg-teal-600 hover:bg-teal-700 transition-colors">
-                    Editar Perfil
-                  </button>
-                </>
-              ) : (
-                <>
-                  {[
-                    { label: "Nome", key: "nome" }, { label: "Nicho Foco", key: "nicho_foco" },
-                    { label: "Método de Trabalho", key: "metodo_trabalho" }, { label: "Filosofia", key: "filosofia" },
-                  ].map(f => (
-                    <div key={f.key}>
-                      <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">{f.label}</label>
-                      <input value={(perfilEdit as any)[f.key]} onChange={e => setPerfilEdit(p => ({ ...p, [f.key]: e.target.value }))}
-                        className="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm text-slate-900 focus:outline-none focus:border-teal-500" />
-                    </div>
-                  ))}
-                  <div className="flex gap-3">
-                    <button onClick={() => setEditandoPerfil(false)}
-                      className="flex-1 py-2.5 rounded-lg text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">Cancelar</button>
-                    <button onClick={salvarPerfil} disabled={salvandoPerfil}
-                      className="flex-1 py-2.5 rounded-lg text-sm font-semibold text-white bg-teal-600 hover:bg-teal-700 disabled:opacity-50 transition-colors">
-                      {salvandoPerfil ? "Salvando..." : "Salvar"}
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
+        <PerfilMentorModal
+          mentorDados={mentorDados} mentorNome={mentorNome} mentorId={mentorId}
+          editandoPerfil={editandoPerfil} setEditandoPerfil={setEditandoPerfil}
+          perfilEdit={perfilEdit} setPerfilEdit={setPerfilEdit} salvandoPerfil={salvandoPerfil}
+          onSalvar={salvarPerfil} onUploadFoto={uploadFoto} onClose={() => setShowPerfilModal(false)}
+        />
       )}
     </div>
   )
