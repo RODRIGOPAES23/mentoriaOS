@@ -68,8 +68,8 @@ export default function ChatMentor({ mentoradoId, mentorId, nomeMentorado }: {
           return (
             <div key={m.id} className={`flex ${meu ? "justify-end" : "justify-start"}`}>
               <div className="max-w-[75%] px-4 py-2.5 rounded-2xl" style={{
-                background: meu ? C.green : "#0a1628",
-                color: meu ? "#0a1628" : "#fff",
+                background: meu ? C.green : C.input,
+                color: meu ? C.input : "#fff",
                 border: meu ? "none" : `1px solid ${C.border}`,
                 borderBottomRightRadius: meu ? 4 : 16,
                 borderBottomLeftRadius: meu ? 16 : 4,
@@ -88,11 +88,11 @@ export default function ChatMentor({ mentoradoId, mentorId, nomeMentorado }: {
       <form onSubmit={enviar} className="flex gap-2 p-4 shrink-0" style={{ borderTop: `1px solid ${C.border}` }}>
         <input value={texto} onChange={e => setTexto(e.target.value)} placeholder="Responder..."
           className="flex-1 px-4 py-2.5 rounded-xl text-sm text-white placeholder-slate-600 focus:outline-none"
-          style={{ background: "#0a1628", border: `1px solid ${C.border}` }}
+          style={{ background: C.input, border: `1px solid ${C.border}` }}
           onFocus={e => e.target.style.borderColor = C.green} onBlur={e => e.target.style.borderColor = C.border} />
         <button type="submit" disabled={enviando || !texto.trim()}
           className="w-11 h-11 rounded-xl flex items-center justify-center disabled:opacity-40 shrink-0"
-          style={{ background: C.green, color: "#0a1628" }}>
+          style={{ background: C.green, color: C.input }}>
           {enviando ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
         </button>
       </form>

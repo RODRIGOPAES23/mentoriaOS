@@ -149,7 +149,7 @@ export default function CallRoom({ mentoradoId, mentorId, nomeMentorado, nomeMen
             ] as const).map(t => (
               <button key={t.id} onClick={() => setTab(t.id)}
                 className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-bold transition-all"
-                style={tab === t.id ? { background: C.green, color: "#0a1628" } : { color: C.muted }}>
+                style={tab === t.id ? { background: C.green, color: C.input } : { color: C.muted }}>
                 <t.icon className="w-3.5 h-3.5" /> {t.label}
               </button>
             ))}
@@ -173,7 +173,7 @@ export default function CallRoom({ mentoradoId, mentorId, nomeMentorado, nomeMen
                   <ol className="space-y-2.5">
                     {briefing.pauta.map((item, i) => (
                       <li key={i} className="flex items-start gap-2.5">
-                        <span className="w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5" style={{ background: C.green, color: "#0a1628" }}>{i + 1}</span>
+                        <span className="w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5" style={{ background: C.green, color: C.input }}>{i + 1}</span>
                         <p className="text-sm leading-snug" style={{ color: "#94b4cc" }}>{item}</p>
                       </li>
                     ))}

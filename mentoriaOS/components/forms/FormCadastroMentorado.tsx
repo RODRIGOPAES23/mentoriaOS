@@ -112,7 +112,7 @@ export function FormCadastroMentorado({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       onSubmit={handleSubmit}
-      className="space-y-6 bg-[#0f2540] rounded-2xl p-8 border border-[#1e3a5f]"
+      className="space-y-6 bg-ck-card rounded-2xl p-8 border border-ck-border"
     >
       <h2 className="text-2xl font-bold text-white mb-6">Cadastro do Mentorado</h2>
 
@@ -140,7 +140,7 @@ export function FormCadastroMentorado({
             value={formData.nome}
             onChange={handleChange}
             required
-            className="bg-[#0a1628] border border-[#1e3a5f] rounded px-4 py-2 text-white placeholder-[#4d7fa8] focus:outline-none focus:border-[#00d68f]"
+            className="bg-ck-input border border-ck-border rounded px-4 py-2 text-white placeholder-ck-muted focus:outline-none focus:border-ck-green"
           />
           <input
             type="email"
@@ -148,7 +148,7 @@ export function FormCadastroMentorado({
             placeholder="Email"
             value={formData.email}
             onChange={handleChange}
-            className="bg-[#0a1628] border border-[#1e3a5f] rounded px-4 py-2 text-white placeholder-[#4d7fa8] focus:outline-none focus:border-[#00d68f]"
+            className="bg-ck-input border border-ck-border rounded px-4 py-2 text-white placeholder-ck-muted focus:outline-none focus:border-ck-green"
           />
           <input
             type="tel"
@@ -156,7 +156,7 @@ export function FormCadastroMentorado({
             placeholder="Celular"
             value={formData.cel}
             onChange={handleChange}
-            className="bg-[#0a1628] border border-[#1e3a5f] rounded px-4 py-2 text-white placeholder-[#4d7fa8] focus:outline-none focus:border-[#00d68f]"
+            className="bg-ck-input border border-ck-border rounded px-4 py-2 text-white placeholder-ck-muted focus:outline-none focus:border-ck-green"
           />
           <input
             type="tel"
@@ -164,7 +164,7 @@ export function FormCadastroMentorado({
             placeholder="Contato de emergência"
             value={formData.contato_emergencia}
             onChange={handleChange}
-            className="bg-[#0a1628] border border-[#1e3a5f] rounded px-4 py-2 text-white placeholder-[#4d7fa8] focus:outline-none focus:border-[#00d68f]"
+            className="bg-ck-input border border-ck-border rounded px-4 py-2 text-white placeholder-ck-muted focus:outline-none focus:border-ck-green"
           />
           <input
             type="text"
@@ -172,7 +172,7 @@ export function FormCadastroMentorado({
             placeholder="Instagram (@user)"
             value={formData.instagram_handle}
             onChange={handleChange}
-            className="bg-[#0a1628] border border-[#1e3a5f] rounded px-4 py-2 text-white placeholder-[#4d7fa8] focus:outline-none focus:border-[#00d68f] md:col-span-2"
+            className="bg-ck-input border border-ck-border rounded px-4 py-2 text-white placeholder-ck-muted focus:outline-none focus:border-ck-green md:col-span-2"
           />
         </div>
       </div>
@@ -187,7 +187,7 @@ export function FormCadastroMentorado({
             placeholder="Tempo de mercado (anos)"
             value={formData.tempo_mercado}
             onChange={handleChange}
-            className="bg-[#0a1628] border border-[#1e3a5f] rounded px-4 py-2 text-white placeholder-[#4d7fa8] focus:outline-none focus:border-[#00d68f]"
+            className="bg-ck-input border border-ck-border rounded px-4 py-2 text-white placeholder-ck-muted focus:outline-none focus:border-ck-green"
           />
           <input
             type="text"
@@ -195,7 +195,7 @@ export function FormCadastroMentorado({
             placeholder="Formação acadêmica"
             value={formData.formacao}
             onChange={handleChange}
-            className="bg-[#0a1628] border border-[#1e3a5f] rounded px-4 py-2 text-white placeholder-[#4d7fa8] focus:outline-none focus:border-[#00d68f]"
+            className="bg-ck-input border border-ck-border rounded px-4 py-2 text-white placeholder-ck-muted focus:outline-none focus:border-ck-green"
           />
         </div>
 
@@ -208,7 +208,7 @@ export function FormCadastroMentorado({
               onChange={handleChange}
               className="w-4 h-4 rounded"
             />
-            <span className="text-sm text-[#94b4cc]">Tem clínica?</span>
+            <span className="text-sm text-slate-300">Tem clínica?</span>
           </label>
           <label className="flex items-center gap-2 cursor-pointer">
             <input
@@ -218,7 +218,7 @@ export function FormCadastroMentorado({
               onChange={handleChange}
               className="w-4 h-4 rounded"
             />
-            <span className="text-sm text-[#94b4cc]">Mentoria</span>
+            <span className="text-sm text-slate-300">Mentoria</span>
           </label>
           <label className="flex items-center gap-2 cursor-pointer">
             <input
@@ -228,7 +228,7 @@ export function FormCadastroMentorado({
               onChange={handleChange}
               className="w-4 h-4 rounded"
             />
-            <span className="text-sm text-[#94b4cc]">Tráfego</span>
+            <span className="text-sm text-slate-300">Tráfego</span>
           </label>
           <label className="flex items-center gap-2 cursor-pointer">
             <input
@@ -238,7 +238,7 @@ export function FormCadastroMentorado({
               onChange={handleChange}
               className="w-4 h-4 rounded"
             />
-            <span className="text-sm text-[#94b4cc]">Agência Mkt</span>
+            <span className="text-sm text-slate-300">Agência Mkt</span>
           </label>
         </div>
       </div>
@@ -253,7 +253,7 @@ export function FormCadastroMentorado({
             value={formData.expectativa_30_dias}
             onChange={handleChange}
             rows={3}
-            className="bg-[#0a1628] border border-[#1e3a5f] rounded px-4 py-2 text-white placeholder-[#4d7fa8] focus:outline-none focus:border-[#00d68f] resize-none"
+            className="bg-ck-input border border-ck-border rounded px-4 py-2 text-white placeholder-ck-muted focus:outline-none focus:border-ck-green resize-none"
           />
           <textarea
             name="expectativa_90_dias"
@@ -261,7 +261,7 @@ export function FormCadastroMentorado({
             value={formData.expectativa_90_dias}
             onChange={handleChange}
             rows={3}
-            className="bg-[#0a1628] border border-[#1e3a5f] rounded px-4 py-2 text-white placeholder-[#4d7fa8] focus:outline-none focus:border-[#00d68f] resize-none"
+            className="bg-ck-input border border-ck-border rounded px-4 py-2 text-white placeholder-ck-muted focus:outline-none focus:border-ck-green resize-none"
           />
           <textarea
             name="expectativa_6_meses"
@@ -269,7 +269,7 @@ export function FormCadastroMentorado({
             value={formData.expectativa_6_meses}
             onChange={handleChange}
             rows={3}
-            className="bg-[#0a1628] border border-[#1e3a5f] rounded px-4 py-2 text-white placeholder-[#4d7fa8] focus:outline-none focus:border-[#00d68f] resize-none"
+            className="bg-ck-input border border-ck-border rounded px-4 py-2 text-white placeholder-ck-muted focus:outline-none focus:border-ck-green resize-none"
           />
           <textarea
             name="expectativa_12_meses"
@@ -277,7 +277,7 @@ export function FormCadastroMentorado({
             value={formData.expectativa_12_meses}
             onChange={handleChange}
             rows={3}
-            className="bg-[#0a1628] border border-[#1e3a5f] rounded px-4 py-2 text-white placeholder-[#4d7fa8] focus:outline-none focus:border-[#00d68f] resize-none"
+            className="bg-ck-input border border-ck-border rounded px-4 py-2 text-white placeholder-ck-muted focus:outline-none focus:border-ck-green resize-none"
           />
         </div>
       </div>
@@ -293,7 +293,7 @@ export function FormCadastroMentorado({
             value={formData.faturamento_medio_3m}
             onChange={handleChange}
             step="0.01"
-            className="bg-[#0a1628] border border-[#1e3a5f] rounded px-4 py-2 text-white placeholder-[#4d7fa8] focus:outline-none focus:border-[#00d68f]"
+            className="bg-ck-input border border-ck-border rounded px-4 py-2 text-white placeholder-ck-muted focus:outline-none focus:border-ck-green"
           />
           <input
             type="text"
@@ -301,12 +301,12 @@ export function FormCadastroMentorado({
             placeholder="Nicho"
             value={formData.nicho}
             onChange={handleChange}
-            className="bg-[#0a1628] border border-[#1e3a5f] rounded px-4 py-2 text-white placeholder-[#4d7fa8] focus:outline-none focus:border-[#00d68f]"
+            className="bg-ck-input border border-ck-border rounded px-4 py-2 text-white placeholder-ck-muted focus:outline-none focus:border-ck-green"
           />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <label className="flex items-center gap-3 bg-[#0a1628] border border-[#1e3a5f] rounded px-4 py-3 cursor-pointer">
+          <label className="flex items-center gap-3 bg-ck-input border border-ck-border rounded px-4 py-3 cursor-pointer">
             <input
               type="checkbox"
               name="atua_trafego"
@@ -314,7 +314,7 @@ export function FormCadastroMentorado({
               onChange={handleChange}
               className="w-4 h-4 rounded"
             />
-            <span className="text-[#94b4cc]">Já atua rodando tráfego?</span>
+            <span className="text-slate-300">Já atua rodando tráfego?</span>
           </label>
 
           {formData.atua_trafego && (
@@ -325,11 +325,11 @@ export function FormCadastroMentorado({
               value={formData.investimento_trafego_mensal || ""}
               onChange={handleChange}
               step="0.01"
-              className="bg-[#0a1628] border border-[#1e3a5f] rounded px-4 py-2 text-white placeholder-[#4d7fa8] focus:outline-none focus:border-[#00d68f]"
+              className="bg-ck-input border border-ck-border rounded px-4 py-2 text-white placeholder-ck-muted focus:outline-none focus:border-ck-green"
             />
           )}
 
-          <label className="flex items-center gap-3 bg-[#0a1628] border border-[#1e3a5f] rounded px-4 py-3 cursor-pointer md:col-span-2">
+          <label className="flex items-center gap-3 bg-ck-input border border-ck-border rounded px-4 py-3 cursor-pointer md:col-span-2">
             <input
               type="checkbox"
               name="tem_vendedora_time"
@@ -337,7 +337,7 @@ export function FormCadastroMentorado({
               onChange={handleChange}
               className="w-4 h-4 rounded"
             />
-            <span className="text-[#94b4cc]">
+            <span className="text-slate-300">
               Possui vendedora dedicada no time?
             </span>
           </label>
@@ -353,7 +353,7 @@ export function FormCadastroMentorado({
           placeholder="Cidade"
           value={formData.cidade}
           onChange={handleChange}
-          className="w-full bg-[#0a1628] border border-[#1e3a5f] rounded px-4 py-2 text-white placeholder-[#4d7fa8] focus:outline-none focus:border-[#00d68f]"
+          className="w-full bg-ck-input border border-ck-border rounded px-4 py-2 text-white placeholder-ck-muted focus:outline-none focus:border-ck-green"
         />
       </div>
 

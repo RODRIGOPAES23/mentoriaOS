@@ -52,7 +52,7 @@ export default function SessaoModal({ mentorId, mentorados, mentoradoIdInicial, 
     else { const j = await res.json(); setErro(j.error || "Erro ao agendar") }
   }
 
-  const inputStyle = { background: "#0a1628", border: `1px solid ${C.border}` }
+  const inputStyle = { background: C.input, border: `1px solid ${C.border}` }
   const onFocus = (e: any) => e.target.style.borderColor = C.green
   const onBlur = (e: any) => e.target.style.borderColor = C.border
 
@@ -76,7 +76,7 @@ export default function SessaoModal({ mentorId, mentorados, mentoradoIdInicial, 
             <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: C.muted }}>Mentorado</label>
             <select value={form.mentoradoId} onChange={e => setForm(f => ({ ...f, mentoradoId: e.target.value }))}
               className="w-full px-3.5 py-2.5 rounded-lg text-sm text-white focus:outline-none transition-all" style={inputStyle} onFocus={onFocus} onBlur={onBlur}>
-              {mentorados.map(m => <option key={m.id} value={m.id} style={{ background: "#0a1628" }}>{m.nome}</option>)}
+              {mentorados.map(m => <option key={m.id} value={m.id} style={{ background: C.input }}>{m.nome}</option>)}
             </select>
           </div>
           <div>
@@ -110,7 +110,7 @@ export default function SessaoModal({ mentorId, mentorados, mentoradoIdInicial, 
               Cancelar
             </button>
             <button type="submit" disabled={salvando}
-              className="flex-1 py-2.5 rounded-lg text-sm font-semibold disabled:opacity-50 transition-all" style={{ background: C.green, color: "#0a1628" }}>
+              className="flex-1 py-2.5 rounded-lg text-sm font-semibold disabled:opacity-50 transition-all" style={{ background: C.green, color: C.input }}>
               {salvando ? "Agendando..." : "Agendar"}
             </button>
           </div>

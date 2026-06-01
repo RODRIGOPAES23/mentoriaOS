@@ -12,6 +12,21 @@ const config: Config = {
         secondary: '#1e293b',
         accent: '#3b82f6',
         'accent-light': '#60a5fa',
+        // Paleta CKlareza (espelha utils/theme.ts para uso em classes Tailwind)
+        ck: {
+          bg: '#0c1c2c',
+          card: '#0f2540',
+          card2: '#112a4a',
+          input: '#0a1628',
+          border: '#1e3a5f',
+          muted: '#4d7fa8',
+          green: '#00d68f',
+          blue: '#4c9aff',
+          amber: '#f59e0b',
+          red: '#f05252',
+          violet: '#a78bfa',
+          gold: '#d4af37',
+        },
       },
       animation: {
         'fade-in-up': 'fadeInUp 0.5s ease-out',

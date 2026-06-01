@@ -73,7 +73,7 @@ export default function Sidebar({ active, onChange, onLogout, collapsed = false,
               title={collapsed ? label : undefined}
               className={`group relative w-full flex items-center transition-all duration-200 rounded-xl ${collapsed ? "justify-center p-2.5" : "gap-3 px-3.5 py-2.5"}`}
               style={isActive
-                ? { background: accent, color: "#0a1628" }
+                ? { background: accent, color: C.input }
                 : { color: C.muted }}
               onMouseEnter={e => { if (!isActive) { (e.currentTarget as HTMLElement).style.background = C.card2; (e.currentTarget as HTMLElement).style.color = "#fff" } }}
               onMouseLeave={e => { if (!isActive) { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = C.muted } }}

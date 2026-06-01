@@ -28,7 +28,7 @@ export default function HistoricoModal({ selected, historico, onClose }: Props) 
                 <div key={h.id} className="p-4 rounded-xl"
                   style={i === 0
                     ? { background: `${C.green}10`, border: `1px solid ${C.green}33` }
-                    : { background: "#0a1628", border: `1px solid ${C.border}` }}>
+                    : { background: C.input, border: `1px solid ${C.border}` }}>
                   <p className="text-xs font-bold mb-2" style={{ color: C.muted }}>{i === 0 ? "✓ Atual" : `Semana -${i}`} · {h.data_envio?.slice(0, 10)}</p>
                   <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
                     <span style={{ color: C.muted }}>Leads: <span className="font-bold text-white">{h.leads_gerados}</span></span>

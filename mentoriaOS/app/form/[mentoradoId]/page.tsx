@@ -98,7 +98,7 @@ export default function FormPage({ params }: { params: { mentoradoId: string } }
                   type="number" step="0.01" required
                   value={formData.vendas_reais}
                   onChange={(e) => setFormData({ ...formData, vendas_reais: e.target.value })}
-                  className="w-full px-4 py-3 bg-[#0a1628] border border-[#1e3a5f] rounded-lg focus:outline-none focus:border-[#00d68f] text-white"
+                  className="w-full px-4 py-3 bg-ck-input border border-ck-border rounded-lg focus:outline-none focus:border-ck-green text-white"
                   placeholder="0.00"
                 />
               </div>
@@ -108,7 +108,7 @@ export default function FormPage({ params }: { params: { mentoradoId: string } }
                   type="number" required
                   value={formData.leads_gerados}
                   onChange={(e) => setFormData({ ...formData, leads_gerados: e.target.value })}
-                  className="w-full px-4 py-3 bg-[#0a1628] border border-[#1e3a5f] rounded-lg focus:outline-none focus:border-[#00d68f] text-white"
+                  className="w-full px-4 py-3 bg-ck-input border border-ck-border rounded-lg focus:outline-none focus:border-ck-green text-white"
                   placeholder="0"
                 />
               </div>
@@ -118,7 +118,7 @@ export default function FormPage({ params }: { params: { mentoradoId: string } }
                   type="number" step="0.01" required
                   value={formData.investimento_trafego}
                   onChange={(e) => setFormData({ ...formData, investimento_trafego: e.target.value })}
-                  className="w-full px-4 py-3 bg-[#0a1628] border border-[#1e3a5f] rounded-lg focus:outline-none focus:border-[#00d68f] text-white"
+                  className="w-full px-4 py-3 bg-ck-input border border-ck-border rounded-lg focus:outline-none focus:border-ck-green text-white"
                   placeholder="0.00"
                 />
               </div>
@@ -128,7 +128,7 @@ export default function FormPage({ params }: { params: { mentoradoId: string } }
                   type="number"
                   value={formData.videos_postados}
                   onChange={(e) => setFormData({ ...formData, videos_postados: e.target.value })}
-                  className="w-full px-4 py-3 bg-[#0a1628] border border-[#1e3a5f] rounded-lg focus:outline-none focus:border-[#00d68f] text-white"
+                  className="w-full px-4 py-3 bg-ck-input border border-ck-border rounded-lg focus:outline-none focus:border-ck-green text-white"
                   placeholder="0"
                 />
               </div>
@@ -142,7 +142,7 @@ export default function FormPage({ params }: { params: { mentoradoId: string } }
               <textarea
                 value={formData.dificuldades_texto}
                 onChange={(e) => setFormData({ ...formData, dificuldades_texto: e.target.value })}
-                className="w-full px-4 py-3 bg-[#0a1628] border border-[#1e3a5f] rounded-lg focus:outline-none focus:border-[#00d68f] text-white min-h-24 resize-none"
+                className="w-full px-4 py-3 bg-ck-input border border-ck-border rounded-lg focus:outline-none focus:border-ck-green text-white min-h-24 resize-none"
                 placeholder="Descreva os principais desafios..."
               />
             </div>
@@ -151,7 +151,7 @@ export default function FormPage({ params }: { params: { mentoradoId: string } }
               <textarea
                 value={formData.tarefas_executadas}
                 onChange={(e) => setFormData({ ...formData, tarefas_executadas: e.target.value })}
-                className="w-full px-4 py-3 bg-[#0a1628] border border-[#1e3a5f] rounded-lg focus:outline-none focus:border-[#00d68f] text-white min-h-24 resize-none"
+                className="w-full px-4 py-3 bg-ck-input border border-ck-border rounded-lg focus:outline-none focus:border-ck-green text-white min-h-24 resize-none"
                 placeholder="Liste as tarefas completadas..."
               />
             </div>

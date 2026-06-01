@@ -50,7 +50,7 @@ export function Bloco4Calls({ calls, accent = C.violet }: Bloco4Props) {
           {callsFormatadas.map((call) => (
             <motion.div key={call.id} whileHover={{ x: 4 }}
               className="rounded-xl p-4 cursor-pointer transition-colors"
-              style={{ background: "#0a1628", border: `1px solid ${C.border}` }}
+              style={{ background: C.input, border: `1px solid ${C.border}` }}
             >
               <div className="flex items-start gap-4">
                 <div className="flex flex-col items-center justify-center rounded-lg px-3 py-2 min-w-fit" style={{ background: `${accent}1a` }}>

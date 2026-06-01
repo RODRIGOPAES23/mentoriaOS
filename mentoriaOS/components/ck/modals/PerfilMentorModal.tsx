@@ -39,7 +39,7 @@ export default function PerfilMentorModal({
               <div className="w-20 h-20 rounded-2xl overflow-hidden transition-all" style={{ border: `3px solid ${C.border}` }}>
                 {mentorDados?.foto_url
                   ? <img src={mentorDados.foto_url} alt={mentorNome} className="w-full h-full object-cover" />
-                  : <div className="w-full h-full flex items-center justify-center text-2xl font-bold text-white" style={{ background: "#0a1628" }}>{mentorNome.slice(0, 2).toUpperCase()}</div>}
+                  : <div className="w-full h-full flex items-center justify-center text-2xl font-bold text-white" style={{ background: C.input }}>{mentorNome.slice(0, 2).toUpperCase()}</div>}
               </div>
               <input type="file" accept="image/*" className="hidden" onChange={e => {
                 const file = e.target.files?.[0]
@@ -54,7 +54,7 @@ export default function PerfilMentorModal({
                 <p className="text-sm font-medium mt-0.5" style={{ color: C.green }}>{mentorDados?.nicho_foco || "—"}</p>
               </div>
               <button onClick={() => { setPerfilEdit(() => ({ nome: mentorDados?.nome || "", nicho_foco: mentorDados?.nicho_foco || "", metodo_trabalho: mentorDados?.metodo_trabalho || "", filosofia: mentorDados?.filosofia || "" })); setEditandoPerfil(true) }}
-                className="w-full py-2.5 rounded-lg text-sm font-semibold transition-colors" style={{ background: C.green, color: "#0a1628" }}>
+                className="w-full py-2.5 rounded-lg text-sm font-semibold transition-colors" style={{ background: C.green, color: C.input }}>
                 Editar Perfil
               </button>
             </>
@@ -68,7 +68,7 @@ export default function PerfilMentorModal({
                   <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: C.muted }}>{f.label}</label>
                   <input value={(perfilEdit as any)[f.key]} onChange={e => setPerfilEdit(p => ({ ...p, [f.key]: e.target.value }))}
                     className="w-full px-3.5 py-2.5 rounded-lg text-sm text-white focus:outline-none transition-all"
-                    style={{ background: "#0a1628", border: `1px solid ${C.border}` }}
+                    style={{ background: C.input, border: `1px solid ${C.border}` }}
                     onFocus={e => e.target.style.borderColor = C.green} onBlur={e => e.target.style.borderColor = C.border} />
                 </div>
               ))}
@@ -76,7 +76,7 @@ export default function PerfilMentorModal({
                 <button onClick={() => setEditandoPerfil(false)}
                   className="flex-1 py-2.5 rounded-lg text-sm font-semibold transition-colors" style={{ background: C.card, color: C.muted, border: `1px solid ${C.border}` }}>Cancelar</button>
                 <button onClick={onSalvar} disabled={salvandoPerfil}
-                  className="flex-1 py-2.5 rounded-lg text-sm font-semibold disabled:opacity-50 transition-all" style={{ background: C.green, color: "#0a1628" }}>
+                  className="flex-1 py-2.5 rounded-lg text-sm font-semibold disabled:opacity-50 transition-all" style={{ background: C.green, color: C.input }}>
                   {salvandoPerfil ? "Salvando..." : "Salvar"}
                 </button>
               </div>

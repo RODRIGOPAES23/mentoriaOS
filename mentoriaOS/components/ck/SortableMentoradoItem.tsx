@@ -26,18 +26,18 @@ export default function SortableMentoradoItem({ m, selectedId, onClick }: {
       onMouseLeave={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.background = "transparent" }}
     >
       <div {...attributes} {...listeners} className="cursor-grab opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-        <GripVertical className="w-3.5 h-3.5" style={{ color: isSelected ? "#0a1628" : C.muted }} />
+        <GripVertical className="w-3.5 h-3.5" style={{ color: isSelected ? C.input : C.muted }} />
       </div>
       <div className="w-8 h-8 rounded-full overflow-hidden shrink-0" style={{ border: `2px solid ${isSelected ? "#ffffff33" : C.border}` }}>
         {m.foto_url
           ? <img src={m.foto_url} alt={m.nome} className="w-full h-full object-cover" />
-          : <div className="w-full h-full flex items-center justify-center text-xs font-bold text-white" style={{ background: isSelected ? "#ffffff22" : "#0a1628" }}>{ini}</div>}
+          : <div className="w-full h-full flex items-center justify-center text-xs font-bold text-white" style={{ background: isSelected ? "#ffffff22" : C.input }}>{ini}</div>}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold truncate" style={{ color: isSelected ? "#0a1628" : "#fff" }}>{m.nome}</p>
+        <p className="text-sm font-semibold truncate" style={{ color: isSelected ? C.input : "#fff" }}>{m.nome}</p>
         <p className="text-[10px] truncate" style={{ color: isSelected ? "#0a162899" : C.muted }}>{m.nicho}</p>
       </div>
-      <div className="w-2 h-2 rounded-full shrink-0" style={{ background: m.status === "Ativo" ? (isSelected ? "#0a1628" : C.green) : C.border }} />
+      <div className="w-2 h-2 rounded-full shrink-0" style={{ background: m.status === "Ativo" ? (isSelected ? C.input : C.green) : C.border }} />
     </div>
   )
 }

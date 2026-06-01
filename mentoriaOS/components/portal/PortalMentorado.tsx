@@ -50,7 +50,7 @@ export default function PortalMentorado({ mentorado, mentor }: { mentorado: Ment
             <div className="w-8 h-8 rounded-full overflow-hidden" style={{ border: `1px solid ${C.border}` }}>
               {mentor.foto_url
                 ? <img src={mentor.foto_url} alt={mentor.nome} className="w-full h-full object-cover" />
-                : <div className="w-full h-full flex items-center justify-center text-xs font-bold text-white" style={{ background: "#0a1628" }}>{mentor.nome.slice(0,2).toUpperCase()}</div>}
+                : <div className="w-full h-full flex items-center justify-center text-xs font-bold text-white" style={{ background: C.input }}>{mentor.nome.slice(0,2).toUpperCase()}</div>}
             </div>
           </div>
         )}
@@ -127,7 +127,7 @@ function AbaCheckin({ mentorado }: { mentorado: Mentorado }) {
     </div>
   )
 
-  const inputStyle = { background: "#0a1628", border: `1px solid ${C.border}` }
+  const inputStyle = { background: C.input, border: `1px solid ${C.border}` }
   return (
     <form onSubmit={submit} className="space-y-6">
       <div>
@@ -171,7 +171,7 @@ function AbaCheckin({ mentorado }: { mentorado: Mentorado }) {
       {error && <p className="text-sm rounded-lg px-4 py-3" style={{ background: `${C.red}18`, border: `1px solid ${C.red}44`, color: C.red }}>{error}</p>}
       <button type="submit" disabled={loading}
         className="w-full py-3 rounded-xl font-bold disabled:opacity-50 transition-all"
-        style={{ background: C.green, color: "#0a1628" }}>
+        style={{ background: C.green, color: C.input }}>
         {loading ? "Enviando..." : "🚀 Enviar Check-in"}
       </button>
     </form>
@@ -344,7 +344,7 @@ function AbaChat({ mentorado, mentor }: { mentorado: Mentorado; mentor: Mentor |
             <div key={m.id} className={`flex ${meu ? "justify-end" : "justify-start"}`}>
               <div className="max-w-[75%] px-4 py-2.5 rounded-2xl" style={{
                 background: meu ? C.green : C.card,
-                color: meu ? "#0a1628" : "#fff",
+                color: meu ? C.input : "#fff",
                 border: meu ? "none" : `1px solid ${C.border}`,
                 borderBottomRightRadius: meu ? 4 : 16,
                 borderBottomLeftRadius: meu ? 16 : 4,
@@ -366,7 +366,7 @@ function AbaChat({ mentorado, mentor }: { mentorado: Mentorado; mentor: Mentor |
           onFocus={e => e.target.style.borderColor = C.green} onBlur={e => e.target.style.borderColor = C.border} />
         <button type="submit" disabled={enviando || !texto.trim()}
           className="w-11 h-11 rounded-xl flex items-center justify-center disabled:opacity-40 shrink-0"
-          style={{ background: C.green, color: "#0a1628" }}>
+          style={{ background: C.green, color: C.input }}>
           {enviando ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
         </button>
       </form>
@@ -392,7 +392,7 @@ function AbaCall({ mentorado, mentor }: { mentorado: Mentorado; mentor: Mentor |
       </p>
       <button onClick={() => setEntrou(true)}
         className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all"
-        style={{ background: C.green, color: "#0a1628" }}>
+        style={{ background: C.green, color: C.input }}>
         <Phone className="w-4 h-4" /> Entrar na Chamada
       </button>
     </div>

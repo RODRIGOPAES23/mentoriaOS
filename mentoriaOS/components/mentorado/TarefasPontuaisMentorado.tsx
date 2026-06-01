@@ -103,7 +103,7 @@ export function TarefasPontuaisMentorado({ mentoradoId }: TarefasPonitaisProps) 
                 <AnimatePresence>
                   {expandedId === tarefa.id && (
                     <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
-                      className="rounded-b-2xl p-4 overflow-hidden" style={{ background: "#0a1628", border: `1px solid ${C.border}`, borderTop: "none" }}>
+                      className="rounded-b-2xl p-4 overflow-hidden" style={{ background: C.input, border: `1px solid ${C.border}`, borderTop: "none" }}>
                       <p className="text-sm font-semibold text-white mb-4">Subtarefas:</p>
                       <div className="space-y-2">
                         {tarefa.tarefas_pontuais_subtarefas.map((sub) => (

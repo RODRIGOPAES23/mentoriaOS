@@ -6,6 +6,7 @@ export const C = {
   bg:     "#0c1c2c",   // body
   card:   "#0f2540",   // superfícies primárias
   card2:  "#112a4a",   // superfícies secundárias / hover
+  input:  "#0a1628",   // fundo de inputs / hover interno (navy mais fundo)
   border: "#1e3a5f",   // bordas sutis
   muted:  "#4d7fa8",   // texto secundário
   green:  "#00d68f",   // sucesso / ativo
@@ -13,6 +14,7 @@ export const C = {
   amber:  "#f59e0b",   // atenção / warning
   red:    "#f05252",   // erro / vencido
   violet: "#a78bfa",   // IA / briefing
+  gold:   "#d4af37",   // assinatura de marca CKlareza
 } as const
 
 export type ThemeColor = keyof typeof C

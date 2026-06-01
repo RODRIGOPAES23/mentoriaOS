@@ -421,7 +421,7 @@ export default function DashboardPage() {
                 <div className="w-8 h-8 rounded-full overflow-hidden ring-1" style={{ ringColor: C.border }}>
                   {mentorDados?.foto_url
                     ? <img src={mentorDados.foto_url} alt={mentorNome} className="w-full h-full object-cover" />
-                    : <div className="w-full h-full flex items-center justify-center text-xs font-bold text-white" style={{ background: "#0a1628" }}>
+                    : <div className="w-full h-full flex items-center justify-center text-xs font-bold text-white" style={{ background: C.input }}>
                         {mentorNome.slice(0, 2).toUpperCase()}
                       </div>}
                 </div>
@@ -492,7 +492,7 @@ export default function DashboardPage() {
                     <input value={filtroSidebar} onChange={e => setFiltroSidebar(e.target.value)}
                       placeholder="Buscar mentorado..."
                       className="w-full pl-9 pr-3 py-2 rounded-lg text-sm text-white placeholder-slate-600 focus:outline-none transition-all"
-                      style={{ background: "#0a1628", border: `1px solid ${C.border}` }}
+                      style={{ background: C.input, border: `1px solid ${C.border}` }}
                       onFocus={e => e.target.style.borderColor = C.green}
                       onBlur={e => e.target.style.borderColor = C.border} />
                   </div>
@@ -576,7 +576,7 @@ export default function DashboardPage() {
                       <div className="flex gap-2 mt-5 pt-5" style={{ borderTop: `1px solid ${C.border}` }}>
                         <button onClick={() => setShowCallRoom(true)}
                           className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-xl transition-all"
-                          style={{ background: C.green, color: "#0a1628" }}>
+                          style={{ background: C.green, color: C.input }}>
                           <Phone className="w-3.5 h-3.5" /> Iniciar Chamada
                         </button>
                         {[
@@ -639,7 +639,7 @@ export default function DashboardPage() {
 
                         {briefing ? (
                           <div className="space-y-5">
-                            <div className="rounded-xl p-4" style={{ background: "#0a1628" }}>
+                            <div className="rounded-xl p-4" style={{ background: C.input }}>
                               <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: C.muted }}>📊 Diagnóstico</p>
                               <p className="text-sm leading-relaxed" style={{ color: "#94b4cc" }}>{briefing.diagnostico}</p>
                             </div>
@@ -676,7 +676,7 @@ export default function DashboardPage() {
                           <button key={tab.id} onClick={() => setActiveTab(tab.id)}
                             className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition-all"
                             style={activeTab === tab.id
-                              ? { background: C.green, color: "#0a1628", border: `1px solid ${C.green}` }
+                              ? { background: C.green, color: C.input, border: `1px solid ${C.green}` }
                               : { color: C.muted }}>
                             <tab.icon className="w-3.5 h-3.5" />
                             {tab.label}

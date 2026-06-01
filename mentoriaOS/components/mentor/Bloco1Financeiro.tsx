@@ -39,7 +39,7 @@ export function Bloco1Financeiro({ vence_24h, vence_2_dias, vence_3_dias, total_
         ))}
       </div>
 
-      <div className="rounded-xl p-4" style={{ background: "#0a1628", border: `1px solid ${C.border}` }}>
+      <div className="rounded-xl p-4" style={{ background: C.input, border: `1px solid ${C.border}` }}>
         <div className="flex items-start gap-3">
           <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: C.amber }} />
           <div>

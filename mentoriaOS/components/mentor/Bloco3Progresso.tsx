@@ -62,7 +62,7 @@ export function Bloco3Progresso({ alunoMaisAtrasado, progresoGeral }: Bloco3Prop
           </p>
           <div className="space-y-3">
             {alunosComAtraso.slice(0, 5).map((item) => (
-              <div key={item.mentorado_id} className="rounded-xl p-3" style={{ background: "#0a1628", border: `1px solid ${C.border}` }}>
+              <div key={item.mentorado_id} className="rounded-xl p-3" style={{ background: C.input, border: `1px solid ${C.border}` }}>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium text-white">{item.mentorado_nome}</span>
                   <span className="text-xs" style={{ color: C.red }}>{item.tarefas_atrasadas} atrasadas</span>

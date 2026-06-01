@@ -67,7 +67,7 @@ export default function MaterialEntregas({ mentoradoId, mentorId }: Props) {
     buscar()
   }
 
-  const inputStyle = { background: "#0a1628", border: `1px solid ${C.border}` }
+  const inputStyle = { background: C.input, border: `1px solid ${C.border}` }
 
   return (
     <div className="rounded-2xl p-6" style={{ background: C.card, border: `1px solid ${C.border}` }}>
@@ -89,7 +89,7 @@ export default function MaterialEntregas({ mentoradoId, mentorId }: Props) {
       </div>
 
       {showForm && (
-        <form onSubmit={criar} className="rounded-xl p-4 mb-4 space-y-3" style={{ background: "#0a1628", border: `1px solid ${C.border}` }}>
+        <form onSubmit={criar} className="rounded-xl p-4 mb-4 space-y-3" style={{ background: C.input, border: `1px solid ${C.border}` }}>
           <input value={desc} onChange={e => setDesc(e.target.value)} placeholder="Ex: PDF do script de vendas"
             className="w-full px-3 py-2 rounded-lg text-sm text-white placeholder-slate-600 focus:outline-none" style={inputStyle} />
           <div className="grid grid-cols-2 gap-2">
@@ -117,7 +117,7 @@ export default function MaterialEntregas({ mentoradoId, mentorId }: Props) {
             const st = STATUS[(m.status as keyof typeof STATUS)] || STATUS.pendente
             const Icon = st.icon
             return (
-              <div key={m.id} className="flex items-center gap-3 p-3 rounded-xl" style={{ background: "#0a1628", border: `1px solid ${C.border}` }}>
+              <div key={m.id} className="flex items-center gap-3 p-3 rounded-xl" style={{ background: C.input, border: `1px solid ${C.border}` }}>
                 <button onClick={() => avancarStatus(m)} title="Avançar status"
                   className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-all"
                   style={{ background: `${st.cor}18`, border: `1px solid ${st.cor}44` }}>

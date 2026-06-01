@@ -60,7 +60,7 @@ export function HistoricoCallsMentorado({ mentoradoId }: HistoricoCallsProps) {
         <div className="rounded-2xl p-6" style={{ background: `linear-gradient(135deg, ${C.card} 0%, ${C.violet}18 100%)`, border: `1px solid ${C.border}` }}>
           <h3 className="text-lg font-bold text-white mb-4">📊 Resumão das Calls</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="rounded-xl p-4" style={{ background: "#0a1628" }}>
+            <div className="rounded-xl p-4" style={{ background: C.input }}>
               <p className="text-sm mb-2" style={{ color: C.muted }}>Total de Calls</p>
               <p className="text-3xl font-bold text-white">{resumao.total_calls}</p>
             </div>
@@ -117,7 +117,7 @@ export function HistoricoCallsMentorado({ mentoradoId }: HistoricoCallsProps) {
                 <AnimatePresence>
                   {expandedId === call.id && (
                     <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
-                      className="rounded-b-2xl p-4 overflow-hidden" style={{ background: "#0a1628", border: `1px solid ${C.border}`, borderTop: "none" }}>
+                      className="rounded-b-2xl p-4 overflow-hidden" style={{ background: C.input, border: `1px solid ${C.border}`, borderTop: "none" }}>
                       {call.resumo_estruturado?.bullets && (
                         <div className="mb-4">
                           <p className="text-sm font-semibold text-white mb-2">📋 Pontos principais</p>

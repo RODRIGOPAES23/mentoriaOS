@@ -22,7 +22,7 @@ interface Props {
 }
 
 export default function EditarMentoradoModal({ selected, selectedId, editData, setEditData, editando, onSubmit, onDelete, onUploadFoto, onClose }: Props) {
-  const inputStyle = { background: "#0a1628", border: `1px solid ${C.border}` }
+  const inputStyle = { background: C.input, border: `1px solid ${C.border}` }
   const onFocus = (e: any) => e.target.style.borderColor = C.green
   const onBlur = (e: any) => e.target.style.borderColor = C.border
 
@@ -35,7 +35,7 @@ export default function EditarMentoradoModal({ selected, selectedId, editData, s
               <div className="w-9 h-9 rounded-full overflow-hidden transition-all" style={{ border: `2px solid ${C.border}` }}>
                 {selected.foto_url
                   ? <img src={selected.foto_url} alt={selected.nome} className="w-full h-full object-cover" />
-                  : <div className="w-full h-full flex items-center justify-center text-xs font-bold text-white" style={{ background: "#0a1628" }}>{selected.nome.slice(0, 2).toUpperCase()}</div>}
+                  : <div className="w-full h-full flex items-center justify-center text-xs font-bold text-white" style={{ background: C.input }}>{selected.nome.slice(0, 2).toUpperCase()}</div>}
               </div>
               <input type="file" accept="image/*" className="hidden" onChange={e => {
                 const file = e.target.files?.[0]
@@ -80,7 +80,7 @@ export default function EditarMentoradoModal({ selected, selectedId, editData, s
             <button type="button" onClick={onClose}
               className="flex-1 py-2.5 rounded-lg text-sm font-semibold transition-colors" style={{ background: C.card, color: C.muted, border: `1px solid ${C.border}` }}>Cancelar</button>
             <button type="submit" disabled={editando}
-              className="flex-1 py-2.5 rounded-lg text-sm font-semibold disabled:opacity-50 transition-all" style={{ background: C.green, color: "#0a1628" }}>
+              className="flex-1 py-2.5 rounded-lg text-sm font-semibold disabled:opacity-50 transition-all" style={{ background: C.green, color: C.input }}>
               {editando ? "Salvando..." : "Salvar Mudanças"}
             </button>
           </div>

@@ -74,7 +74,7 @@ export default function AdminView({ mentorId, accent }: Props) {
   )
 
   const { empresa, mentores, mentorados, stats } = data
-  const inputStyle = { background: "#0a1628", border: `1px solid ${C.border}` }
+  const inputStyle = { background: C.input, border: `1px solid ${C.border}` }
 
   return (
     <div className="space-y-5">
@@ -129,8 +129,8 @@ export default function AdminView({ mentorId, accent }: Props) {
             </button>
           ) : (
             <div className="flex gap-2">
-              <button onClick={() => setEditandoDna(false)} className="px-3 py-1.5 rounded-lg text-xs font-semibold" style={{ background: "#0a1628", color: C.muted, border: `1px solid ${C.border}` }}><X className="w-3.5 h-3.5" /></button>
-              <button onClick={salvarDna} disabled={salvando} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold" style={{ background: accent, color: "#0a1628" }}>
+              <button onClick={() => setEditandoDna(false)} className="px-3 py-1.5 rounded-lg text-xs font-semibold" style={{ background: C.input, color: C.muted, border: `1px solid ${C.border}` }}><X className="w-3.5 h-3.5" /></button>
+              <button onClick={salvarDna} disabled={salvando} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold" style={{ background: accent, color: C.input }}>
                 {salvando ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />} Salvar
               </button>
             </div>
@@ -139,11 +139,11 @@ export default function AdminView({ mentorId, accent }: Props) {
 
         {!editandoDna ? (
           <div className="space-y-4">
-            <div className="rounded-xl p-4" style={{ background: "#0a1628" }}>
+            <div className="rounded-xl p-4" style={{ background: C.input }}>
               <div className="flex items-center gap-1.5 mb-2"><Target className="w-3.5 h-3.5" style={{ color: accent }} /><p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.muted }}>Método de Trabalho</p></div>
               <p className="text-sm leading-relaxed" style={{ color: "#94b4cc" }}>{empresa.metodo_trabalho || "Não definido."}</p>
             </div>
-            <div className="rounded-xl p-4" style={{ background: "#0a1628" }}>
+            <div className="rounded-xl p-4" style={{ background: C.input }}>
               <div className="flex items-center gap-1.5 mb-2"><BookOpen className="w-3.5 h-3.5" style={{ color: C.violet }} /><p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: C.muted }}>Filosofia</p></div>
               <p className="text-sm leading-relaxed" style={{ color: "#94b4cc" }}>{empresa.filosofia || "Não definida."}</p>
             </div>
@@ -176,7 +176,7 @@ export default function AdminView({ mentorId, accent }: Props) {
           {mentores.map((m: any) => (
             <div key={m.id} className="px-6 py-3.5 flex items-center gap-3" style={{ borderBottom: `1px solid ${C.border}40` }}>
               <div className="w-9 h-9 rounded-full overflow-hidden shrink-0" style={{ border: `1px solid ${C.border}` }}>
-                {m.foto_url ? <img src={m.foto_url} alt={m.nome} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-xs font-bold text-white" style={{ background: "#0a1628" }}>{iniciais(m.nome)}</div>}
+                {m.foto_url ? <img src={m.foto_url} alt={m.nome} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-xs font-bold text-white" style={{ background: C.input }}>{iniciais(m.nome)}</div>}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
@@ -215,7 +215,7 @@ export default function AdminView({ mentorId, accent }: Props) {
             {mentorados.map((mo: any) => (
               <div key={mo.id} className="px-6 py-3.5 flex items-center gap-3" style={{ borderBottom: `1px solid ${C.border}40` }}>
                 <div className="w-9 h-9 rounded-full overflow-hidden shrink-0" style={{ border: `1px solid ${C.border}` }}>
-                  {mo.foto_url ? <img src={mo.foto_url} alt={mo.nome} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-xs font-bold" style={{ background: "#0a1628", color: accent }}>{iniciais(mo.nome)}</div>}
+                  {mo.foto_url ? <img src={mo.foto_url} alt={mo.nome} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-xs font-bold" style={{ background: C.input, color: accent }}>{iniciais(mo.nome)}</div>}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-white truncate">{mo.nome}</p>
@@ -235,7 +235,7 @@ export default function AdminView({ mentorId, accent }: Props) {
                 {mo.codigo_acesso && (
                   <button onClick={() => copiarConvite(mo.codigo_acesso)} title="Copiar link de convite"
                     className="text-[10px] font-bold px-2 py-1 rounded-lg shrink-0 transition-all"
-                    style={{ background: "#0a1628", color: C.muted, border: `1px solid ${C.border}` }}>
+                    style={{ background: C.input, color: C.muted, border: `1px solid ${C.border}` }}>
                     {mo.codigo_acesso}
                   </button>
                 )}
