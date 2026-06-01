@@ -2,6 +2,7 @@
 
 import { LayoutDashboard, Users, Calendar, FolderArchive, Settings, Sparkles, LogOut, ChevronLeft, ChevronRight, Building2 } from "lucide-react"
 import { C } from "@/utils/theme"
+import PoweredBy from "./PoweredBy"
 
 export type CkView = "visao-geral" | "mentorados" | "calendario" | "historico" | "config" | "empresa"
 
@@ -44,9 +45,7 @@ export default function Sidebar({ active, onChange, onLogout, collapsed = false,
         {!collapsed && (
           <div className="flex-1 min-w-0">
             <h1 className="text-[15px] font-bold text-white tracking-tight leading-none truncate">{marca}</h1>
-            <p className="text-[9px] mt-0.5 tracking-widest" style={{ color: C.muted }}>
-              {esconderMarca ? "MENTORIA" : "POWERED BY CKLAREZA"}
-            </p>
+            <p className="text-[9px] mt-0.5 tracking-widest" style={{ color: C.muted }}>MENTORIA</p>
           </div>
         )}
         <button
@@ -99,7 +98,7 @@ export default function Sidebar({ active, onChange, onLogout, collapsed = false,
           <LogOut className="w-[18px] h-[18px] shrink-0" />
           {!collapsed && <span className="text-sm font-semibold">Trocar mentor</span>}
         </button>
-        {!collapsed && <p className="text-[9px] text-center mt-3" style={{ color: C.border }}>CKlareza · v5.1</p>}
+        {!collapsed && <div className="mt-3"><PoweredBy size="xs" /></div>}
       </div>
     </aside>
   )

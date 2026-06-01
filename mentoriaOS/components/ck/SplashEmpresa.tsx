@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Sparkles } from "lucide-react"
+import PoweredBy from "./PoweredBy"
 
 interface Props {
   nome: string
@@ -99,6 +100,17 @@ export default function SplashEmpresa({ nome, logoUrl, accent, onFinish }: Props
           <p className="text-[11px] tracking-[0.3em] uppercase" style={{ color: accent }}>Mentoria</p>
           <span className="h-px w-8" style={{ background: `${accent}88` }} />
         </div>
+      </div>
+
+      {/* Assinatura CKlareza — surge sutil no fim */}
+      <div
+        className="absolute bottom-10"
+        style={{
+          opacity: fase === "hold" ? 1 : 0,
+          transition: "opacity 0.8s ease 0.5s",
+        }}
+      >
+        <PoweredBy size="xs" />
       </div>
 
       <style jsx>{`

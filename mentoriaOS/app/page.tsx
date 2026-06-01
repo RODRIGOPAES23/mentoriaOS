@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { useEmpresa, resolverSlug } from "@/hooks/useEmpresa"
 import SplashEmpresa from "@/components/ck/SplashEmpresa"
 import MusicaAmbiente from "@/components/ck/MusicaAmbiente"
+import PoweredBy from "@/components/ck/PoweredBy"
 
 const C = {
   bg:     "#0c1c2c",
@@ -160,6 +161,8 @@ export default function HomePage() {
           >
             + Adicionar novo mentor
           </button>
+
+          {empresa.slug && <div className="mt-8"><PoweredBy /></div>}
         </div>
       </div>
     </div>
