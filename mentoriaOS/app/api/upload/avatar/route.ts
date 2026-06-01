@@ -45,7 +45,10 @@ export async function POST(request: Request) {
     const publicUrl = urlData.publicUrl
 
     // Salvar URL no banco (update na tabela correspondente)
-    if (type === "empresa") {
+    if (type === "empresa-musica") {
+      const { error: dbError } = await supabase.from("empresas").update({ musica_url: publicUrl }).eq("id", id)
+      if (dbError) console.error("DB error:", dbError)
+    } else if (type === "empresa") {
       const { error: dbError } = await supabase.from("empresas").update({ logo_url: publicUrl }).eq("id", id)
       if (dbError) console.error("DB error:", dbError)
     } else {

@@ -36,7 +36,7 @@ export async function GET(request: Request) {
   // Empresa (com DNA: método + filosofia)
   const { data: empresa } = await supabase
     .from("empresas")
-    .select("id, slug, nome, logo_url, cor_primaria, cor_secundaria, nicho_foco, metodo_trabalho, filosofia, esconder_marca")
+    .select("id, slug, nome, logo_url, cor_primaria, cor_secundaria, nicho_foco, metodo_trabalho, filosofia, esconder_marca, musica_url")
     .eq("id", empresaId)
     .single()
 

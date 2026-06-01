@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Building2, Users, GraduationCap, AlertTriangle, Sparkles, Target, BookOpen, Edit2, Check, X, Loader2, Crown } from "lucide-react"
+import { Building2, Users, GraduationCap, AlertTriangle, Sparkles, Target, BookOpen, Edit2, Check, X, Loader2, Crown, Music, Volume2 } from "lucide-react"
 import { C } from "@/utils/theme"
 
 interface Props { mentorId: string; accent: string }
@@ -55,6 +55,16 @@ export default function AdminView({ mentorId, accent }: Props) {
     const fd = new FormData()
     fd.append("file", file); fd.append("type", "empresa"); fd.append("id", empresaId)
     await fetch("/api/upload/avatar", { method: "POST", body: fd })
+    carregar()
+  }
+
+  const [enviandoMusica, setEnviandoMusica] = useState(false)
+  const uploadMusica = async (file: File, empresaId: string) => {
+    setEnviandoMusica(true)
+    const fd = new FormData()
+    fd.append("file", file); fd.append("type", "empresa-musica"); fd.append("id", empresaId)
+    await fetch("/api/upload/avatar", { method: "POST", body: fd })
+    setEnviandoMusica(false)
     carregar()
   }
 
@@ -164,6 +174,33 @@ export default function AdminView({ mentorId, accent }: Props) {
             ))}
           </div>
         )}
+      </div>
+
+      {/* Música ambiente */}
+      <div className="rounded-2xl p-6" style={{ background: C.card, border: `1px solid ${C.border}` }}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${accent}18`, border: `1px solid ${accent}30` }}>
+              <Music className="w-4 h-4" style={{ color: accent }} />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-white">Música Ambiente</h3>
+              <p className="text-[11px]" style={{ color: C.muted }}>
+                {empresa.musica_url ? "Tocando em loop, volume baixo, com botão de desligar" : "Nenhuma música carregada"}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {empresa.musica_url && <Volume2 className="w-4 h-4" style={{ color: accent }} />}
+            <label className="cursor-pointer px-3 py-1.5 rounded-lg text-xs font-semibold transition-all" style={{ background: `${accent}18`, border: `1px solid ${accent}33`, color: accent }}>
+              {enviandoMusica ? "Enviando..." : empresa.musica_url ? "Trocar" : "Carregar música"}
+              <input type="file" accept="audio/*" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) uploadMusica(f, empresa.id) }} />
+            </label>
+          </div>
+        </div>
+        <p className="text-[11px] mt-3 leading-relaxed" style={{ color: C.muted }}>
+          ⚠️ Use apenas faixas que você tem direito de usar (próprias ou royalty-free). O player toca em loop baixinho e o usuário pode desligar a qualquer momento — a escolha dele fica salva.
+        </p>
       </div>
 
       {/* Mentores da empresa */}

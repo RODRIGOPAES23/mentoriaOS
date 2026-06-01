@@ -11,6 +11,7 @@ export interface Empresa {
   cor_secundaria: string
   esconder_marca: boolean
   ativo: boolean
+  musica_url?: string | null
 }
 
 /**

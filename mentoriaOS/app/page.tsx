@@ -5,6 +5,7 @@ import { ArrowRight, Sparkles, BarChart3, Brain, CheckCircle2, Zap, Calendar, Us
 import { useRouter } from "next/navigation"
 import { useEmpresa, resolverSlug } from "@/hooks/useEmpresa"
 import SplashEmpresa from "@/components/ck/SplashEmpresa"
+import MusicaAmbiente from "@/components/ck/MusicaAmbiente"
 
 const C = {
   bg:     "#0c1c2c",
@@ -83,9 +84,12 @@ export default function HomePage() {
     <SplashEmpresa nome={marca} logoUrl={empresa.logo_url} accent={accent} onFinish={() => setShowSplash(false)} />
   ) : null
 
+  // Player de música ambiente (white label) — presente em todas as telas da landing
+  const musica = empresa.slug ? <MusicaAmbiente src={empresa.musica_url || null} accent={accent} /> : null
+
   if (carregando) return (
     <>
-      {splash}
+      {splash}{musica}
       <div style={{ background: C.bg }} className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3" style={{ background: accent+"22", border: `1px solid ${accent}44` }}>
@@ -100,7 +104,7 @@ export default function HomePage() {
   // ── SELETOR ──────────────────────────────────────────────────────────────
   if (mentores.length > 0 && !showSetup) return (
     <>
-    {splash}
+    {splash}{musica}
     <div style={{ background: C.bg }} className="min-h-screen flex flex-col">
       {/* Header */}
       <nav style={{ background: C.card, borderBottom: `1px solid ${C.border}` }} className="px-8 py-4 flex items-center justify-between">
@@ -165,7 +169,7 @@ export default function HomePage() {
   // ── SETUP / LANDING ────────────────────────────────────────────────────────
   return (
     <>
-    {splash}
+    {splash}{musica}
     <div style={{ background: C.bg }} className="min-h-screen">
       {/* Header */}
       <nav style={{ background: C.card, borderBottom: `1px solid ${C.border}` }} className="px-8 py-4 flex items-center justify-between sticky top-0 z-10">
