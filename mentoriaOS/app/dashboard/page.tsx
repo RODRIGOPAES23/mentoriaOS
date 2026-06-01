@@ -21,6 +21,7 @@ import VisaoGeral from "@/components/ck/VisaoGeral"
 import SessaoModal from "@/components/ck/SessaoModal"
 import CallRoom from "@/components/ck/CallRoom"
 import ChatMentor from "@/components/ck/ChatMentor"
+import AdminView from "@/components/ck/AdminView"
 import { useLocalStorage } from "@/hooks/useLocalStorage"
 import { useEmpresa } from "@/hooks/useEmpresa"
 import { C } from "@/utils/theme"
@@ -226,6 +227,7 @@ export default function DashboardPage() {
   const [sidebarCollapsed, setSidebarCollapsed] = useLocalStorage("ck:sidebar-collapsed", false)
   const { empresa } = useEmpresa()
   const accent = empresa.cor_primaria
+  const [isAdmin, setIsAdmin] = useState(false)
   const [overviewData, setOverviewData] = useState<any>(null)
   const [overviewLoading, setOverviewLoading] = useState(false)
   const [showSessaoModal, setShowSessaoModal] = useState(false)
@@ -345,6 +347,7 @@ export default function DashboardPage() {
       setMentorados(lista)
       setMentorNome(dataMentor.nome || "CKlareza")
       setMentorDados(dataMentor)
+      setIsAdmin(dataMentor.role === "admin")
       if (lista.length > 0 && !selectedId) setSelectedId(lista[0].id)
       setUltimaAtualizacao(new Date())
     } finally { setLoading(false) }
@@ -472,6 +475,7 @@ export default function DashboardPage() {
   // ── HEADER DO MÓDULO ─────────────────────────────────────────────────────
   const MODULE_LABELS: Record<CkView, string> = {
     "visao-geral": "Visão Geral",
+    "empresa": "Empresa",
     "mentorados": "Mentorados",
     "calendario": "Calendário",
     "historico": "Histórico",
@@ -491,6 +495,7 @@ export default function DashboardPage() {
         accent={accent}
         logoUrl={empresa.logo_url}
         esconderMarca={empresa.esconder_marca}
+        isAdmin={isAdmin}
         onLogout={() => { localStorage.removeItem("mentorSelecionado"); window.location.href = "/" }}
       />
 
@@ -572,6 +577,13 @@ export default function DashboardPage() {
                 onAbrirMentorado={(id) => { setSelectedId(id); setCkView("mentorados") }}
                 onAgendar={() => setShowSessaoModal(true)}
               />
+            </div>
+          )}
+
+          {/* ══ EMPRESA (ADMIN) ══════════════════════════════════════════ */}
+          {ckView === "empresa" && mentorId && (
+            <div className="p-6">
+              <AdminView mentorId={mentorId} accent={accent} />
             </div>
           )}
 

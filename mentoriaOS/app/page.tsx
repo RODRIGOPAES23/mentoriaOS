@@ -49,9 +49,10 @@ export default function HomePage() {
     if (!form.nome.trim() || !form.email.trim()) return
     setSalvando(true)
     try {
-      const res = await fetch("/api/mentors/create", {
+      const slug = resolverSlug()
+      const res = await fetch("/api/mentor/setup", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nome: form.nome, email: form.email, metodo_trabalho: form.metodo, filosofia: form.filosofia, nicho_foco: form.nicho }),
+        body: JSON.stringify({ nome: form.nome, email: form.email, metodo_trabalho: form.metodo, filosofia: form.filosofia, nicho_foco: form.nicho, empresa_slug: slug }),
       })
       if (res.ok) {
         const json = await res.json()

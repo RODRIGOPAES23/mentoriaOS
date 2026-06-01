@@ -11,7 +11,7 @@ export async function GET(request: Request) {
 
     let query = supabase
       .from("mentors")
-      .select("id, nome, nicho_foco, metodo_trabalho, filosofia, email, foto_url")
+      .select("id, nome, nicho_foco, metodo_trabalho, filosofia, email, foto_url, role, empresa_id")
 
     if (mentorId) query = query.eq("id", mentorId)
 
@@ -36,7 +36,7 @@ export async function PATCH(request: Request) {
       .from("mentors")
       .update({ nome, nicho_foco, metodo_trabalho, filosofia })
       .eq("id", mentorId)
-      .select("id, nome, nicho_foco, metodo_trabalho, filosofia, email, foto_url")
+      .select("id, nome, nicho_foco, metodo_trabalho, filosofia, email, foto_url, role, empresa_id")
       .single()
 
     if (error) return Response.json({ error: error.message }, { status: 500, headers: NO_CACHE })

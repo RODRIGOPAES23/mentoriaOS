@@ -1,12 +1,13 @@
 "use client"
 
-import { LayoutDashboard, Users, Calendar, FolderArchive, Settings, Sparkles, LogOut, ChevronLeft, ChevronRight } from "lucide-react"
+import { LayoutDashboard, Users, Calendar, FolderArchive, Settings, Sparkles, LogOut, ChevronLeft, ChevronRight, Building2 } from "lucide-react"
 import { C } from "@/utils/theme"
 
-export type CkView = "visao-geral" | "mentorados" | "calendario" | "historico" | "config"
+export type CkView = "visao-geral" | "mentorados" | "calendario" | "historico" | "config" | "empresa"
 
-const ITENS: { id: CkView; label: string; icon: typeof LayoutDashboard }[] = [
+const ITENS: { id: CkView; label: string; icon: typeof LayoutDashboard; adminOnly?: boolean }[] = [
   { id: "visao-geral", label: "Dashboard", icon: LayoutDashboard },
+  { id: "empresa", label: "Empresa", icon: Building2, adminOnly: true },
   { id: "mentorados", label: "Mentorados", icon: Users },
   { id: "calendario", label: "Calendário", icon: Calendar },
   { id: "historico", label: "Histórico", icon: FolderArchive },
@@ -23,9 +24,11 @@ interface Props {
   accent?: string         // cor primária da empresa
   logoUrl?: string | null // logo da empresa
   esconderMarca?: boolean // esconde "MENTORIA INTELIGENTE / CKlareza"
+  isAdmin?: boolean       // mostra aba Empresa só para admin
 }
 
-export default function Sidebar({ active, onChange, onLogout, collapsed = false, onToggle, marca = "CKlareza", accent = C.green, logoUrl = null, esconderMarca = false }: Props) {
+export default function Sidebar({ active, onChange, onLogout, collapsed = false, onToggle, marca = "CKlareza", accent = C.green, logoUrl = null, esconderMarca = false, isAdmin = false }: Props) {
+  const itens = ITENS.filter(i => !i.adminOnly || isAdmin)
   return (
     <aside
       className={`shrink-0 flex flex-col h-screen sticky top-0 transition-all duration-300 ${collapsed ? "w-[68px]" : "w-64"}`}
@@ -62,7 +65,7 @@ export default function Sidebar({ active, onChange, onLogout, collapsed = false,
 
       {/* Navegação */}
       <nav className={`flex-1 py-3 space-y-1 ${collapsed ? "px-2" : "px-3"}`}>
-        {ITENS.map(({ id, label, icon: Icon }) => {
+        {itens.map(({ id, label, icon: Icon }) => {
           const isActive = active === id
           return (
             <button

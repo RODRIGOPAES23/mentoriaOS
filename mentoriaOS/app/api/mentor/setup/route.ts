@@ -12,11 +12,11 @@ export async function POST(request: Request) {
     return Response.json({ error: "Body inválido" }, { status: 400, headers: NO_CACHE })
   }
 
-  const { nome, email, metodo_trabalho, filosofia, nicho_foco } = body
+  const { nome, email, metodo_trabalho, filosofia, nicho_foco, empresa_slug } = body
 
-  if (!nome || !email || !metodo_trabalho) {
+  if (!nome || !email) {
     return Response.json(
-      { error: "Nome, email e método de trabalho são obrigatórios" },
+      { error: "Nome e email são obrigatórios" },
       { status: 400, headers: NO_CACHE }
     )
   }
@@ -42,15 +42,36 @@ export async function POST(request: Request) {
       )
     }
 
-    // Insere novo mentor
+    // Resolve empresa pelo slug (white label) e herda método/filosofia se vazios
+    let empresaId: string | null = null
+    let empresaMetodo: string | null = null
+    let empresaFilosofia: string | null = null
+    let empresaNicho: string | null = null
+    if (empresa_slug) {
+      const { data: emp } = await supabase
+        .from("empresas")
+        .select("id, metodo_trabalho, filosofia, nicho_foco")
+        .eq("slug", String(empresa_slug).toLowerCase())
+        .single()
+      if (emp) {
+        empresaId = emp.id
+        empresaMetodo = emp.metodo_trabalho
+        empresaFilosofia = emp.filosofia
+        empresaNicho = emp.nicho_foco
+      }
+    }
+
+    // Insere novo mentor — herda DNA da empresa se não informou
     const { data, error } = await supabase
       .from("mentors")
       .insert({
         nome,
         email,
-        metodo_trabalho,
-        filosofia: filosofia || null,
-        nicho_foco: nicho_foco || null,
+        metodo_trabalho: metodo_trabalho || empresaMetodo || null,
+        filosofia: filosofia || empresaFilosofia || null,
+        nicho_foco: nicho_foco || empresaNicho || null,
+        empresa_id: empresaId,
+        role: "mentor",
       })
       .select()
       .single()
