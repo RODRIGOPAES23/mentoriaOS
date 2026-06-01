@@ -40,6 +40,28 @@ export default function AdminView({ mentorId, accent }: Props) {
     setSalvando(false); setEditandoDna(false); carregar()
   }
 
+  const trocarRole = async (targetMentorId: string, atual: string) => {
+    const novoRole = atual === "admin" ? "mentor" : "admin"
+    const msg = novoRole === "admin" ? "Tornar este mentor ADMIN da empresa?" : "Remover privilégios de admin deste mentor?"
+    if (!confirm(msg)) return
+    await fetch("/api/empresa/admin", {
+      method: "PATCH", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mentorId, acao: "set_role", targetMentorId, novoRole }),
+    })
+    carregar()
+  }
+
+  const uploadLogo = async (file: File, empresaId: string) => {
+    const fd = new FormData()
+    fd.append("file", file); fd.append("type", "empresa"); fd.append("id", empresaId)
+    await fetch("/api/upload/avatar", { method: "POST", body: fd })
+    carregar()
+  }
+
+  const copiarConvite = async (codigo: string) => {
+    try { await navigator.clipboard.writeText(`${window.location.origin}/m/${codigo}`) } catch {}
+  }
+
   if (loading) return <div className="p-8 text-center text-sm" style={{ color: C.muted }}><Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" style={{ color: accent }} />Carregando empresa...</div>
 
   if (negado) return (
@@ -58,9 +80,12 @@ export default function AdminView({ mentorId, accent }: Props) {
       {/* Header empresa */}
       <div className="rounded-2xl p-6" style={{ background: `linear-gradient(135deg, ${C.card} 0%, ${accent}15 100%)`, border: `1px solid ${C.border}` }}>
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 overflow-hidden" style={{ background: `${accent}20`, border: `1px solid ${accent}44` }}>
-            {empresa.logo_url ? <img src={empresa.logo_url} alt={empresa.nome} className="w-full h-full object-cover" /> : <Building2 className="w-7 h-7" style={{ color: accent }} />}
-          </div>
+          <label className="cursor-pointer shrink-0" title="Trocar logo da empresa">
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center overflow-hidden transition-all hover:opacity-80" style={{ background: `${accent}20`, border: `1px solid ${accent}44` }}>
+              {empresa.logo_url ? <img src={empresa.logo_url} alt={empresa.nome} className="w-full h-full object-cover" /> : <Building2 className="w-7 h-7" style={{ color: accent }} />}
+            </div>
+            <input type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) uploadLogo(f, empresa.id) }} />
+          </label>
           <div className="flex-1">
             <div className="flex items-center gap-2">
               <h1 className="text-2xl font-bold text-white">{empresa.nome}</h1>
@@ -162,6 +187,15 @@ export default function AdminView({ mentorId, accent }: Props) {
               <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ background: `${C.blue}15`, color: C.blue, border: `1px solid ${C.blue}30` }}>
                 {m.total_mentorados} mentorado{m.total_mentorados !== 1 ? "s" : ""}
               </span>
+              {m.id !== mentorId && (
+                <button onClick={() => trocarRole(m.id, m.role)}
+                  className="text-[11px] font-bold px-2.5 py-1 rounded-full transition-all"
+                  style={m.role === "admin"
+                    ? { background: `${C.muted}15`, color: C.muted, border: `1px solid ${C.border}` }
+                    : { background: `${accent}15`, color: accent, border: `1px solid ${accent}33` }}>
+                  {m.role === "admin" ? "Rebaixar" : "Tornar Admin"}
+                </button>
+              )}
             </div>
           ))}
         </div>
@@ -196,6 +230,13 @@ export default function AdminView({ mentorId, accent }: Props) {
                   <span className="flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-full shrink-0" style={{ background: `${C.red}18`, color: C.red, border: `1px solid ${C.red}33` }}>
                     <AlertTriangle className="w-2.5 h-2.5" /> {mo.vencidas}
                   </span>
+                )}
+                {mo.codigo_acesso && (
+                  <button onClick={() => copiarConvite(mo.codigo_acesso)} title="Copiar link de convite"
+                    className="text-[10px] font-bold px-2 py-1 rounded-lg shrink-0 transition-all"
+                    style={{ background: "#0a1628", color: C.muted, border: `1px solid ${C.border}` }}>
+                    {mo.codigo_acesso}
+                  </button>
                 )}
               </div>
             ))}

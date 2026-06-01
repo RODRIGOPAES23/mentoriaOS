@@ -45,15 +45,13 @@ export async function POST(request: Request) {
     const publicUrl = urlData.publicUrl
 
     // Salvar URL no banco (update na tabela correspondente)
-    const table = type === "mentor" ? "mentors" : "mentorados"
-    const { error: dbError } = await supabase
-      .from(table)
-      .update({ foto_url: publicUrl })
-      .eq("id", id)
-
-    // Ignorar erro de coluna inexistente (será tratado na UI)
-    if (dbError && !dbError.message.includes("foto_url")) {
-      console.error("DB error:", dbError)
+    if (type === "empresa") {
+      const { error: dbError } = await supabase.from("empresas").update({ logo_url: publicUrl }).eq("id", id)
+      if (dbError) console.error("DB error:", dbError)
+    } else {
+      const table = type === "mentor" ? "mentors" : "mentorados"
+      const { error: dbError } = await supabase.from(table).update({ foto_url: publicUrl }).eq("id", id)
+      if (dbError && !dbError.message.includes("foto_url")) console.error("DB error:", dbError)
     }
 
     return Response.json({ success: true, url: publicUrl })

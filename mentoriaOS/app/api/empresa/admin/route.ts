@@ -130,6 +130,22 @@ export async function PATCH(request: Request) {
     return Response.json({ error: "Acesso restrito ao admin" }, { status: 403, headers: NO_CACHE })
   }
 
+  // Ação: promover/rebaixar mentor (admin ↔ mentor)
+  if (body.acao === "set_role" && body.targetMentorId && body.novoRole) {
+    if (!["admin", "mentor"].includes(body.novoRole)) {
+      return Response.json({ error: "role inválido" }, { status: 400, headers: NO_CACHE })
+    }
+    // Garante que o alvo é da mesma empresa
+    const { data: alvo } = await supabase.from("mentors").select("empresa_id").eq("id", body.targetMentorId).single()
+    if (alvo?.empresa_id !== solicitante.empresa_id) {
+      return Response.json({ error: "Mentor não pertence à sua empresa" }, { status: 403, headers: NO_CACHE })
+    }
+    const { error } = await supabase.from("mentors").update({ role: body.novoRole }).eq("id", body.targetMentorId)
+    if (error) return Response.json({ error: error.message }, { status: 500, headers: NO_CACHE })
+    return Response.json({ success: true }, { headers: NO_CACHE })
+  }
+
+  // Edição do DNA / branding da empresa
   const update: any = {}
   for (const k of ["nome", "metodo_trabalho", "filosofia", "nicho_foco", "cor_primaria", "cor_secundaria", "logo_url"]) {
     if (body[k] !== undefined) update[k] = body[k]

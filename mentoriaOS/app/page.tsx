@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { ArrowRight, Sparkles, BarChart3, Brain, CheckCircle2, Zap, Calendar, Users, Target } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEmpresa, resolverSlug } from "@/hooks/useEmpresa"
+import SplashEmpresa from "@/components/ck/SplashEmpresa"
 
 const C = {
   bg:     "#0c1c2c",
@@ -22,9 +23,21 @@ function iniciais(nome: string) {
 
 export default function HomePage() {
   const router = useRouter()
-  const { empresa } = useEmpresa()
+  const { empresa, loading: empresaLoading } = useEmpresa()
   const accent = empresa.cor_primaria   // cor white label da empresa
   const marca = empresa.slug ? empresa.nome : "CKlareza"
+  const [showSplash, setShowSplash] = useState(false)
+
+  // Splash de abertura — 1x por sessão, só quando há empresa white label resolvida
+  useEffect(() => {
+    if (empresaLoading) return
+    if (!empresa.slug) return
+    try {
+      if (sessionStorage.getItem("ck:splash-" + empresa.slug)) return
+      sessionStorage.setItem("ck:splash-" + empresa.slug, "1")
+      setShowSplash(true)
+    } catch {}
+  }, [empresaLoading, empresa.slug])
   const [mentores, setMentores] = useState<Mentor[]>([])
   const [carregando, setCarregando] = useState(true)
   const [showSetup, setShowSetup] = useState(false)
@@ -65,19 +78,29 @@ export default function HomePage() {
     } finally { setSalvando(false) }
   }
 
+  // Splash sobreposto (cobre toda a tela enquanto ativo)
+  const splash = showSplash ? (
+    <SplashEmpresa nome={marca} logoUrl={empresa.logo_url} accent={accent} onFinish={() => setShowSplash(false)} />
+  ) : null
+
   if (carregando) return (
-    <div style={{ background: C.bg }} className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3" style={{ background: accent+"22", border: `1px solid ${accent}44` }}>
-          <Sparkles className="w-6 h-6 animate-pulse" style={{ color: accent }} />
+    <>
+      {splash}
+      <div style={{ background: C.bg }} className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3" style={{ background: accent+"22", border: `1px solid ${accent}44` }}>
+            <Sparkles className="w-6 h-6 animate-pulse" style={{ color: accent }} />
+          </div>
+          <p style={{ color: C.muted }} className="text-sm">Carregando {marca}...</p>
         </div>
-        <p style={{ color: C.muted }} className="text-sm">Carregando {marca}...</p>
       </div>
-    </div>
+    </>
   )
 
   // ── SELETOR ──────────────────────────────────────────────────────────────
   if (mentores.length > 0 && !showSetup) return (
+    <>
+    {splash}
     <div style={{ background: C.bg }} className="min-h-screen flex flex-col">
       {/* Header */}
       <nav style={{ background: C.card, borderBottom: `1px solid ${C.border}` }} className="px-8 py-4 flex items-center justify-between">
@@ -136,10 +159,13 @@ export default function HomePage() {
         </div>
       </div>
     </div>
+    </>
   )
 
   // ── SETUP / LANDING ────────────────────────────────────────────────────────
   return (
+    <>
+    {splash}
     <div style={{ background: C.bg }} className="min-h-screen">
       {/* Header */}
       <nav style={{ background: C.card, borderBottom: `1px solid ${C.border}` }} className="px-8 py-4 flex items-center justify-between sticky top-0 z-10">
@@ -256,5 +282,6 @@ export default function HomePage() {
         </>
       )}
     </div>
+    </>
   )
 }
