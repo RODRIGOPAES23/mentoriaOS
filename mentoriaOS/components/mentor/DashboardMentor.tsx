@@ -11,9 +11,10 @@ import { C } from "@/utils/theme"
 interface DashboardMentorProps {
   mentorId: string
   accent?: string
+  onAbrirMentorado?: (id: string) => void
 }
 
-function DashboardMentorBase({ mentorId, accent = C.green }: DashboardMentorProps) {
+function DashboardMentorBase({ mentorId, accent = C.green, onAbrirMentorado }: DashboardMentorProps) {
   const [dashboard, setDashboard] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -86,12 +87,15 @@ function DashboardMentorBase({ mentorId, accent = C.green }: DashboardMentorProp
       transition={{ staggerChildren: 0.1 }}
       className="space-y-6"
     >
-      {/* BLOCO 1: Pendências Financeiras */}
+      {/* BLOCO 1: Pendências Financeiras (nominal) */}
       <Bloco1Financeiro
         vence_24h={dashboard.bloco1_financeiro?.vence_24h || 0}
         vence_2_dias={dashboard.bloco1_financeiro?.vence_2_dias || 0}
         vence_3_dias={dashboard.bloco1_financeiro?.vence_3_dias || 0}
         total_pendente={dashboard.bloco1_financeiro?.total_pendente || 0}
+        proximos={dashboard.bloco1_financeiro?.proximos || []}
+        accent={accent}
+        onAbrirMentorado={onAbrirMentorado}
       />
 
       {/* BLOCO 2: Mentorados + Renovações */}

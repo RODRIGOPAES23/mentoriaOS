@@ -21,7 +21,6 @@ import SessaoModal from "@/components/ck/SessaoModal"
 import CallRoom from "@/components/ck/CallRoom"
 import ChatMentor from "@/components/ck/ChatMentor"
 import AdminView from "@/components/ck/AdminView"
-import DashboardAcao from "@/components/ck/DashboardAcao"
 import { DashboardMentor } from "@/components/mentor/DashboardMentor"
 import MaterialEntregas from "@/components/mentor/MaterialEntregas"
 import TarefasPontuaisMentor from "@/components/mentor/TarefasPontuaisMentor"
@@ -464,12 +463,10 @@ export default function DashboardPage() {
           {/* ══ VISÃO GERAL ══════════════════════════════════════════════ */}
           {ckView === "visao-geral" && mentorId && (
             <div className="p-6">
-              <DashboardAcao
+              <DashboardMentor
                 mentorId={mentorId}
                 accent={accent}
                 onAbrirMentorado={(id) => { setSelectedId(id); setCkView("mentorados") }}
-                onAgendar={() => setShowSessaoModal(true)}
-                onIrCalendario={() => setCkView("calendario")}
               />
             </div>
           )}

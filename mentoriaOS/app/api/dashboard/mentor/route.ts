@@ -21,15 +21,8 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // BLOCO 1: Pendências financeiras (24h, 2 dias, 3 dias)
-    const { data: financeiro } = await supabaseAdmin
-      .from("v_financeiro_resumo")
-      .select("*")
-      .eq("mentor_id", mentorId)
-      .single()
-
-    // BLOCO 2: Mentorados ativos + renovações próximas 30/60 dias
     const today = new Date()
+    today.setHours(0, 0, 0, 0)
     const in30Days = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000)
     const in60Days = new Date(today.getTime() + 60 * 24 * 60 * 60 * 1000)
 
@@ -41,6 +34,34 @@ export async function GET(request: NextRequest) {
       .eq("mentor_id", mentorId)
       .eq("status", "Ativo")
       .order("data_fim", { ascending: true })
+
+    // BLOCO 1: Pendências financeiras NOMINAIS (quem paga, quanto, em quantos dias)
+    const nomeDe = (id: string) => mentorados?.find(m => m.id === id)?.nome || "—"
+    const { data: pagamentos } = await supabaseAdmin
+      .from("pagamentos")
+      .select("id, mentorado_id, valor, data_vencimento, status")
+      .eq("mentor_id", mentorId)
+      .neq("status", "pago")
+      .order("data_vencimento", { ascending: true })
+
+    const diasAte = (d: string | null) => {
+      if (!d) return null
+      const [y, mo, dd] = d.split("T")[0].split("-").map(Number)
+      return Math.ceil((new Date(y, mo - 1, dd).getTime() - today.getTime()) / 86400000)
+    }
+    const aReceber = (pagamentos || []).map(p => ({
+      id: p.id, mentorado_id: p.mentorado_id, nome: nomeDe(p.mentorado_id),
+      valor: Number(p.valor || 0), dias: diasAte(p.data_vencimento), vencido: (diasAte(p.data_vencimento) ?? 99) < 0,
+    }))
+    const financeiro = {
+      vence_24h: aReceber.filter(p => p.dias === 0 || p.dias === 1).reduce((s, p) => s + p.valor, 0),
+      vence_2_dias: aReceber.filter(p => p.dias === 2).reduce((s, p) => s + p.valor, 0),
+      vence_3_dias: aReceber.filter(p => p.dias === 3).reduce((s, p) => s + p.valor, 0),
+      total_pendente: aReceber.reduce((s, p) => s + p.valor, 0),
+      // lista nominal: só os próximos 7 dias + vencidos (o que o mentor precisa cobrar)
+      proximos: aReceber.filter(p => (p.dias ?? 99) <= 7).slice(0, 8),
+      vencidos: aReceber.filter(p => p.vencido),
+    }
 
     const mentoradosComRenovacao = {
       total: mentorados?.length || 0,
