@@ -39,23 +39,30 @@ export default function MusicaAmbiente({ src, accent }: Props) {
     return () => { a.pause(); audioRef.current = null }
   }, [src])
 
-  // Tenta iniciar no primeiro gesto do usuário (contorna bloqueio de autoplay)
+  // Tenta iniciar IMEDIATAMENTE no load; se o navegador bloquear (autoplay policy),
+  // dispara no primeiríssimo gesto do usuário — qualquer tipo de interação.
   useEffect(() => {
     if (!pronto || !ligado) return
+
+    let iniciado = false
+    const eventos = ["pointerdown", "click", "keydown", "touchstart", "scroll", "mousemove", "wheel"]
+
     const tentarTocar = () => {
       const a = audioRef.current
-      if (a && a.paused) {
-        a.play().then(() => setTocando(true)).catch(() => {})
-      }
+      if (!a || iniciado) return
+      a.play()
+        .then(() => { iniciado = true; setTocando(true); limpar() })
+        .catch(() => { /* navegador bloqueou — aguarda próximo gesto */ })
     }
-    // tenta já (se o usuário interagiu antes) e no próximo gesto
+
+    const limpar = () => eventos.forEach(ev => window.removeEventListener(ev, tentarTocar))
+
+    // 1) tenta autoplay direto (funciona se o usuário já interagiu antes nesta aba)
     tentarTocar()
-    window.addEventListener("click", tentarTocar, { once: true })
-    window.addEventListener("keydown", tentarTocar, { once: true })
-    return () => {
-      window.removeEventListener("click", tentarTocar)
-      window.removeEventListener("keydown", tentarTocar)
-    }
+    // 2) arma todos os gestos — o primeiro que disparar inicia a música
+    eventos.forEach(ev => window.addEventListener(ev, tentarTocar, { passive: true }))
+
+    return () => limpar()
   }, [pronto, ligado])
 
   const toggle = () => {
