@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { ArrowRight, Sparkles, BarChart3, Brain, CheckCircle2, Zap, Calendar, Users, Target } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useEmpresa, resolverSlug } from "@/hooks/useEmpresa"
 
 const C = {
   bg:     "#0c1c2c",
@@ -10,7 +11,6 @@ const C = {
   card2:  "#112a4a",
   border: "#1e3a5f",
   muted:  "#4d7fa8",
-  green:  "#00d68f",
   blue:   "#4c9aff",
 }
 
@@ -22,6 +22,9 @@ function iniciais(nome: string) {
 
 export default function HomePage() {
   const router = useRouter()
+  const { empresa } = useEmpresa()
+  const accent = empresa.cor_primaria   // cor white label da empresa
+  const marca = empresa.slug ? empresa.nome : "CKlareza"
   const [mentores, setMentores] = useState<Mentor[]>([])
   const [carregando, setCarregando] = useState(true)
   const [showSetup, setShowSetup] = useState(false)
@@ -29,7 +32,9 @@ export default function HomePage() {
   const [salvando, setSalvando] = useState(false)
 
   useEffect(() => {
-    fetch("/api/mentors/list", { cache: "no-store" })
+    const slug = resolverSlug()
+    const qs = slug ? `?empresa=${slug}` : ""
+    fetch(`/api/mentors/list${qs}`, { cache: "no-store" })
       .then(r => r.json()).then(j => setMentores(j.mentores || []))
       .catch(() => {}).finally(() => setCarregando(false))
   }, [])
@@ -62,10 +67,10 @@ export default function HomePage() {
   if (carregando) return (
     <div style={{ background: C.bg }} className="min-h-screen flex items-center justify-center">
       <div className="text-center">
-        <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3" style={{ background: "#00d68f22", border: "1px solid #00d68f44" }}>
-          <Sparkles className="w-6 h-6 animate-pulse" style={{ color: C.green }} />
+        <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3" style={{ background: accent+"22", border: `1px solid ${accent}44` }}>
+          <Sparkles className="w-6 h-6 animate-pulse" style={{ color: accent }} />
         </div>
-        <p style={{ color: C.muted }} className="text-sm">Carregando CKlareza...</p>
+        <p style={{ color: C.muted }} className="text-sm">Carregando {marca}...</p>
       </div>
     </div>
   )
@@ -76,11 +81,11 @@ export default function HomePage() {
       {/* Header */}
       <nav style={{ background: C.card, borderBottom: `1px solid ${C.border}` }} className="px-8 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "#00d68f22", border: "1px solid #00d68f44" }}>
-            <Sparkles className="w-5 h-5" style={{ color: C.green }} />
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: accent+"22", border: `1px solid ${accent}44` }}>
+            <Sparkles className="w-5 h-5" style={{ color: accent }} />
           </div>
           <div>
-            <h1 className="text-[15px] font-bold text-white leading-none tracking-tight">CKlareza</h1>
+            <h1 className="text-[15px] font-bold text-white leading-none tracking-tight">{marca}</h1>
             <p className="text-[9px] tracking-widest mt-0.5" style={{ color: C.muted }}>MENTORIA INTELIGENTE</p>
           </div>
         </div>
@@ -90,8 +95,8 @@ export default function HomePage() {
       <div className="flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: "#00d68f15", border: "1px solid #00d68f33" }}>
-              <Sparkles className="w-8 h-8" style={{ color: C.green }} />
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: accent+"15", border: `1px solid ${accent}33` }}>
+              <Sparkles className="w-8 h-8" style={{ color: accent }} />
             </div>
             <h2 className="text-2xl font-bold text-white">Bem-vindo de volta!</h2>
             <p className="mt-1.5 text-sm" style={{ color: C.muted }}>Selecione seu perfil de mentor</p>
@@ -102,13 +107,13 @@ export default function HomePage() {
               <button key={m.id} onClick={() => selecionarMentor(m.id)}
                 className="w-full flex items-center gap-4 p-4 rounded-2xl text-left group transition-all duration-200"
                 style={{ background: C.card, border: `1px solid ${C.border}` }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = C.green; (e.currentTarget as HTMLElement).style.background = C.card2 }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = accent; (e.currentTarget as HTMLElement).style.background = C.card2 }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = C.border; (e.currentTarget as HTMLElement).style.background = C.card }}
               >
                 <div className="w-11 h-11 rounded-xl overflow-hidden shrink-0" style={{ border: `2px solid ${C.border}` }}>
                   {m.foto_url
                     ? <img src={m.foto_url} alt={m.nome} className="w-full h-full object-cover" />
-                    : <div className="w-full h-full flex items-center justify-center text-sm font-bold" style={{ background: "#0a1628", color: C.green }}>{iniciais(m.nome)}</div>}
+                    : <div className="w-full h-full flex items-center justify-center text-sm font-bold" style={{ background: "#0a1628", color: accent }}>{iniciais(m.nome)}</div>}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-white">{m.nome}</p>
@@ -122,7 +127,7 @@ export default function HomePage() {
           <button onClick={() => setShowSetup(true)}
             className="w-full mt-4 py-3 text-sm font-semibold rounded-xl transition-colors"
             style={{ color: C.muted, border: `1px dashed ${C.border}` }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = C.green; (e.currentTarget as HTMLElement).style.borderColor = C.green }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = accent; (e.currentTarget as HTMLElement).style.borderColor = accent }}
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = C.muted; (e.currentTarget as HTMLElement).style.borderColor = C.border }}
           >
             + Adicionar novo mentor
@@ -138,18 +143,18 @@ export default function HomePage() {
       {/* Header */}
       <nav style={{ background: C.card, borderBottom: `1px solid ${C.border}` }} className="px-8 py-4 flex items-center justify-between sticky top-0 z-10">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "#00d68f22", border: "1px solid #00d68f44" }}>
-            <Sparkles className="w-5 h-5" style={{ color: C.green }} />
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: accent+"22", border: `1px solid ${accent}44` }}>
+            <Sparkles className="w-5 h-5" style={{ color: accent }} />
           </div>
           <div>
-            <h1 className="text-[15px] font-bold text-white leading-none tracking-tight">CKlareza</h1>
+            <h1 className="text-[15px] font-bold text-white leading-none tracking-tight">{marca}</h1>
             <p className="text-[9px] tracking-widest mt-0.5" style={{ color: C.muted }}>MENTORIA INTELIGENTE</p>
           </div>
         </div>
         {!showSetup && (
           <button onClick={() => setShowSetup(true)}
             className="px-4 py-2 text-sm font-semibold rounded-xl text-white transition-all"
-            style={{ background: "#00d68f22", border: "1px solid #00d68f44", color: C.green }}>
+            style={{ background: accent+"22", border: `1px solid ${accent}44`, color: accent }}>
             Começar agora →
           </button>
         )}
@@ -178,7 +183,7 @@ export default function HomePage() {
                       placeholder={f.ph}
                       className="w-full px-4 py-2.5 rounded-xl text-sm text-white placeholder-slate-600 focus:outline-none transition-all"
                       style={{ background: "#0a1628", border: `1px solid ${C.border}` }}
-                      onFocus={e => e.target.style.borderColor = C.green}
+                      onFocus={e => e.target.style.borderColor = accent}
                       onBlur={e => e.target.style.borderColor = C.border}
                     />
                   </div>
@@ -191,7 +196,7 @@ export default function HomePage() {
                   </button>
                   <button type="submit" disabled={salvando}
                     className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-50 transition-all"
-                    style={{ background: "#00d68f22", border: "1px solid #00d68f66", color: C.green }}>
+                    style={{ background: accent+"22", border: `1px solid ${accent}66`, color: accent }}>
                     {salvando ? "Criando..." : "Criar conta →"}
                   </button>
                 </div>
@@ -204,19 +209,19 @@ export default function HomePage() {
           <section className="px-8 py-24 text-center">
             <div className="max-w-3xl mx-auto">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold mb-6"
-                style={{ background: "#00d68f15", border: "1px solid #00d68f33", color: C.green }}>
+                style={{ background: accent+"15", border: `1px solid ${accent}33`, color: accent }}>
                 <Sparkles className="w-4 h-4" /> Plataforma de Mentoria com IA
               </div>
               <h2 className="text-5xl font-bold text-white mb-6 leading-tight">
                 Clareza total em<br />
-                <span style={{ color: C.green }}>cada jornada de mentoria</span>
+                <span style={{ color: accent }}>cada jornada de mentoria</span>
               </h2>
               <p className="text-lg mb-10 leading-relaxed max-w-2xl mx-auto" style={{ color: C.muted }}>
                 Acompanhe sessões, metas e resultados dos seus mentorados com análise de IA em tempo real. Tudo num só lugar.
               </p>
               <button onClick={() => setShowSetup(true)}
                 className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-semibold text-white transition-all hover:-translate-y-0.5"
-                style={{ background: "#00d68f22", border: "1px solid #00d68f66", color: C.green, boxShadow: "0 0 30px #00d68f22" }}>
+                style={{ background: accent+"22", border: `1px solid ${accent}66`, color: accent, boxShadow: `0 0 30px ${accent}22` }}>
                 Começar gratuitamente <ArrowRight className="w-5 h-5" />
               </button>
             </div>
@@ -225,7 +230,7 @@ export default function HomePage() {
           <section className="px-8 pb-24 max-w-5xl mx-auto">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {[
-                { icon: Brain,        cor: C.green, titulo: "Briefing IA",         desc: "Análise do gargalo + pauta de call gerada pelo Gemini automaticamente." },
+                { icon: Brain,        cor: accent, titulo: "Briefing IA",         desc: "Análise do gargalo + pauta de call gerada pelo Gemini automaticamente." },
                 { icon: BarChart3,    cor: C.blue,  titulo: "Histórico & Evolução", desc: "8 semanas de dados em visualização interativa com variação %." },
                 { icon: CheckCircle2, cor: "#a78bfa",titulo: "Check-in Semanal",    desc: "Mentorados preenchem formulário simples. Dados fluem direto para o dashboard." },
                 { icon: Calendar,     cor: "#f59e0b",titulo: "Calendário de Sessões",desc: "Agende calls com link Meet/Zoom e veja próximas sessões na Visão Geral." },

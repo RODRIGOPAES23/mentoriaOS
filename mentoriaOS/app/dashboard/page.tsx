@@ -22,6 +22,7 @@ import SessaoModal from "@/components/ck/SessaoModal"
 import CallRoom from "@/components/ck/CallRoom"
 import ChatMentor from "@/components/ck/ChatMentor"
 import { useLocalStorage } from "@/hooks/useLocalStorage"
+import { useEmpresa } from "@/hooks/useEmpresa"
 import { C } from "@/utils/theme"
 
 // ── INTERFACES ────────────────────────────────────────────────────────────────
@@ -223,6 +224,8 @@ export default function DashboardPage() {
   // CKlareza v5 — estado de navegação
   const [ckView, setCkView] = useState<CkView>("visao-geral")
   const [sidebarCollapsed, setSidebarCollapsed] = useLocalStorage("ck:sidebar-collapsed", false)
+  const { empresa } = useEmpresa()
+  const accent = empresa.cor_primaria
   const [overviewData, setOverviewData] = useState<any>(null)
   const [overviewLoading, setOverviewLoading] = useState(false)
   const [showSessaoModal, setShowSessaoModal] = useState(false)
@@ -484,6 +487,10 @@ export default function DashboardPage() {
         onChange={setCkView}
         collapsed={sidebarCollapsed}
         onToggle={() => setSidebarCollapsed(c => !c)}
+        marca={empresa.slug ? empresa.nome : "CKlareza"}
+        accent={accent}
+        logoUrl={empresa.logo_url}
+        esconderMarca={empresa.esconder_marca}
         onLogout={() => { localStorage.removeItem("mentorSelecionado"); window.location.href = "/" }}
       />
 
