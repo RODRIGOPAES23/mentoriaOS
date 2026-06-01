@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, memo } from "react"
 import { motion } from "framer-motion"
 import { Bloco1Financeiro } from "./Bloco1Financeiro"
 import { Bloco2Mentorados } from "./Bloco2Mentorados"
@@ -13,7 +13,7 @@ interface DashboardMentorProps {
   accent?: string
 }
 
-export function DashboardMentor({ mentorId, accent = C.green }: DashboardMentorProps) {
+function DashboardMentorBase({ mentorId, accent = C.green }: DashboardMentorProps) {
   const [dashboard, setDashboard] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -114,3 +114,6 @@ export function DashboardMentor({ mentorId, accent = C.green }: DashboardMentorP
     </motion.div>
   )
 }
+
+// memo: só re-renderiza se mentorId/accent mudarem (não a cada toggle de modal do pai)
+export const DashboardMentor = memo(DashboardMentorBase)

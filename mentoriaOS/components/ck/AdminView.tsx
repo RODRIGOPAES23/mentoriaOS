@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, memo } from "react"
 import { Building2, Users, GraduationCap, AlertTriangle, Sparkles, Target, BookOpen, Edit2, Check, X, Loader2, Crown } from "lucide-react"
 import { C } from "@/utils/theme"
 
@@ -8,7 +8,7 @@ interface Props { mentorId: string; accent: string }
 
 function iniciais(n: string) { return n.split(" ").map(x => x[0]).join("").slice(0,2).toUpperCase() }
 
-export default function AdminView({ mentorId, accent }: Props) {
+function AdminViewBase({ mentorId, accent }: Props) {
   const [data, setData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [negado, setNegado] = useState(false)
@@ -247,3 +247,6 @@ export default function AdminView({ mentorId, accent }: Props) {
     </div>
   )
 }
+
+// memo: só re-renderiza se mentorId/accent mudarem
+export default memo(AdminViewBase)
