@@ -606,14 +606,22 @@ export default function DashboardPage() {
                           const pct = variacao(historico, card.key)
                           const Icon = card.icon
                           return (
-                            <div key={card.key} className="rounded-2xl p-5 transition-all hover:-translate-y-0.5" style={{ background: C.card, border: `1px solid ${C.border}` }}>
-                              <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3" style={{ background: `${card.cor}18`, border: `1px solid ${card.cor}30` }}>
-                                <Icon className="w-4 h-4" style={{ color: card.cor }} />
+                            <button key={card.key} onClick={() => setShowHistoricoModal(true)}
+                              title={`Ver histórico de ${card.label}`}
+                              className="text-left rounded-2xl p-5 transition-all hover:-translate-y-0.5"
+                              style={{ background: C.card, border: `1px solid ${C.border}` }}
+                              onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = `${card.cor}66`}
+                              onMouseLeave={e => (e.currentTarget as HTMLElement).style.borderColor = C.border}>
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: `${card.cor}18`, border: `1px solid ${card.cor}30` }}>
+                                  <Icon className="w-4 h-4" style={{ color: card.cor }} />
+                                </div>
+                                <History className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: C.muted }} />
                               </div>
                               <p className="text-2xl font-bold text-white">{card.prefixo}{card.valor?.toLocaleString("pt-BR")}</p>
                               <p className="text-xs mt-0.5 mb-2" style={{ color: C.muted }}>{card.label}</p>
                               <BadgeVariacao pct={pct} />
-                            </div>
+                            </button>
                           )
                         })}
                       </div>
