@@ -59,13 +59,39 @@ export default function AdminView({ mentorId, accent }: Props) {
   }
 
   const [enviandoMusica, setEnviandoMusica] = useState(false)
+  const [erroMusica, setErroMusica] = useState("")
   const uploadMusica = async (file: File, empresaId: string) => {
+    setErroMusica("")
+    // Áudio costuma passar do limite de 4.5MB do Vercel → sobe DIRETO pro Supabase
     setEnviandoMusica(true)
-    const fd = new FormData()
-    fd.append("file", file); fd.append("type", "empresa-musica"); fd.append("id", empresaId)
-    await fetch("/api/upload/avatar", { method: "POST", body: fd })
-    setEnviandoMusica(false)
-    carregar()
+    try {
+      const { getRealtimeClient } = await import("@/lib/supabase-realtime")
+      const supabase = getRealtimeClient()
+      const ext = file.name.split(".").pop()?.toLowerCase() || "mp3"
+      const path = `empresa-musica-${empresaId}.${ext}`
+
+      const { error: upErr } = await supabase.storage
+        .from("avatars")
+        .upload(path, file, { upsert: true, contentType: file.type || "audio/mpeg" })
+
+      if (upErr) { setErroMusica("Falha no upload: " + upErr.message); setEnviandoMusica(false); return }
+
+      const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path)
+      const url = pub.publicUrl
+
+      // Salva só a URL no banco (payload minúsculo, não estoura limite)
+      const res = await fetch("/api/empresa/admin", {
+        method: "PATCH", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mentorId, musica_url: url }),
+      })
+      if (!res.ok) { setErroMusica("Áudio subiu mas não salvou no banco."); setEnviandoMusica(false); return }
+
+      setEnviandoMusica(false)
+      carregar()
+    } catch (e: any) {
+      setErroMusica("Erro: " + (e?.message || String(e)))
+      setEnviandoMusica(false)
+    }
   }
 
   const copiarConvite = async (codigo: string) => {
@@ -198,6 +224,12 @@ export default function AdminView({ mentorId, accent }: Props) {
             </label>
           </div>
         </div>
+        {erroMusica && (
+          <p className="text-[11px] mt-3 px-3 py-2 rounded-lg" style={{ background: `${C.red}18`, border: `1px solid ${C.red}44`, color: C.red }}>{erroMusica}</p>
+        )}
+        {empresa.musica_url && (
+          <audio src={empresa.musica_url} controls className="w-full mt-3" style={{ height: 36 }} />
+        )}
         <p className="text-[11px] mt-3 leading-relaxed" style={{ color: C.muted }}>
           ⚠️ Use apenas faixas que você tem direito de usar (próprias ou royalty-free). O player toca em loop baixinho e o usuário pode desligar a qualquer momento — a escolha dele fica salva.
         </p>

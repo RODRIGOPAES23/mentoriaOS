@@ -147,7 +147,7 @@ export async function PATCH(request: Request) {
 
   // Edição do DNA / branding da empresa
   const update: any = {}
-  for (const k of ["nome", "metodo_trabalho", "filosofia", "nicho_foco", "cor_primaria", "cor_secundaria", "logo_url"]) {
+  for (const k of ["nome", "metodo_trabalho", "filosofia", "nicho_foco", "cor_primaria", "cor_secundaria", "logo_url", "musica_url"]) {
     if (body[k] !== undefined) update[k] = body[k]
   }
 
