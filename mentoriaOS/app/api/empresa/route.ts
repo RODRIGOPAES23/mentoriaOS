@@ -16,7 +16,7 @@ export async function GET(request: Request) {
 
   const { data: empresa, error } = await supabase
     .from("empresas")
-    .select("id, slug, nome, logo_url, cor_primaria, cor_secundaria, esconder_marca, ativo, musica_url")
+    .select("id, slug, nome, logo_url, cor_primaria, cor_secundaria, esconder_marca, ativo")
     .eq("slug", slug)
     .eq("ativo", true)
     .single()

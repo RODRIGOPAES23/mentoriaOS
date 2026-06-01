@@ -22,7 +22,6 @@ import SessaoModal from "@/components/ck/SessaoModal"
 import CallRoom from "@/components/ck/CallRoom"
 import ChatMentor from "@/components/ck/ChatMentor"
 import AdminView from "@/components/ck/AdminView"
-import MusicaAmbiente from "@/components/ck/MusicaAmbiente"
 import { useLocalStorage } from "@/hooks/useLocalStorage"
 import { useEmpresa } from "@/hooks/useEmpresa"
 import { C } from "@/utils/theme"
@@ -489,7 +488,6 @@ export default function DashboardPage() {
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: C.bg }}>
       {/* Música ambiente da empresa (white label) */}
-      {empresa.slug && <MusicaAmbiente src={empresa.musica_url || null} accent={accent} />}
       {/* ── SIDEBAR CKlareza ─────────────────────────────────────────── */}
       <Sidebar
         active={ckView}
