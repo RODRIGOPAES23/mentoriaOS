@@ -15,7 +15,7 @@ export async function GET(request: Request) {
 
   let query = supabase
     .from("mentorados")
-    .select("id, nome, nicho, status, foco_macro, data_inicio, data_fim, cidade, faturamento_atual, meta_faturamento, foto_url, ordem, codigo_acesso")
+    .select("id, nome, nicho, status, foco_macro, data_inicio, data_fim, cidade, faturamento_atual, meta_faturamento, foto_url, ordem, codigo_acesso, instagram_handle, expectativa_30_dias, expectativa_90_dias")
     .eq("status", "Ativo")
 
   if (mentorId) query = query.eq("mentor_id", mentorId)
@@ -40,6 +40,29 @@ export async function GET(request: Request) {
     if (da !== db) return da - db
     return (a.nome || "").localeCompare(b.nome || "")
   })
+
+  // Enriquecer com datas de call (automático das sessões)
+  const ids = unique.map(m => m.id)
+  if (ids.length > 0) {
+    const agoraIso = new Date().toISOString()
+    const { data: sessoes } = await supabase
+      .from("sessoes")
+      .select("mentorado_id, data_hora, status")
+      .in("mentorado_id", ids)
+    const ultimaCall: Record<string, string> = {}
+    const proximaCall: Record<string, string> = {}
+    for (const s of sessoes || []) {
+      if (s.data_hora < agoraIso) {
+        if (!ultimaCall[s.mentorado_id] || s.data_hora > ultimaCall[s.mentorado_id]) ultimaCall[s.mentorado_id] = s.data_hora
+      } else if (s.status === "agendada") {
+        if (!proximaCall[s.mentorado_id] || s.data_hora < proximaCall[s.mentorado_id]) proximaCall[s.mentorado_id] = s.data_hora
+      }
+    }
+    for (const m of unique as any[]) {
+      m.data_ultima_call = ultimaCall[m.id] || null
+      m.data_proxima_call = proximaCall[m.id] || null
+    }
+  }
 
   return Response.json({ mentorados: unique }, { headers: NO_CACHE })
 }

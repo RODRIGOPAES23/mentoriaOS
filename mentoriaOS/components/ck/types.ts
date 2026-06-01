@@ -14,6 +14,11 @@ export interface Mentorado {
   foto_url?: string
   ordem?: number
   codigo_acesso?: string
+  instagram_handle?: string
+  expectativa_30_dias?: string
+  expectativa_90_dias?: string
+  data_ultima_call?: string | null
+  data_proxima_call?: string | null
 }
 
 export interface BriefingIA {

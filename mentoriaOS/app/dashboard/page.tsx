@@ -32,6 +32,7 @@ import BadgeVariacao from "@/components/ck/BadgeVariacao"
 import CountdownDias from "@/components/ck/CountdownDias"
 import SortableMentoradoItem from "@/components/ck/SortableMentoradoItem"
 import CalendarioView from "@/components/ck/CalendarioView"
+import AvisoPagamento from "@/components/ck/AvisoPagamento"
 import CadastroMentoradoModal from "@/components/ck/modals/CadastroMentoradoModal"
 import EditarMentoradoModal from "@/components/ck/modals/EditarMentoradoModal"
 import HistoricoModal from "@/components/ck/modals/HistoricoModal"
@@ -523,6 +524,9 @@ export default function DashboardPage() {
                   </div>
                 ) : (
                   <div className="space-y-5">
+                    {/* ── Aviso de pagamento (faixa no topo) ── */}
+                    <AvisoPagamento key={`aviso-${selectedId}`} mentoradoId={selectedId} onIrFinanceiro={() => setActiveTab("financeiro")} />
+
                     {/* ── Info Card ──────────────────────────────────────── */}
                     <div className="rounded-2xl p-6" style={{ background: C.card, border: `1px solid ${C.border}` }}>
                       <div className="flex items-start gap-5">
@@ -550,6 +554,12 @@ export default function DashboardPage() {
                             </span>
                           </div>
                           <div className="flex flex-wrap gap-x-5 gap-y-1 mt-3 text-xs" style={{ color: C.muted }}>
+                            {selected.instagram_handle && (
+                              <a href={`https://instagram.com/${selected.instagram_handle.replace("@", "")}`} target="_blank" rel="noreferrer"
+                                className="hover:underline" style={{ color: C.blue }}>
+                                @{selected.instagram_handle.replace("@", "")}
+                              </a>
+                            )}
                             <span>📅 Início: <span className="text-white font-medium">{selected.data_inicio}</span></span>
                             {selected.data_fim && (
                               <span>🏁 Término: <span className="text-white font-medium">{selected.data_fim}</span> · <CountdownDias dataFim={selected.data_fim} /></span>
@@ -557,6 +567,28 @@ export default function DashboardPage() {
                             {selected.cidade && <span>📍 <span className="text-white font-medium">{selected.cidade}</span></span>}
                             <span>🎯 <span className="text-white font-medium">{selected.foco_macro}</span></span>
                           </div>
+                          {/* Datas de call (automático das sessões) */}
+                          <div className="flex flex-wrap gap-x-5 gap-y-1 mt-1 text-xs" style={{ color: C.muted }}>
+                            <span>📞 Última call: <span className="text-white font-medium">{selected.data_ultima_call ? new Date(selected.data_ultima_call).toLocaleDateString("pt-BR") : "—"}</span></span>
+                            <span>⏭️ Próxima call: <span className="font-medium" style={{ color: selected.data_proxima_call ? C.green : C.muted }}>{selected.data_proxima_call ? new Date(selected.data_proxima_call).toLocaleDateString("pt-BR") + " " + new Date(selected.data_proxima_call).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : "não agendada"}</span></span>
+                          </div>
+                          {/* Metas 30/90 dias (do cadastro) */}
+                          {(selected.expectativa_30_dias || selected.expectativa_90_dias) && (
+                            <div className="flex flex-wrap gap-3 mt-2">
+                              {selected.expectativa_30_dias && (
+                                <div className="flex-1 min-w-[180px] rounded-lg px-3 py-2" style={{ background: C.input, border: `1px solid ${C.border}` }}>
+                                  <p className="text-[9px] font-bold uppercase tracking-widest" style={{ color: C.amber }}>Meta 30 dias</p>
+                                  <p className="text-xs text-white mt-0.5">{selected.expectativa_30_dias}</p>
+                                </div>
+                              )}
+                              {selected.expectativa_90_dias && (
+                                <div className="flex-1 min-w-[180px] rounded-lg px-3 py-2" style={{ background: C.input, border: `1px solid ${C.border}` }}>
+                                  <p className="text-[9px] font-bold uppercase tracking-widest" style={{ color: C.green }}>Meta 90 dias</p>
+                                  <p className="text-xs text-white mt-0.5">{selected.expectativa_90_dias}</p>
+                                </div>
+                              )}
+                            </div>
+                          )}
                           {(selected.faturamento_atual || selected.meta_faturamento) && (
                             <div className="flex gap-4 mt-2">
                               {selected.faturamento_atual && (
