@@ -6,12 +6,14 @@ import { Bloco1Financeiro } from "./Bloco1Financeiro"
 import { Bloco2Mentorados } from "./Bloco2Mentorados"
 import { Bloco3Progresso } from "./Bloco3Progresso"
 import { Bloco4Calls } from "./Bloco4Calls"
+import { C } from "@/utils/theme"
 
 interface DashboardMentorProps {
   mentorId: string
+  accent?: string
 }
 
-export function DashboardMentor({ mentorId }: DashboardMentorProps) {
+export function DashboardMentor({ mentorId, accent = C.green }: DashboardMentorProps) {
   const [dashboard, setDashboard] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -48,21 +50,21 @@ export function DashboardMentor({ mentorId }: DashboardMentorProps) {
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-          className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full"
+          className="w-8 h-8 border-2 rounded-full"
+          style={{ borderColor: accent, borderTopColor: "transparent" }}
         />
-        <span className="ml-3 text-slate-400">Carregando dashboard...</span>
+        <span className="ml-3" style={{ color: C.muted }}>Carregando dashboard...</span>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="bg-red-900/20 border border-red-700/50 rounded-lg p-6">
-        <p className="text-red-300">{error}</p>
-        <button
-          onClick={fetchDashboard}
-          className="mt-4 px-4 py-2 bg-red-700 hover:bg-red-600 rounded text-white text-sm transition-colors"
-        >
+      <div className="rounded-2xl p-6" style={{ background: `${C.red}10`, border: `1px solid ${C.red}33` }}>
+        <p style={{ color: "#fca5a5" }}>{error}</p>
+        <button onClick={fetchDashboard}
+          className="mt-4 px-4 py-2 rounded-lg text-white text-sm font-semibold transition-colors"
+          style={{ background: C.red }}>
           Tentar novamente
         </button>
       </div>
@@ -71,7 +73,7 @@ export function DashboardMentor({ mentorId }: DashboardMentorProps) {
 
   if (!dashboard) {
     return (
-      <div className="text-center py-20 text-slate-400">
+      <div className="text-center py-20" style={{ color: C.muted }}>
         <p>Nenhum dado disponível</p>
       </div>
     )
@@ -98,6 +100,7 @@ export function DashboardMentor({ mentorId }: DashboardMentorProps) {
         prox_30_dias={dashboard.bloco2_mentorados?.prox_30_dias || []}
         prox_60_dias={dashboard.bloco2_mentorados?.prox_60_dias || []}
         ultimo_mes={dashboard.bloco2_mentorados?.ultimo_mes || []}
+        accent={accent}
       />
 
       {/* BLOCO 3: Progresso de Tarefas */}
@@ -107,7 +110,7 @@ export function DashboardMentor({ mentorId }: DashboardMentorProps) {
       />
 
       {/* BLOCO 4: Calendário de Calls */}
-      <Bloco4Calls calls={dashboard.bloco4_calls || []} />
+      <Bloco4Calls calls={dashboard.bloco4_calls || []} accent={accent} />
     </motion.div>
   )
 }

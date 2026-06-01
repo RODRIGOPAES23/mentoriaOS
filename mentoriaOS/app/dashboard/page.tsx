@@ -458,7 +458,7 @@ export default function DashboardPage() {
           {ckView === "visao-geral" && (
             <div className="p-6 space-y-6">
               {/* BLOCOS v7: financeiro / mentorados / progresso / calls */}
-              {mentorId && <DashboardMentor mentorId={mentorId} />}
+              {mentorId && <DashboardMentor mentorId={mentorId} accent={accent} />}
               <VisaoGeral
                 data={overviewData}
                 loading={overviewLoading}
