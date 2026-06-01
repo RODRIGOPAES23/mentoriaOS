@@ -9,9 +9,9 @@ import {
   DollarSign, Phone, MapPin, Filter, ChevronDown, Sparkles, Settings, MessageCircle
 } from "lucide-react"
 import type { CheckinRow } from "@/lib/supabase"
-import PendenciasSection from "@/components/PendenciasSection"
-import FinanceiroSection from "@/components/FinanceiroSection"
-import AnalisarCallModal from "@/components/AnalisarCallModal"
+import PendenciasSection from "@/components/ck/PendenciasSection"
+import FinanceiroSection from "@/components/ck/FinanceiroSection"
+import AnalisarCallModal from "@/components/ck/AnalisarCallModal"
 import { getRealtimeClient } from "@/lib/supabase-realtime"
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core"
 import { SortableContext, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable"
