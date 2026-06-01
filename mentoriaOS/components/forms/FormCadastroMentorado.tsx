@@ -86,10 +86,17 @@ export function FormCadastroMentorado({
 
     try {
       if (onSave) {
-        onSave(formData)
+        await onSave(formData)
       } else {
-        // API call aqui se necessário
-        console.log("Form data:", formData)
+        // Persiste via API (cadastro completo com campos expandidos v7)
+        const mentorId = typeof window !== "undefined" ? localStorage.getItem("mentorSelecionado") : null
+        const res = await fetch("/api/dashboard/mentorados", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...formData, mentor_id: mentorId }),
+        })
+        const json = await res.json()
+        if (!res.ok) throw new Error(json.error || "Erro ao cadastrar")
       }
       setSuccess(true)
       setTimeout(() => setSuccess(false), 3000)

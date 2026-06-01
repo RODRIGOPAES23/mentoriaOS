@@ -73,6 +73,18 @@ export async function POST(request: Request) {
   }
   if (mentorId) insertData.mentor_id = mentorId
 
+  // Campos expandidos v7 (cadastro completo) — passados só se presentes
+  const camposExpandidos = [
+    "email", "cel", "contato_emergencia", "tempo_mercado", "formacao",
+    "tem_clinica", "experiencia_mentoria", "experiencia_trafego", "experiencia_agencia_mkt",
+    "expectativa_30_dias", "expectativa_90_dias", "expectativa_6_meses", "expectativa_12_meses",
+    "faturamento_medio_3m", "atua_trafego", "investimento_trafego_mensal", "tem_vendedora_time",
+    "instagram_handle", "cidade", "data_fim",
+  ]
+  for (const k of camposExpandidos) {
+    if (body[k] !== undefined && body[k] !== "" && body[k] !== null) insertData[k] = body[k]
+  }
+
   const { data, error } = await supabase
     .from("mentorados")
     .insert(insertData)
