@@ -12,6 +12,9 @@ const config: Config = {
         secondary: '#1e293b',
         accent: '#3b82f6',
         'accent-light': '#60a5fa',
+        // Accent dinâmico white-label — injetado via --ck-accent no wrapper do dashboard
+        'ck-accent': 'var(--ck-accent, #00d68f)',
+        'ck-accent-2': 'var(--ck-accent-2, #4c9aff)',
         // Paleta CKlareza (espelha utils/theme.ts para uso em classes Tailwind)
         ck: {
           bg: '#0c1c2c',
