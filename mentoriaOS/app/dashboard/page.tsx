@@ -22,6 +22,7 @@ import SessaoModal from "@/components/ck/SessaoModal"
 import CallRoom from "@/components/ck/CallRoom"
 import ChatMentor from "@/components/ck/ChatMentor"
 import AdminView from "@/components/ck/AdminView"
+import { DashboardMentor } from "@/components/mentor/DashboardMentor"
 import { useLocalStorage } from "@/hooks/useLocalStorage"
 import { useEmpresa } from "@/hooks/useEmpresa"
 import { C } from "@/utils/theme"
@@ -590,7 +591,9 @@ export default function DashboardPage() {
 
           {/* ══ VISÃO GERAL ══════════════════════════════════════════════ */}
           {ckView === "visao-geral" && (
-            <div className="p-6">
+            <div className="p-6 space-y-6">
+              {/* BLOCOS v7: financeiro / mentorados / progresso / calls */}
+              {mentorId && <DashboardMentor mentorId={mentorId} />}
               <VisaoGeral
                 data={overviewData}
                 loading={overviewLoading}

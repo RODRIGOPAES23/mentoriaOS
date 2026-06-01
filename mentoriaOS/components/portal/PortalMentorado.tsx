@@ -4,10 +4,12 @@ import { useState, useEffect, useRef, useCallback } from "react"
 import dynamic from "next/dynamic"
 import {
   Send, CheckCircle2, Circle, MessageCircle, ClipboardList, BarChart3, Video,
-  Sparkles, Loader2, Phone, AlertCircle, Clock
+  Sparkles, Loader2, Phone, AlertCircle, Clock, History
 } from "lucide-react"
 import { getRealtimeClient } from "@/lib/supabase-realtime"
 import { C } from "@/utils/theme"
+import { HistoricoCallsMentorado } from "@/components/mentorado/HistoricoCallsMentorado"
+import { TarefasPontuaisMentorado } from "@/components/mentorado/TarefasPontuaisMentorado"
 
 const JitsiMeeting = dynamic(() => import("@jitsi/react-sdk").then(m => m.JitsiMeeting), { ssr: false })
 
@@ -19,7 +21,7 @@ interface Mentor { id: string; nome: string; foto_url?: string; nicho_foco?: str
 interface Tarefa { id: string; texto: string; status: string; data_vencimento: string | null }
 interface Mensagem { id: string; autor: string; texto: string; created_at: string }
 
-type Aba = "checkin" | "tarefas" | "chat" | "call"
+type Aba = "checkin" | "tarefas" | "jornada" | "chat" | "call"
 
 function parseDateLocal(s: string) { const [y,m,d] = s.split("T")[0].split("-").map(Number); return new Date(y, m-1, d) }
 
@@ -59,6 +61,12 @@ export default function PortalMentorado({ mentorado, mentor }: { mentorado: Ment
         <div className="max-w-2xl mx-auto p-4">
           {aba === "checkin" && <AbaCheckin mentorado={mentorado} />}
           {aba === "tarefas" && <AbaTarefas mentorado={mentorado} />}
+          {aba === "jornada" && (
+            <div className="space-y-6">
+              <TarefasPontuaisMentorado mentoradoId={mentorado.id} />
+              <HistoricoCallsMentorado mentoradoId={mentorado.id} />
+            </div>
+          )}
           {aba === "chat"    && <AbaChat mentorado={mentorado} mentor={mentor} />}
           {aba === "call"    && <AbaCall mentorado={mentorado} mentor={mentor} />}
         </div>
@@ -69,6 +77,7 @@ export default function PortalMentorado({ mentorado, mentor }: { mentorado: Ment
         {([
           { id: "checkin", label: "Check-in", icon: BarChart3 },
           { id: "tarefas", label: "Tarefas",  icon: ClipboardList },
+          { id: "jornada", label: "Jornada",  icon: History },
           { id: "chat",    label: "Chat",     icon: MessageCircle },
           { id: "call",    label: "Call",     icon: Video },
         ] as const).map(t => (
