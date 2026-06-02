@@ -1,7 +1,7 @@
 "use client"
 
 import { RefObject } from "react"
-import { AlertCircle, ChevronDown, User, Settings, LogOut, Sparkles } from "lucide-react"
+import { AlertCircle, ChevronDown, Settings, LogOut, Sparkles } from "lucide-react"
 import { C } from "@/utils/theme"
 
 interface Props {
@@ -14,7 +14,6 @@ interface Props {
   setShowMenu: (v: boolean) => void
   menuRef: RefObject<HTMLDivElement>
   onVencidas: () => void
-  onMeuPerfil: () => void
   onConfiguracoes: () => void
   onSair: () => void
 }
@@ -23,10 +22,9 @@ interface Props {
 export default function DashboardHeader({
   moduleLabel, realtimeConnected, mentorNome, mentorFotoUrl, tarefasVencidas,
   showMenu, setShowMenu, menuRef, onVencidas,
-  onMeuPerfil, onConfiguracoes, onSair,
+  onConfiguracoes, onSair,
 }: Props) {
   const itensMenu = [
-    { label: "Meu Perfil", icon: User, onClick: onMeuPerfil },
     { label: "Configurações", icon: Settings, onClick: onConfiguracoes },
   ]
 

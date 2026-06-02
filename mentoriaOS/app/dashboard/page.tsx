@@ -341,7 +341,6 @@ export default function DashboardPage() {
           setShowMenu={setShowMenuPerfil}
           menuRef={menuPerfilRef}
           onVencidas={() => setCkView("atividades")}
-          onMeuPerfil={() => { setConfigTab("geral"); setCkView("configuracoes"); setShowMenuPerfil(false) }}
           onConfiguracoes={() => { setConfigTab("geral"); setCkView("configuracoes"); setShowMenuPerfil(false) }}
           onSair={logout}
         />
