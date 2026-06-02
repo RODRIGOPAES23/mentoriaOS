@@ -63,7 +63,7 @@ export function Bloco3Progresso({ alunoMaisAtrasado, progresoGeral, onAbrirMento
             Acompanhamento {alunosComAtraso.length === 1 ? "de 1 aluno" : `de ${alunosComAtraso.length} alunos`}
           </p>
           <div className="space-y-2">
-            {alunosComAtraso.slice(0, 5).map((item) => (
+            {alunosComAtraso.slice(0, 3).map((item) => (
               <button key={item.mentorado_id} onClick={() => onAbrirMentorado?.(item.mentorado_id)} title={`Abrir ${item.mentorado_nome}`}
                 className="w-full text-left rounded-xl p-2.5 transition-colors" style={{ background: C.input, border: `1px solid ${C.border}` }}
                 onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = `${C.red}55`}

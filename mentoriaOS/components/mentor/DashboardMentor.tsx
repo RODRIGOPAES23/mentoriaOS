@@ -87,10 +87,10 @@ function DashboardMentorBase({ mentorId, accent = C.green, onAbrirMentorado, onI
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ staggerChildren: 0.1 }}
-      className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start"
+      className="grid grid-cols-1 lg:grid-cols-2 gap-3 items-start"
     >
-      {/* COLUNA ESQUERDA: Pendências · Próximas Calls · Mentorados (empilhados) */}
-      <div className="space-y-4">
+      {/* COLUNA ESQUERDA: Pendências Financeiras + Próximas Calls */}
+      <div className="space-y-3">
         <Bloco1Financeiro
           vence_24h={dashboard.bloco1_financeiro?.vence_24h || 0}
           vence_2_dias={dashboard.bloco1_financeiro?.vence_2_dias || 0}
@@ -102,6 +102,15 @@ function DashboardMentorBase({ mentorId, accent = C.green, onAbrirMentorado, onI
           onIrFinanceiro={onIrFinanceiro}
         />
         <Bloco4Calls calls={dashboard.bloco4_calls || []} accent={accent} onAbrirMentorado={onAbrirMentorado} />
+      </div>
+
+      {/* COLUNA DIREITA: Progresso de Tarefas + Mentorados Ativos */}
+      <div className="space-y-3">
+        <Bloco3Progresso
+          alunoMaisAtrasado={dashboard.bloco3_progresso?.alunoMaisAtrasado}
+          progresoGeral={dashboard.bloco3_progresso?.progresoGeral || []}
+          onAbrirMentorado={onAbrirMentorado}
+        />
         <Bloco2Mentorados
           total={dashboard.bloco2_mentorados?.total || 0}
           prox_30_dias={dashboard.bloco2_mentorados?.prox_30_dias || []}
@@ -111,13 +120,6 @@ function DashboardMentorBase({ mentorId, accent = C.green, onAbrirMentorado, onI
           onIrMentorados={onIrMentorados}
         />
       </div>
-
-      {/* COLUNA DIREITA: Progresso de Tarefas */}
-      <Bloco3Progresso
-        alunoMaisAtrasado={dashboard.bloco3_progresso?.alunoMaisAtrasado}
-        progresoGeral={dashboard.bloco3_progresso?.progresoGeral || []}
-        onAbrirMentorado={onAbrirMentorado}
-      />
     </motion.div>
   )
 }

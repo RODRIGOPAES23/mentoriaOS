@@ -319,7 +319,7 @@ export default function DashboardPage() {
 
         <main className="flex-1 overflow-y-auto">
           {ckView === "visao-geral" && mentorId && (
-            <div className="p-6">
+            <div className="p-4">
               <DashboardMentor mentorId={mentorId} accent={accent}
                 onAbrirMentorado={(id) => { setSelectedId(id); setCkView("mentorados") }}
                 onIrFinanceiro={() => setCkView("financeiro")}

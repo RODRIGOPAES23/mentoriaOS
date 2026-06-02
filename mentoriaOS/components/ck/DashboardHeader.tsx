@@ -43,7 +43,6 @@ export default function DashboardHeader({
       <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1.5 pointer-events-none">
         <Sparkles className="w-4 h-4" style={{ color: C.gold }} />
         <span className="text-lg font-bold tracking-tight" style={{
-          fontFamily: "Georgia, 'Times New Roman', serif",
           background: "linear-gradient(180deg, #f0d97d 0%, #d4af37 55%, #9c7d2e 100%)",
           WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent",
         }}>
