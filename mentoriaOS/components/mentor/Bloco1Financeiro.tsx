@@ -21,6 +21,7 @@ interface Bloco1Props {
   proximos?: PagItem[]
   accent?: string
   onAbrirMentorado?: (id: string) => void
+  onIrFinanceiro?: () => void
 }
 
 function fmt(v: number) { return `R$ ${v.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}` }
@@ -38,7 +39,7 @@ function prazoCor(p: PagItem) {
   return "#eab308"
 }
 
-export function Bloco1Financeiro({ vence_24h, vence_2_dias, vence_3_dias, total_pendente, proximos = [], onAbrirMentorado }: Bloco1Props) {
+export function Bloco1Financeiro({ vence_24h, vence_2_dias, vence_3_dias, total_pendente, proximos = [], onAbrirMentorado, onIrFinanceiro }: Bloco1Props) {
   const janelas = [
     { label: "Em 24h", valor: vence_24h, cor: C.red },
     { label: "Em 2 dias", valor: vence_2_dias, cor: C.amber },
@@ -66,10 +67,12 @@ export function Bloco1Financeiro({ vence_24h, vence_2_dias, vence_3_dias, total_
       {/* Janelas por prazo (resumo) */}
       <div className="grid grid-cols-3 gap-2 mb-3">
         {janelas.map((j, i) => (
-          <div key={i} className="rounded-xl p-2.5 text-center" style={{ background: `${j.cor}14`, border: `1px solid ${j.cor}33` }}>
+          <button key={i} onClick={onIrFinanceiro} title="Ver financeiro"
+            className="rounded-xl p-2.5 text-center transition-all hover:-translate-y-0.5"
+            style={{ background: `${j.cor}14`, border: `1px solid ${j.cor}33` }}>
             <p className="text-[10px] mb-0.5" style={{ color: j.cor }}>{j.label}</p>
             <p className="text-base font-bold text-white">{fmt(j.valor)}</p>
-          </div>
+          </button>
         ))}
       </div>
 

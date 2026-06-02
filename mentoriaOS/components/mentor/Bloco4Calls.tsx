@@ -16,9 +16,10 @@ interface CallItem {
 interface Bloco4Props {
   calls: CallItem[]
   accent?: string
+  onAbrirMentorado?: (id: string) => void
 }
 
-export function Bloco4Calls({ calls, accent = C.violet }: Bloco4Props) {
+export function Bloco4Calls({ calls, accent = C.violet, onAbrirMentorado }: Bloco4Props) {
   const diasSemana = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sab"]
   const callsFormatadas = calls?.map((call) => {
     const data = new Date(call.data_hora)
@@ -49,6 +50,8 @@ export function Bloco4Calls({ calls, accent = C.violet }: Bloco4Props) {
         <div className="space-y-2">
           {callsFormatadas.map((call) => (
             <motion.div key={call.id} whileHover={{ x: 4 }}
+              onClick={() => onAbrirMentorado?.(call.mentorado_id)}
+              title={call.mentorado_nome ? `Abrir ${call.mentorado_nome}` : undefined}
               className="rounded-xl p-3 cursor-pointer transition-colors"
               style={{ background: C.input, border: `1px solid ${C.border}` }}
             >

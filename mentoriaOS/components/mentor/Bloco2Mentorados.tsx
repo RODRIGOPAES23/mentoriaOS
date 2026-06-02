@@ -20,9 +20,10 @@ interface Bloco2Props {
   prox_60_dias: Mentorado[]
   ultimo_mes: Mentorado[]
   accent?: string
+  onIrMentorados?: () => void
 }
 
-export function Bloco2Mentorados({ total, prox_30_dias, prox_60_dias, ultimo_mes, accent = C.green }: Bloco2Props) {
+export function Bloco2Mentorados({ total, prox_30_dias, prox_60_dias, ultimo_mes, accent = C.green, onIrMentorados }: Bloco2Props) {
   const cards = [
     { label: "Total", valor: total, cor: accent },
     { label: "Renovação próx 30d", valor: prox_30_dias.length, cor: C.blue },
@@ -44,10 +45,12 @@ export function Bloco2Mentorados({ total, prox_30_dias, prox_60_dias, ultimo_mes
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
         {cards.map((c, i) => (
-          <div key={i} className="rounded-xl p-3" style={{ background: `${c.cor}14`, border: `1px solid ${c.cor}33` }}>
+          <button key={i} onClick={onIrMentorados} title="Ver mentorados"
+            className="rounded-xl p-3 text-left transition-all hover:-translate-y-0.5"
+            style={{ background: `${c.cor}14`, border: `1px solid ${c.cor}33` }}>
             <p className="text-xs mb-0.5" style={{ color: c.cor }}>{c.label}</p>
             <p className="text-2xl font-bold text-white">{c.valor}</p>
-          </div>
+          </button>
         ))}
       </div>
 

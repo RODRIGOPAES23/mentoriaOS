@@ -14,6 +14,7 @@ interface Props {
   setShowMenu: (v: boolean) => void
   menuRef: RefObject<HTMLDivElement>
   podeEditarMentorado: boolean
+  onVencidas: () => void
   onMeuPerfil: () => void
   onEditarMentorado: () => void
   onHistorico: () => void
@@ -24,7 +25,7 @@ interface Props {
 /** Barra superior do dashboard do mentor (presenter puro). */
 export default function DashboardHeader({
   moduleLabel, realtimeConnected, mentorNome, mentorFotoUrl, tarefasVencidas,
-  showMenu, setShowMenu, menuRef, podeEditarMentorado,
+  showMenu, setShowMenu, menuRef, podeEditarMentorado, onVencidas,
   onMeuPerfil, onEditarMentorado, onHistorico, onConfiguracoes, onSair,
 }: Props) {
   const itensMenu = [
@@ -59,10 +60,15 @@ export default function DashboardHeader({
 
       <div className="flex items-center gap-3">
         {tarefasVencidas > 0 && (
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: `${C.red}18`, border: `1px solid ${C.red}44` }}>
+          <button onClick={onVencidas}
+            title="Ver atividades atrasadas"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full transition-all"
+            style={{ background: `${C.red}18`, border: `1px solid ${C.red}44` }}
+            onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = `${C.red}28`}
+            onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = `${C.red}18`}>
             <AlertCircle className="w-3.5 h-3.5" style={{ color: C.red }} />
             <span className="text-xs font-bold" style={{ color: C.red }}>{tarefasVencidas} vencida{tarefasVencidas > 1 ? "s" : ""}</span>
-          </div>
+          </button>
         )}
         <div className="relative" ref={menuRef}>
           <button onClick={() => setShowMenu(!showMenu)}

@@ -339,6 +339,7 @@ export default function DashboardPage() {
           setShowMenu={setShowMenuPerfil}
           menuRef={menuPerfilRef}
           podeEditarMentorado={!!selected}
+          onVencidas={() => setCkView("atividades")}
           onMeuPerfil={() => { setConfigTab("geral"); setCkView("configuracoes"); setShowMenuPerfil(false) }}
           onEditarMentorado={() => { abrirEditarMentorado(); setShowMenuPerfil(false) }}
           onHistorico={() => { setShowHistoricoModal(true); setShowMenuPerfil(false) }}
@@ -350,7 +351,9 @@ export default function DashboardPage() {
           {ckView === "visao-geral" && mentorId && (
             <div className="p-6">
               <DashboardMentor mentorId={mentorId} accent={accent}
-                onAbrirMentorado={(id) => { setSelectedId(id); setCkView("mentorados") }} />
+                onAbrirMentorado={(id) => { setSelectedId(id); setCkView("mentorados") }}
+                onIrFinanceiro={() => setCkView("financeiro")}
+                onIrMentorados={() => setCkView("mentorados")} />
             </div>
           )}
 

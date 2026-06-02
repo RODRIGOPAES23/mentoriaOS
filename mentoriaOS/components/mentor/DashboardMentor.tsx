@@ -12,9 +12,11 @@ interface DashboardMentorProps {
   mentorId: string
   accent?: string
   onAbrirMentorado?: (id: string) => void
+  onIrFinanceiro?: () => void
+  onIrMentorados?: () => void
 }
 
-function DashboardMentorBase({ mentorId, accent = C.green, onAbrirMentorado }: DashboardMentorProps) {
+function DashboardMentorBase({ mentorId, accent = C.green, onAbrirMentorado, onIrFinanceiro, onIrMentorados }: DashboardMentorProps) {
   const [dashboard, setDashboard] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -97,14 +99,16 @@ function DashboardMentorBase({ mentorId, accent = C.green, onAbrirMentorado }: D
           proximos={dashboard.bloco1_financeiro?.proximos || []}
           accent={accent}
           onAbrirMentorado={onAbrirMentorado}
+          onIrFinanceiro={onIrFinanceiro}
         />
-        <Bloco4Calls calls={dashboard.bloco4_calls || []} accent={accent} />
+        <Bloco4Calls calls={dashboard.bloco4_calls || []} accent={accent} onAbrirMentorado={onAbrirMentorado} />
         <Bloco2Mentorados
           total={dashboard.bloco2_mentorados?.total || 0}
           prox_30_dias={dashboard.bloco2_mentorados?.prox_30_dias || []}
           prox_60_dias={dashboard.bloco2_mentorados?.prox_60_dias || []}
           ultimo_mes={dashboard.bloco2_mentorados?.ultimo_mes || []}
           accent={accent}
+          onIrMentorados={onIrMentorados}
         />
       </div>
 
@@ -112,6 +116,7 @@ function DashboardMentorBase({ mentorId, accent = C.green, onAbrirMentorado }: D
       <Bloco3Progresso
         alunoMaisAtrasado={dashboard.bloco3_progresso?.alunoMaisAtrasado}
         progresoGeral={dashboard.bloco3_progresso?.progresoGeral || []}
+        onAbrirMentorado={onAbrirMentorado}
       />
     </motion.div>
   )
