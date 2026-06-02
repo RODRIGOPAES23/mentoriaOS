@@ -8,7 +8,6 @@ import AdminView from "../AdminView"
 interface Props {
   mentorId: string
   accent: string
-  isAdmin: boolean
   mentorNome: string
   mentorDados: { foto_url?: string } | null
   perfilEdit: { nome: string; nicho_foco: string; metodo_trabalho: string; filosofia: string }
@@ -26,16 +25,16 @@ const inputCls = "w-full px-3.5 py-2.5 rounded-lg text-sm text-white focus:outli
 
 /** Central única de configurações. Geral = perfil do mentor (ex-"Meu Perfil"). Empresa (AdminView) vive aqui. */
 export default function ConfiguracoesView({
-  mentorId, accent, isAdmin, mentorNome, mentorDados, perfilEdit, setPerfilEdit,
+  mentorId, accent, mentorNome, mentorDados, perfilEdit, setPerfilEdit,
   salvandoPerfil, onSalvarPerfil, onUploadFoto, onAbrirMentorado, initialTab = "geral",
 }: Props) {
   const [aba, setAba] = useState<Aba>(initialTab)
 
   const abas = [
-    { id: "geral" as const, label: "Meu Perfil", icon: User, show: true },
-    { id: "tema" as const, label: "Tema", icon: Moon, show: true },
-    { id: "empresa" as const, label: "Empresa", icon: Building2, show: isAdmin },
-  ].filter(a => a.show)
+    { id: "geral" as const, label: "Meu Perfil", icon: User },
+    { id: "tema" as const, label: "Tema", icon: Moon },
+    { id: "empresa" as const, label: "Empresa", icon: Building2 },
+  ]
 
   const inputStyle = { background: C.input, border: `1px solid ${C.border}` }
   const focus = (e: any) => (e.target.style.borderColor = accent)
@@ -122,7 +121,7 @@ export default function ConfiguracoesView({
         </div>
       )}
 
-      {aba === "empresa" && isAdmin && (
+      {aba === "empresa" && (
         <AdminView mentorId={mentorId} accent={accent} onAbrirMentorado={onAbrirMentorado} />
       )}
     </div>

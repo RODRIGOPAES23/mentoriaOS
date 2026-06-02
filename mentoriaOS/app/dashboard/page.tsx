@@ -397,7 +397,6 @@ export default function DashboardPage() {
               key={`config-${configTab}`}
               mentorId={mentorId}
               accent={accent}
-              isAdmin={isAdmin}
               mentorNome={mentorNome}
               mentorDados={mentorDados}
               perfilEdit={perfilEdit}
