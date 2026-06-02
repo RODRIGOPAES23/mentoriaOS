@@ -66,6 +66,7 @@ export default function DashboardPage() {
   // Score de urgência por mentorado + badge de vencidas
   const [scoreMap, setScoreMap] = useState<Record<string, number>>({})
   const [tarefasVencidas, setTarefasVencidas] = useState(0)
+  const [cobrancasVencidas, setCobrancasVencidas] = useState(0)
 
   // UI / navegação
   const [ckView, setCkView] = useState<CkView>("visao-geral")
@@ -166,6 +167,21 @@ export default function DashboardPage() {
   }, [mentorId, mentorados])
 
   useEffect(() => { calcularScores() }, [calcularScores])
+
+  // ── COBRANÇAS VENCIDAS (badge do topo — mesmo critério da tela Financeiro) ──────
+  const calcularCobrancasVencidas = useCallback(async () => {
+    if (!mentorId) { setCobrancasVencidas(0); return }
+    const hoje = new Date(); hoje.setHours(0, 0, 0, 0)
+    const j = await fetch(`/api/dashboard/pagamentos?mentorId=${mentorId}&t=${Date.now()}`).then(r => r.json()).catch(() => ({ pagamentos: [] }))
+    const venc = (j.pagamentos || []).filter((p: any) => {
+      if (p.status === "pago" || !p.data_vencimento) return false
+      const [y, mo, d] = p.data_vencimento.split("T")[0].split("-").map(Number)
+      return new Date(y, mo - 1, d) < hoje
+    }).length
+    setCobrancasVencidas(venc)
+  }, [mentorId])
+
+  useEffect(() => { calcularCobrancasVencidas() }, [calcularCobrancasVencidas, mentorados])
 
   // ── SALVAR PERFIL MENTOR ───────────────────────────────────────────────────────
   const salvarPerfil = useCallback(async () => {
@@ -309,10 +325,12 @@ export default function DashboardPage() {
           mentorNome={mentorNome}
           mentorFotoUrl={mentorDados?.foto_url}
           tarefasVencidas={tarefasVencidas}
+          cobrancasVencidas={cobrancasVencidas}
           showMenu={showMenuPerfil}
           setShowMenu={setShowMenuPerfil}
           menuRef={menuPerfilRef}
           onVencidas={() => setCkView("atividades")}
+          onCobrancasVencidas={() => setCkView("financeiro")}
           onConfiguracoes={() => { setConfigTab("geral"); setCkView("configuracoes"); setShowMenuPerfil(false) }}
           onSair={logout}
         />

@@ -1,7 +1,7 @@
 "use client"
 
 import { RefObject } from "react"
-import { AlertCircle, ChevronDown, Settings, LogOut, Sparkles } from "lucide-react"
+import { AlertCircle, ChevronDown, Settings, LogOut, Sparkles, DollarSign } from "lucide-react"
 import { C } from "@/utils/theme"
 
 interface Props {
@@ -10,18 +10,20 @@ interface Props {
   mentorNome: string
   mentorFotoUrl?: string | null
   tarefasVencidas: number
+  cobrancasVencidas: number
   showMenu: boolean
   setShowMenu: (v: boolean) => void
   menuRef: RefObject<HTMLDivElement>
   onVencidas: () => void
+  onCobrancasVencidas: () => void
   onConfiguracoes: () => void
   onSair: () => void
 }
 
 /** Barra superior do dashboard do mentor (presenter puro). */
 export default function DashboardHeader({
-  moduleLabel, realtimeConnected, mentorNome, mentorFotoUrl, tarefasVencidas,
-  showMenu, setShowMenu, menuRef, onVencidas,
+  moduleLabel, realtimeConnected, mentorNome, mentorFotoUrl, tarefasVencidas, cobrancasVencidas,
+  showMenu, setShowMenu, menuRef, onVencidas, onCobrancasVencidas,
   onConfiguracoes, onSair,
 }: Props) {
   const itensMenu = [
@@ -60,6 +62,17 @@ export default function DashboardHeader({
             onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = `${C.red}18`}>
             <AlertCircle className="w-3.5 h-3.5" style={{ color: C.red }} />
             <span className="text-xs font-bold" style={{ color: C.red }}>{tarefasVencidas} vencida{tarefasVencidas > 1 ? "s" : ""}</span>
+          </button>
+        )}
+        {cobrancasVencidas > 0 && (
+          <button onClick={onCobrancasVencidas}
+            title="Ver cobranças vencidas"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full transition-all"
+            style={{ background: `${C.amber}18`, border: `1px solid ${C.amber}44` }}
+            onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = `${C.amber}28`}
+            onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = `${C.amber}18`}>
+            <DollarSign className="w-3.5 h-3.5" style={{ color: C.amber }} />
+            <span className="text-xs font-bold" style={{ color: C.amber }}>{cobrancasVencidas} cobrança{cobrancasVencidas > 1 ? "s" : ""} vencida{cobrancasVencidas > 1 ? "s" : ""}</span>
           </button>
         )}
         <div className="relative" ref={menuRef}>
