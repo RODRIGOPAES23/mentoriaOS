@@ -7,10 +7,22 @@ export async function PATCH(request: Request, { params }: { params: { id: string
   const supabase = adminClient()
   try {
     const body = await request.json()
-    const { status, data_pagamento } = body
-    const update: any = { status }
-    if (status === "pago" && !data_pagamento) update.data_pagamento = new Date().toISOString().slice(0, 10)
-    else if (data_pagamento) update.data_pagamento = data_pagamento
+    const update: any = {}
+
+    // Status (e data de pagamento derivada)
+    if (body.status !== undefined) {
+      update.status = body.status
+      if (body.status === "pago") update.data_pagamento = body.data_pagamento || new Date().toISOString().slice(0, 10)
+      else update.data_pagamento = null
+    } else if (body.data_pagamento !== undefined) {
+      update.data_pagamento = body.data_pagamento || null
+    }
+
+    // Edição dos campos do pagamento (ex.: mudar a data de vencimento)
+    if (body.valor !== undefined) update.valor = Number(body.valor) || 0
+    if (body.data_vencimento !== undefined) update.data_vencimento = body.data_vencimento || null
+    if (body.descricao !== undefined) update.descricao = body.descricao || null
+    if (body.parcela !== undefined) update.parcela = Number(body.parcela) || 1
 
     const { data, error } = await supabase
       .from("pagamentos")

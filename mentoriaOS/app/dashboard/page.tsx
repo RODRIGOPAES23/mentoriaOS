@@ -358,7 +358,7 @@ export default function DashboardPage() {
 
           {ckView === "financeiro" && mentorId && (
             <FinanceiroView mentorId={mentorId} accent={accent} mentorados={mentorados}
-              onAbrirMentorado={(id) => { setSelectedId(id); setCkView("mentorados") }} />
+              onAbrirMentorado={(id) => { setSelectedId(id); setActiveTab("financeiro"); setCkView("mentorados") }} />
           )}
 
           {ckView === "atividades" && mentorId && (

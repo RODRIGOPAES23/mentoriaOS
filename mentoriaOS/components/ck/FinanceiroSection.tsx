@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Plus, CheckCircle2, Clock, AlertCircle, Trash2, DollarSign } from "lucide-react"
+import { Plus, CheckCircle2, Clock, AlertCircle, Trash2, DollarSign, Pencil } from "lucide-react"
 
 interface Pagamento {
   id: string
@@ -40,7 +40,8 @@ export default function FinanceiroSection({ mentoradoId, mentorId }: FinanceiroS
   const [pagamentos, setPagamentos] = useState<Pagamento[]>([])
   const [loading, setLoading] = useState(false)
   const [showForm, setShowForm] = useState(false)
-  const [form, setForm] = useState({ valor: "", data_vencimento: "", descricao: "", parcela: "1" })
+  const [editId, setEditId] = useState<string | null>(null)
+  const [form, setForm] = useState({ valor: "", data_vencimento: "", descricao: "", parcela: "1", status: "pendente" })
 
   const buscar = useCallback(async () => {
     if (!mentoradoId) return
@@ -56,22 +57,55 @@ export default function FinanceiroSection({ mentoradoId, mentorId }: FinanceiroS
 
   useEffect(() => { buscar() }, [mentoradoId, buscar])
 
-  const criar = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!mentoradoId || !mentorId || !form.data_vencimento) return
-    await fetch("/api/dashboard/pagamentos", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        mentoradoId, mentorId,
-        valor: parseFloat(form.valor) || 0,
-        data_vencimento: form.data_vencimento,
-        descricao: form.descricao || null,
-        parcela: parseInt(form.parcela) || 1,
-      }),
-    })
-    setForm({ valor: "", data_vencimento: "", descricao: "", parcela: "1" })
+  const resetForm = () => {
+    setForm({ valor: "", data_vencimento: "", descricao: "", parcela: "1", status: "pendente" })
+    setEditId(null)
     setShowForm(false)
+  }
+
+  const abrirEdicao = (p: Pagamento) => {
+    setForm({
+      valor: String(p.valor ?? ""),
+      data_vencimento: (p.data_vencimento || "").split("T")[0],
+      descricao: p.descricao || "",
+      parcela: String(p.parcela ?? 1),
+      status: p.status || "pendente",
+    })
+    setEditId(p.id)
+    setShowForm(true)
+  }
+
+  const salvar = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!form.data_vencimento) return
+    if (editId) {
+      // Edição (ex.: mudar data de vencimento, valor, status)
+      await fetch(`/api/dashboard/pagamentos/${editId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          valor: parseFloat(form.valor) || 0,
+          data_vencimento: form.data_vencimento,
+          descricao: form.descricao || null,
+          parcela: parseInt(form.parcela) || 1,
+          status: form.status,
+        }),
+      })
+    } else {
+      if (!mentoradoId || !mentorId) return
+      await fetch("/api/dashboard/pagamentos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mentoradoId, mentorId,
+          valor: parseFloat(form.valor) || 0,
+          data_vencimento: form.data_vencimento,
+          descricao: form.descricao || null,
+          parcela: parseInt(form.parcela) || 1,
+        }),
+      })
+    }
+    resetForm()
     buscar()
   }
 
@@ -104,7 +138,7 @@ export default function FinanceiroSection({ mentoradoId, mentorId }: FinanceiroS
           <h3 className="text-lg font-semibold text-white">Financeiro</h3>
         </div>
         <button
-          onClick={() => setShowForm(!showForm)}
+          onClick={() => { if (showForm) { resetForm() } else { setForm({ valor: "", data_vencimento: "", descricao: "", parcela: "1", status: "pendente" }); setEditId(null); setShowForm(true) } }}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/25 text-xs font-semibold transition-all"
         >
           <Plus className="w-3.5 h-3.5" /> Pagamento
@@ -125,7 +159,10 @@ export default function FinanceiroSection({ mentoradoId, mentorId }: FinanceiroS
 
       {/* Form */}
       {showForm && (
-        <form onSubmit={criar} className="bg-slate-800/50 rounded-xl p-4 mb-4 space-y-3 border border-slate-700/30">
+        <form onSubmit={salvar} className="bg-slate-800/50 rounded-xl p-4 mb-4 space-y-3 border border-slate-700/30">
+          <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
+            {editId ? "✎ Editar pagamento" : "+ Novo pagamento"}
+          </p>
           <div className="grid grid-cols-2 gap-2">
             <div>
               <label className="text-[10px] text-slate-400 uppercase tracking-widest">Valor (R$)</label>
@@ -154,14 +191,24 @@ export default function FinanceiroSection({ mentoradoId, mentorId }: FinanceiroS
                 className="w-full mt-1 px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:border-emerald-500" />
             </div>
           </div>
+          {editId && (
+            <div>
+              <label className="text-[10px] text-slate-400 uppercase tracking-widest">Status</label>
+              <select value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))}
+                className="w-full mt-1 px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:border-emerald-500">
+                <option value="pendente">Pendente</option>
+                <option value="pago">Pago</option>
+              </select>
+            </div>
+          )}
           <div className="flex gap-2">
-            <button type="button" onClick={() => setShowForm(false)}
+            <button type="button" onClick={resetForm}
               className="flex-1 py-2 rounded-lg bg-slate-700/50 text-slate-400 text-sm hover:bg-slate-700 transition-colors">
               Cancelar
             </button>
             <button type="submit"
               className="flex-1 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm transition-colors">
-              Salvar
+              {editId ? "Salvar mudanças" : "Salvar"}
             </button>
           </div>
         </form>
@@ -223,7 +270,11 @@ export default function FinanceiroSection({ mentoradoId, mentorId }: FinanceiroS
                       PAGO
                     </button>
                   )}
-                  <button onClick={() => deletar(p.id)}
+                  <button onClick={() => abrirEdicao(p)} title="Editar pagamento"
+                    className="p-1 rounded hover:bg-blue-500/20 transition-colors">
+                    <Pencil className="w-3.5 h-3.5 text-blue-400" />
+                  </button>
+                  <button onClick={() => deletar(p.id)} title="Remover pagamento"
                     className="p-1 rounded hover:bg-red-500/20 transition-colors">
                     <Trash2 className="w-3.5 h-3.5 text-red-400" />
                   </button>
