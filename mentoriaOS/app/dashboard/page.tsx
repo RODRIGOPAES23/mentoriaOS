@@ -261,7 +261,7 @@ export default function DashboardPage() {
   const deletarMentorado = useCallback(async (id: string) => {
     if (!confirm("Tem certeza que deseja deletar este mentorado? Todos os dados serão perdidos.")) return
     const res = await fetch(`/api/dashboard/mentorados/${id}`, { method: "DELETE" })
-    if (res.ok) { setSelectedId(""); recarregarMentorados() }
+    if (res.ok) { setSelectedId(""); setShowEditarCadastro(false); recarregarMentorados() }
   }, [recarregarMentorados])
 
   const copiarLinkCheckin = useCallback(async () => {
@@ -366,7 +366,6 @@ export default function DashboardPage() {
               onAnalisarCall={() => setShowAnalisarCall(true)}
               onEditarCadastro={() => setShowEditarCadastro(true)}
               onHistorico={() => setShowHistoricoModal(true)}
-              onExcluir={() => deletarMentorado(selectedId)}
             />
           )}
 
@@ -430,6 +429,7 @@ export default function DashboardPage() {
           nome={selected.nome}
           onClose={() => setShowEditarCadastro(false)}
           onSalvo={() => { setShowEditarCadastro(false); recarregarMentorados() }}
+          onExcluir={() => deletarMentorado(selectedId)}
         />
       )}
 

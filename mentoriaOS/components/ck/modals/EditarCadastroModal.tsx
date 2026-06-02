@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { X, Loader2, Briefcase } from "lucide-react"
+import { X, Loader2, Briefcase, Trash2 } from "lucide-react"
 import { C } from "@/utils/theme"
 import { FormCadastroMentorado } from "@/components/forms/FormCadastroMentorado"
 
@@ -10,11 +10,12 @@ interface Props {
   nome: string
   onClose: () => void
   onSalvo: () => void
+  onExcluir: () => void
 }
 
 /** Edição do CADASTRO COMPLETO do mentorado (visão do mentor):
  *  19 campos do form + seção "Operação da Mentoria" (foco, término, metas, faturamento). */
-export default function EditarCadastroModal({ mentoradoId, nome, onClose, onSalvo }: Props) {
+export default function EditarCadastroModal({ mentoradoId, nome, onClose, onSalvo, onExcluir }: Props) {
   const [initial, setInitial] = useState<any | null>(null)
   const [erro, setErro] = useState("")
   // Campos operacionais (não fazem parte do form de intake)
@@ -115,6 +116,18 @@ export default function EditarCadastroModal({ mentoradoId, nome, onClose, onSalv
 
             {/* Form de intake (19 campos) — o botão Salvar dele grava o conjunto todo */}
             <FormCadastroMentorado mentoradoId={mentoradoId} initialData={initial} onSave={salvar} />
+
+            {/* Zona de perigo — Excluir (abaixo do Salvar) */}
+            <div className="rounded-2xl p-5" style={{ background: C.card, border: `1px solid ${C.red}33` }}>
+              <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: C.muted }}>Zona de Perigo</p>
+              <button onClick={onExcluir}
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-colors"
+                style={{ background: `${C.red}15`, color: "#fca5a5", border: `1px solid ${C.red}33` }}
+                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = `${C.red}28`}
+                onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = `${C.red}15`}>
+                <Trash2 className="w-4 h-4" /> Excluir mentorado
+              </button>
+            </div>
           </>
         )}
       </div>

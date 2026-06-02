@@ -4,7 +4,7 @@ import { useState } from "react"
 import {
   Search, UserPlus, Target, BarChart3, TrendingUp, BookOpen, CheckCircle2, Briefcase,
   DollarSign, MessageCircle, Phone, Sparkles, Zap, Link2, Check, RefreshCw, Calendar, History,
-  ChevronDown, Users, Pencil, Trash2,
+  ChevronDown, Users, Pencil,
 } from "lucide-react"
 import type { CheckinRow } from "@/lib/supabase"
 import { C } from "@/utils/theme"
@@ -56,7 +56,6 @@ interface Props {
   onAnalisarCall: () => void
   onEditarCadastro: () => void
   onHistorico: () => void
-  onExcluir: () => void
 }
 
 function iniciais(nome: string) {
@@ -69,7 +68,7 @@ export default function MentoradosView({
   selected, checkin, historico, briefing, mentorId,
   activeTab, setActiveTab, tarefasVencidas, atualizando, linkCopiado, briefingLoading, accent,
   onUploadFoto, onCopiarLink, onAtualizarCheckin, onAgendarSessao, onIniciarChamada, onGerarBriefing, onAnalisarCall,
-  onEditarCadastro, onHistorico, onExcluir,
+  onEditarCadastro, onHistorico,
 }: Props) {
   const [aberto, setAberto] = useState(false)
 
@@ -248,7 +247,6 @@ export default function MentoradosView({
                   { icon: linkCopiado ? Check : Link2, label: linkCopiado ? "Copiado!" : "Copiar Convite", onClick: onCopiarLink, color: C.muted },
                   { icon: RefreshCw, label: "Atualizar", onClick: onAtualizarCheckin, color: C.muted },
                   { icon: Calendar, label: "Agendar Sessão", onClick: onAgendarSessao, color: C.blue },
-                  { icon: Trash2, label: "Excluir", onClick: onExcluir, color: C.red },
                 ].map(btn => (
                   <button key={btn.label} onClick={btn.onClick}
                     className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl transition-all"
@@ -293,51 +291,7 @@ export default function MentoradosView({
               </div>
             )}
 
-            {/* Briefing IA */}
-            {checkin && (
-              <div className="rounded-2xl p-6" style={{ background: C.card, border: `1px solid ${C.border}` }}>
-                <div className="flex items-center justify-between mb-5">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${C.violet}18`, border: `1px solid ${C.violet}30` }}>
-                      <Sparkles className="w-4 h-4" style={{ color: C.violet }} />
-                    </div>
-                    <h3 className="text-sm font-semibold text-white">Briefing da IA</h3>
-                  </div>
-                  <button onClick={onGerarBriefing} disabled={briefingLoading}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg disabled:opacity-50 transition-all"
-                    style={{ background: `${C.violet}18`, border: `1px solid ${C.violet}33`, color: C.violet }}>
-                    <Zap className={`w-3.5 h-3.5 ${briefingLoading ? "animate-pulse" : ""}`} />
-                    {briefingLoading ? "Gerando..." : "Gerar com IA"}
-                  </button>
-                </div>
-
-                {briefing ? (
-                  <div className="space-y-5">
-                    <div className="rounded-xl p-4" style={{ background: C.input }}>
-                      <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: C.muted }}>📊 Diagnóstico</p>
-                      <p className="text-sm leading-relaxed" style={{ color: "#94b4cc" }}>{briefing.diagnostico}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest mb-3" style={{ color: C.muted }}>🎯 Pauta da Call</p>
-                      <ol className="space-y-2">
-                        {briefing.pauta.map((item, i) => (
-                          <li key={i} className="flex items-start gap-3">
-                            <span className="w-5 h-5 rounded-full text-white text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5" style={{ background: C.green }}>{i + 1}</span>
-                            <p className="text-sm" style={{ color: "#94b4cc" }}>{item}</p>
-                          </li>
-                        ))}
-                      </ol>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-sm text-center py-6" style={{ color: C.muted }}>
-                    Clique em &apos;Gerar com IA&apos; para criar o briefing desta sessão.
-                  </p>
-                )}
-              </div>
-            )}
-
-            {/* Tabs */}
+            {/* Abas (acima do Briefing) */}
             <div>
               <div className="flex gap-1 rounded-xl p-1 mb-4" style={{ background: C.card }}>
                 {([
@@ -389,6 +343,50 @@ export default function MentoradosView({
                 </div>
               )}
             </div>
+
+            {/* Briefing IA (abaixo das abas) */}
+            {checkin && (
+              <div className="rounded-2xl p-6" style={{ background: C.card, border: `1px solid ${C.border}` }}>
+                <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${C.violet}18`, border: `1px solid ${C.violet}30` }}>
+                      <Sparkles className="w-4 h-4" style={{ color: C.violet }} />
+                    </div>
+                    <h3 className="text-sm font-semibold text-white">Briefing da IA</h3>
+                  </div>
+                  <button onClick={onGerarBriefing} disabled={briefingLoading}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg disabled:opacity-50 transition-all"
+                    style={{ background: `${C.violet}18`, border: `1px solid ${C.violet}33`, color: C.violet }}>
+                    <Zap className={`w-3.5 h-3.5 ${briefingLoading ? "animate-pulse" : ""}`} />
+                    {briefingLoading ? "Gerando..." : "Gerar com IA"}
+                  </button>
+                </div>
+
+                {briefing ? (
+                  <div className="space-y-5">
+                    <div className="rounded-xl p-4" style={{ background: C.input }}>
+                      <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: C.muted }}>📊 Diagnóstico</p>
+                      <p className="text-sm leading-relaxed" style={{ color: "#94b4cc" }}>{briefing.diagnostico}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-widest mb-3" style={{ color: C.muted }}>🎯 Pauta da Call</p>
+                      <ol className="space-y-2">
+                        {briefing.pauta.map((item, i) => (
+                          <li key={i} className="flex items-start gap-3">
+                            <span className="w-5 h-5 rounded-full text-white text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5" style={{ background: C.green }}>{i + 1}</span>
+                            <p className="text-sm" style={{ color: "#94b4cc" }}>{item}</p>
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-center py-6" style={{ color: C.muted }}>
+                    Clique em &apos;Gerar com IA&apos; para criar o briefing desta sessão.
+                  </p>
+                )}
+              </div>
+            )}
 
             {!checkin && (
               <div className="rounded-2xl p-8 text-center" style={{ background: C.card, border: `1px solid ${C.border}` }}>
