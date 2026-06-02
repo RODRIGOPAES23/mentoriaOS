@@ -22,7 +22,6 @@ import CallRoom from "@/components/ck/CallRoom"
 import AnalisarCallModal from "@/components/ck/AnalisarCallModal"
 import CadastroMentoradoModalFull from "@/components/ck/modals/CadastroMentoradoModalFull"
 import EditarCadastroModal from "@/components/ck/modals/EditarCadastroModal"
-import EditarMentoradoModal from "@/components/ck/modals/EditarMentoradoModal"
 import HistoricoModal from "@/components/ck/modals/HistoricoModal"
 
 // ── Helpers de domínio ────────────────────────────────────────────────────────
@@ -79,15 +78,12 @@ export default function DashboardPage() {
   const [atualizando, setAtualizando] = useState(false)
   const [briefingLoading, setBriefingLoading] = useState(false)
   const [linkCopiado, setLinkCopiado] = useState(false)
-  const [editando, setEditando] = useState(false)
   const [salvandoPerfil, setSalvandoPerfil] = useState(false)
 
   // Formulários / modais
-  const [editData, setEditData] = useState({ nome: "", nicho: "", foco_macro: "", status: "Ativo", cidade: "", data_fim: "", faturamento_atual: "", meta_faturamento: "", meta_atual: "" })
   const [perfilEdit, setPerfilEdit] = useState({ nome: "", nicho_foco: "", metodo_trabalho: "", filosofia: "" })
   const [configTab, setConfigTab] = useState<"geral" | "tema" | "empresa">("geral")
   const [showCadastro, setShowCadastro] = useState(false)
-  const [showEditModal, setShowEditModal] = useState(false)
   const [showEditarCadastro, setShowEditarCadastro] = useState(false)
   const [showHistoricoModal, setShowHistoricoModal] = useState(false)
   const [showMenuPerfil, setShowMenuPerfil] = useState(false)
@@ -262,18 +258,6 @@ export default function DashboardPage() {
   }, [mentorDados])
 
   // ── CRUD MENTORADO ───────────────────────────────────────────────────────────
-  const editarMentorado = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!selectedId) return
-    setEditando(true)
-    try {
-      const res = await fetch(`/api/dashboard/mentorados/${selectedId}`, {
-        method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(editData),
-      })
-      if (res.ok) { setShowEditModal(false); recarregarMentorados() }
-    } finally { setEditando(false) }
-  }, [editData, selectedId, recarregarMentorados])
-
   const deletarMentorado = useCallback(async (id: string) => {
     if (!confirm("Tem certeza que deseja deletar este mentorado? Todos os dados serão perdidos.")) return
     const res = await fetch(`/api/dashboard/mentorados/${id}`, { method: "DELETE" })
@@ -289,18 +273,6 @@ export default function DashboardPage() {
       setTimeout(() => setLinkCopiado(false), 2000)
     } catch {}
   }, [selectedId, mentorados])
-
-  const abrirEditarMentorado = useCallback(() => {
-    const sel = mentorados.find(m => m.id === selectedId)
-    if (!sel) return
-    setEditData({
-      nome: sel.nome, nicho: sel.nicho, foco_macro: sel.foco_macro, status: "Ativo",
-      cidade: sel.cidade || "", data_fim: sel.data_fim || "",
-      faturamento_atual: sel.faturamento_atual?.toString() || "", meta_faturamento: sel.meta_faturamento?.toString() || "",
-      meta_atual: sel.meta_atual || "",
-    })
-    setShowEditModal(true)
-  }, [mentorados, selectedId])
 
   // ── DERIVADOS ──────────────────────────────────────────────────────────────────
   const termoBusca = filtroSidebar.trim().toLowerCase()
@@ -394,7 +366,7 @@ export default function DashboardPage() {
               onAnalisarCall={() => setShowAnalisarCall(true)}
               onEditarCadastro={() => setShowEditarCadastro(true)}
               onHistorico={() => setShowHistoricoModal(true)}
-              onEditarRapido={abrirEditarMentorado}
+              onExcluir={() => deletarMentorado(selectedId)}
             />
           )}
 
@@ -459,13 +431,6 @@ export default function DashboardPage() {
           onClose={() => setShowEditarCadastro(false)}
           onSalvo={() => { setShowEditarCadastro(false); recarregarMentorados() }}
         />
-      )}
-
-      {showEditModal && selected && (
-        <EditarMentoradoModal selected={selected} selectedId={selectedId}
-          editData={editData} setEditData={setEditData} editando={editando}
-          onSubmit={editarMentorado} onDelete={deletarMentorado}
-          onUploadFoto={uploadFoto} onClose={() => setShowEditModal(false)} />
       )}
 
       {showHistoricoModal && selected && (

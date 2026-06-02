@@ -4,7 +4,7 @@ import { useState } from "react"
 import {
   Search, UserPlus, Target, BarChart3, TrendingUp, BookOpen, CheckCircle2, Briefcase,
   DollarSign, MessageCircle, Phone, Sparkles, Zap, Link2, Check, RefreshCw, Calendar, History,
-  ChevronDown, Users, Pencil, SlidersHorizontal,
+  ChevronDown, Users, Pencil, Trash2,
 } from "lucide-react"
 import type { CheckinRow } from "@/lib/supabase"
 import { C } from "@/utils/theme"
@@ -56,7 +56,7 @@ interface Props {
   onAnalisarCall: () => void
   onEditarCadastro: () => void
   onHistorico: () => void
-  onEditarRapido: () => void
+  onExcluir: () => void
 }
 
 function iniciais(nome: string) {
@@ -69,7 +69,7 @@ export default function MentoradosView({
   selected, checkin, historico, briefing, mentorId,
   activeTab, setActiveTab, tarefasVencidas, atualizando, linkCopiado, briefingLoading, accent,
   onUploadFoto, onCopiarLink, onAtualizarCheckin, onAgendarSessao, onIniciarChamada, onGerarBriefing, onAnalisarCall,
-  onEditarCadastro, onHistorico, onEditarRapido,
+  onEditarCadastro, onHistorico, onExcluir,
 }: Props) {
   const [aberto, setAberto] = useState(false)
 
@@ -248,7 +248,7 @@ export default function MentoradosView({
                   { icon: linkCopiado ? Check : Link2, label: linkCopiado ? "Copiado!" : "Copiar Convite", onClick: onCopiarLink, color: C.muted },
                   { icon: RefreshCw, label: "Atualizar", onClick: onAtualizarCheckin, color: C.muted },
                   { icon: Calendar, label: "Agendar Sessão", onClick: onAgendarSessao, color: C.blue },
-                  { icon: SlidersHorizontal, label: "Status / Excluir", onClick: onEditarRapido, color: C.muted },
+                  { icon: Trash2, label: "Excluir", onClick: onExcluir, color: C.red },
                 ].map(btn => (
                   <button key={btn.label} onClick={btn.onClick}
                     className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl transition-all"
