@@ -87,34 +87,32 @@ function DashboardMentorBase({ mentorId, accent = C.green, onAbrirMentorado }: D
       transition={{ staggerChildren: 0.1 }}
       className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start"
     >
-      {/* BLOCO 1: Pendências Financeiras (nominal) */}
-      <Bloco1Financeiro
-        vence_24h={dashboard.bloco1_financeiro?.vence_24h || 0}
-        vence_2_dias={dashboard.bloco1_financeiro?.vence_2_dias || 0}
-        vence_3_dias={dashboard.bloco1_financeiro?.vence_3_dias || 0}
-        total_pendente={dashboard.bloco1_financeiro?.total_pendente || 0}
-        proximos={dashboard.bloco1_financeiro?.proximos || []}
-        accent={accent}
-        onAbrirMentorado={onAbrirMentorado}
-      />
+      {/* COLUNA ESQUERDA: Pendências · Próximas Calls · Mentorados (empilhados) */}
+      <div className="space-y-4">
+        <Bloco1Financeiro
+          vence_24h={dashboard.bloco1_financeiro?.vence_24h || 0}
+          vence_2_dias={dashboard.bloco1_financeiro?.vence_2_dias || 0}
+          vence_3_dias={dashboard.bloco1_financeiro?.vence_3_dias || 0}
+          total_pendente={dashboard.bloco1_financeiro?.total_pendente || 0}
+          proximos={dashboard.bloco1_financeiro?.proximos || []}
+          accent={accent}
+          onAbrirMentorado={onAbrirMentorado}
+        />
+        <Bloco4Calls calls={dashboard.bloco4_calls || []} accent={accent} />
+        <Bloco2Mentorados
+          total={dashboard.bloco2_mentorados?.total || 0}
+          prox_30_dias={dashboard.bloco2_mentorados?.prox_30_dias || []}
+          prox_60_dias={dashboard.bloco2_mentorados?.prox_60_dias || []}
+          ultimo_mes={dashboard.bloco2_mentorados?.ultimo_mes || []}
+          accent={accent}
+        />
+      </div>
 
-      {/* BLOCO 2: Mentorados + Renovações */}
-      <Bloco2Mentorados
-        total={dashboard.bloco2_mentorados?.total || 0}
-        prox_30_dias={dashboard.bloco2_mentorados?.prox_30_dias || []}
-        prox_60_dias={dashboard.bloco2_mentorados?.prox_60_dias || []}
-        ultimo_mes={dashboard.bloco2_mentorados?.ultimo_mes || []}
-        accent={accent}
-      />
-
-      {/* BLOCO 3: Progresso de Tarefas */}
+      {/* COLUNA DIREITA: Progresso de Tarefas */}
       <Bloco3Progresso
         alunoMaisAtrasado={dashboard.bloco3_progresso?.alunoMaisAtrasado}
         progresoGeral={dashboard.bloco3_progresso?.progresoGeral || []}
       />
-
-      {/* BLOCO 4: Calendário de Calls */}
-      <Bloco4Calls calls={dashboard.bloco4_calls || []} accent={accent} />
     </motion.div>
   )
 }
