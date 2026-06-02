@@ -85,7 +85,7 @@ function DashboardMentorBase({ mentorId, accent = C.green, onAbrirMentorado }: D
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ staggerChildren: 0.1 }}
-      className="space-y-4"
+      className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start"
     >
       {/* BLOCO 1: Pendências Financeiras (nominal) */}
       <Bloco1Financeiro
