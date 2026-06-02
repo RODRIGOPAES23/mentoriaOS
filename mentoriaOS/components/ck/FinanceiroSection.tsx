@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Plus, CheckCircle2, Clock, AlertCircle, Trash2, DollarSign, Pencil } from "lucide-react"
+import { Plus, CheckCircle2, Clock, AlertCircle, Trash2, DollarSign, Pencil, X } from "lucide-react"
 
 interface Pagamento {
   id: string
@@ -157,61 +157,70 @@ export default function FinanceiroSection({ mentoradoId, mentorId }: FinanceiroS
         </div>
       </div>
 
-      {/* Form */}
+      {/* Form em POPUP (modal) */}
       {showForm && (
-        <form onSubmit={salvar} className="bg-slate-800/50 rounded-xl p-4 mb-4 space-y-3 border border-slate-700/30">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
-            {editId ? "✎ Editar pagamento" : "+ Novo pagamento"}
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="text-[10px] text-slate-400 uppercase tracking-widest">Valor (R$)</label>
-              <input type="number" step="0.01" placeholder="0,00" value={form.valor}
-                onChange={e => setForm(f => ({ ...f, valor: e.target.value }))}
-                className="w-full mt-1 px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:border-emerald-500" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm p-4"
+          style={{ background: "#00000070" }} onClick={resetForm}>
+          <div className="w-full max-w-md rounded-2xl bg-slate-800 border border-slate-700 shadow-2xl"
+            onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700">
+              <h3 className="text-sm font-bold text-white">{editId ? "Editar pagamento" : "Novo pagamento"}</h3>
+              <button onClick={resetForm} className="p-1.5 rounded-lg text-slate-400 hover:text-white transition-colors">
+                <X className="w-5 h-5" />
+              </button>
             </div>
-            <div>
-              <label className="text-[10px] text-slate-400 uppercase tracking-widest">Vencimento</label>
-              <input type="date" required value={form.data_vencimento}
-                onChange={e => setForm(f => ({ ...f, data_vencimento: e.target.value }))}
-                className="w-full mt-1 px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:border-emerald-500" />
-            </div>
+            <form onSubmit={salvar} className="p-5 space-y-3">
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-[10px] text-slate-400 uppercase tracking-widest">Valor (R$)</label>
+                  <input type="number" step="0.01" placeholder="0,00" value={form.valor}
+                    onChange={e => setForm(f => ({ ...f, valor: e.target.value }))}
+                    className="w-full mt-1 px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:border-emerald-500" />
+                </div>
+                <div>
+                  <label className="text-[10px] text-slate-400 uppercase tracking-widest">Vencimento</label>
+                  <input type="date" required value={form.data_vencimento}
+                    onChange={e => setForm(f => ({ ...f, data_vencimento: e.target.value }))}
+                    className="w-full mt-1 px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:border-emerald-500" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="text-[10px] text-slate-400 uppercase tracking-widest">Descrição</label>
+                  <input type="text" placeholder="Ex: Parcela 1/12" value={form.descricao}
+                    onChange={e => setForm(f => ({ ...f, descricao: e.target.value }))}
+                    className="w-full mt-1 px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:border-emerald-500" />
+                </div>
+                <div>
+                  <label className="text-[10px] text-slate-400 uppercase tracking-widest">Parcela #</label>
+                  <input type="number" min="1" value={form.parcela}
+                    onChange={e => setForm(f => ({ ...f, parcela: e.target.value }))}
+                    className="w-full mt-1 px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:border-emerald-500" />
+                </div>
+              </div>
+              {editId && (
+                <div>
+                  <label className="text-[10px] text-slate-400 uppercase tracking-widest">Status</label>
+                  <select value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))}
+                    className="w-full mt-1 px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:border-emerald-500">
+                    <option value="pendente">Pendente</option>
+                    <option value="pago">Pago</option>
+                  </select>
+                </div>
+              )}
+              <div className="flex gap-2 pt-1">
+                <button type="button" onClick={resetForm}
+                  className="flex-1 py-2 rounded-lg bg-slate-700/50 text-slate-400 text-sm hover:bg-slate-700 transition-colors">
+                  Cancelar
+                </button>
+                <button type="submit"
+                  className="flex-1 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm transition-colors">
+                  {editId ? "Salvar mudanças" : "Salvar"}
+                </button>
+              </div>
+            </form>
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="text-[10px] text-slate-400 uppercase tracking-widest">Descrição</label>
-              <input type="text" placeholder="Ex: Parcela 1/12" value={form.descricao}
-                onChange={e => setForm(f => ({ ...f, descricao: e.target.value }))}
-                className="w-full mt-1 px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:border-emerald-500" />
-            </div>
-            <div>
-              <label className="text-[10px] text-slate-400 uppercase tracking-widest">Parcela #</label>
-              <input type="number" min="1" value={form.parcela}
-                onChange={e => setForm(f => ({ ...f, parcela: e.target.value }))}
-                className="w-full mt-1 px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:border-emerald-500" />
-            </div>
-          </div>
-          {editId && (
-            <div>
-              <label className="text-[10px] text-slate-400 uppercase tracking-widest">Status</label>
-              <select value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))}
-                className="w-full mt-1 px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:border-emerald-500">
-                <option value="pendente">Pendente</option>
-                <option value="pago">Pago</option>
-              </select>
-            </div>
-          )}
-          <div className="flex gap-2">
-            <button type="button" onClick={resetForm}
-              className="flex-1 py-2 rounded-lg bg-slate-700/50 text-slate-400 text-sm hover:bg-slate-700 transition-colors">
-              Cancelar
-            </button>
-            <button type="submit"
-              className="flex-1 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm transition-colors">
-              {editId ? "Salvar mudanças" : "Salvar"}
-            </button>
-          </div>
-        </form>
+        </div>
       )}
 
       {/* Lista */}
