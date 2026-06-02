@@ -1,8 +1,6 @@
 "use client"
 
 import { useEffect, useState, useCallback, useRef } from "react"
-import { useSensor, useSensors, PointerSensor, DragEndEvent } from "@dnd-kit/core"
-import { arrayMove } from "@dnd-kit/sortable"
 import type { CheckinRow } from "@/lib/supabase"
 import { getRealtimeClient } from "@/lib/supabase-realtime"
 import { useLocalStorage } from "@/hooks/useLocalStorage"
@@ -17,6 +15,7 @@ import MentoradosView from "@/components/ck/views/MentoradosView"
 import FinanceiroView from "@/components/ck/views/FinanceiroView"
 import CalendarioOperacao from "@/components/ck/views/CalendarioOperacao"
 import ConfiguracoesView from "@/components/ck/views/ConfiguracoesView"
+import KanbanAtividades from "@/components/ck/KanbanAtividades"
 
 import SessaoModal from "@/components/ck/SessaoModal"
 import CallRoom from "@/components/ck/CallRoom"
@@ -43,6 +42,7 @@ const MODULE_LABELS: Record<CkView, string> = {
   "visao-geral": "Visão Geral",
   "financeiro": "Financeiro",
   "mentorados": "Mentorados",
+  "atividades": "Atividades",
   "calendario": "Calendário",
   "configuracoes": "Configurações",
 }
@@ -95,7 +95,6 @@ export default function DashboardPage() {
 
   const { empresa } = useEmpresa()
   const accent = empresa.cor_primaria
-  const dndSensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))
   const menuPerfilRef = useRef<HTMLDivElement>(null)
 
   // ── INIT ────────────────────────────────────────────────────────────────────
@@ -125,22 +124,6 @@ export default function DashboardPage() {
       if (type === "mentor") setMentorDados(prev => prev ? { ...prev, foto_url: json.url } : prev)
       else setMentorados(prev => prev.map(m => m.id === id ? { ...m, foto_url: json.url } : m))
     }
-  }, [])
-
-  // ── DRAG & DROP (reordena mentorados, persiste ordem) ─────────────────────────
-  const handleDragEnd = useCallback((event: DragEndEvent) => {
-    const { active, over } = event
-    if (!over || active.id === over.id) return
-    setMentorados(prev => {
-      const oldIdx = prev.findIndex(m => m.id === active.id)
-      const newIdx = prev.findIndex(m => m.id === over.id)
-      const reordenado = arrayMove(prev, oldIdx, newIdx)
-      fetch("/api/dashboard/mentorados/reorder", {
-        method: "PATCH", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: reordenado.map((m, i) => ({ id: m.id, ordem: i })) }),
-      }).catch(() => {})
-      return reordenado
-    })
   }, [])
 
   // ── SCORE DE URGÊNCIA ─────────────────────────────────────────────────────────
@@ -376,17 +359,19 @@ export default function DashboardPage() {
               onAbrirMentorado={(id) => { setSelectedId(id); setCkView("mentorados") }} />
           )}
 
+          {ckView === "atividades" && mentorId && (
+            <KanbanAtividades mentorados={mentorados}
+              onAbrirMentorado={(id) => { setSelectedId(id); setCkView("mentorados") }} />
+          )}
+
           {ckView === "mentorados" && (
             <MentoradosView
               filtered={filtered}
-              scoreMap={scoreMap}
               selectedId={selectedId}
               onSelect={setSelectedId}
               filtroSidebar={filtroSidebar}
               setFiltroSidebar={setFiltroSidebar}
               onNovoMentorado={() => setShowCadastro(true)}
-              sensors={dndSensors}
-              onDragEnd={handleDragEnd}
               selected={selected}
               checkin={checkin}
               historico={historico}

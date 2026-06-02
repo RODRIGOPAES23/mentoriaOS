@@ -32,9 +32,9 @@ export function Bloco4Calls({ calls, accent = C.violet }: Bloco4Props) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-      className="rounded-2xl p-6" style={{ background: C.card, border: `1px solid ${C.border}` }}
+      className="rounded-2xl p-4" style={{ background: C.card, border: `1px solid ${C.border}` }}
     >
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-3 mb-3">
         <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${accent}18`, border: `1px solid ${accent}30` }}>
           <Calendar className="w-4 h-4" style={{ color: accent }} />
         </div>
@@ -46,10 +46,10 @@ export function Bloco4Calls({ calls, accent = C.violet }: Bloco4Props) {
           <p>Nenhuma call agendada</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2">
           {callsFormatadas.map((call) => (
             <motion.div key={call.id} whileHover={{ x: 4 }}
-              className="rounded-xl p-4 cursor-pointer transition-colors"
+              className="rounded-xl p-3 cursor-pointer transition-colors"
               style={{ background: C.input, border: `1px solid ${C.border}` }}
             >
               <div className="flex items-start gap-4">

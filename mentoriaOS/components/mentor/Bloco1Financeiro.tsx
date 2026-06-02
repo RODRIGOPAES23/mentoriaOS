@@ -48,9 +48,9 @@ export function Bloco1Financeiro({ vence_24h, vence_2_dias, vence_3_dias, total_
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-      className="rounded-2xl p-6" style={{ background: C.card, border: `1px solid ${C.border}` }}
+      className="rounded-2xl p-4" style={{ background: C.card, border: `1px solid ${C.border}` }}
     >
-      <div className="flex items-center justify-between mb-5">
+      <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${C.red}18`, border: `1px solid ${C.red}30` }}>
             <TrendingDown className="w-4 h-4" style={{ color: C.red }} />
@@ -64,11 +64,11 @@ export function Bloco1Financeiro({ vence_24h, vence_2_dias, vence_3_dias, total_
       </div>
 
       {/* Janelas por prazo (resumo) */}
-      <div className="grid grid-cols-3 gap-3 mb-5">
+      <div className="grid grid-cols-3 gap-2 mb-3">
         {janelas.map((j, i) => (
-          <div key={i} className="rounded-xl p-3 text-center" style={{ background: `${j.cor}14`, border: `1px solid ${j.cor}33` }}>
-            <p className="text-[10px] mb-1" style={{ color: j.cor }}>{j.label}</p>
-            <p className="text-lg font-bold text-white">{fmt(j.valor)}</p>
+          <div key={i} className="rounded-xl p-2.5 text-center" style={{ background: `${j.cor}14`, border: `1px solid ${j.cor}33` }}>
+            <p className="text-[10px] mb-0.5" style={{ color: j.cor }}>{j.label}</p>
+            <p className="text-base font-bold text-white">{fmt(j.valor)}</p>
           </div>
         ))}
       </div>
@@ -84,7 +84,7 @@ export function Bloco1Financeiro({ vence_24h, vence_2_dias, vence_3_dias, total_
             return (
               <button key={p.id}
                 onClick={() => onAbrirMentorado?.(p.mentorado_id)}
-                className="w-full flex items-center gap-3 p-3 rounded-xl text-left transition-colors"
+                className="w-full flex items-center gap-3 p-2.5 rounded-xl text-left transition-colors"
                 style={{ background: C.input, border: `1px solid ${C.border}` }}
                 onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = `${cor}55`}
                 onMouseLeave={e => (e.currentTarget as HTMLElement).style.borderColor = C.border}>

@@ -33,26 +33,26 @@ export function Bloco2Mentorados({ total, prox_30_dias, prox_60_dias, ultimo_mes
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-      className="rounded-2xl p-6" style={{ background: C.card, border: `1px solid ${C.border}` }}
+      className="rounded-2xl p-4" style={{ background: C.card, border: `1px solid ${C.border}` }}
     >
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-3 mb-3">
         <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${C.blue}18`, border: `1px solid ${C.blue}30` }}>
           <Users className="w-4 h-4" style={{ color: C.blue }} />
         </div>
         <h2 className="text-base font-semibold text-white">Mentorados Ativos</h2>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
         {cards.map((c, i) => (
-          <div key={i} className="rounded-xl p-4" style={{ background: `${c.cor}14`, border: `1px solid ${c.cor}33` }}>
-            <p className="text-xs mb-1" style={{ color: c.cor }}>{c.label}</p>
-            <p className="text-3xl font-bold text-white">{c.valor}</p>
+          <div key={i} className="rounded-xl p-3" style={{ background: `${c.cor}14`, border: `1px solid ${c.cor}33` }}>
+            <p className="text-xs mb-0.5" style={{ color: c.cor }}>{c.label}</p>
+            <p className="text-2xl font-bold text-white">{c.valor}</p>
           </div>
         ))}
       </div>
 
       {ultimo_mes.length > 0 && (
-        <div className="rounded-xl p-4" style={{ background: `${C.red}10`, border: `1px solid ${C.red}33` }}>
+        <div className="rounded-xl p-3" style={{ background: `${C.red}10`, border: `1px solid ${C.red}33` }}>
           <div className="flex items-start gap-3">
             <AlertTriangle className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: C.red }} />
             <div>

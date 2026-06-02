@@ -1,18 +1,17 @@
 "use client"
 
+import { useState } from "react"
 import {
   Search, UserPlus, Target, BarChart3, TrendingUp, BookOpen, CheckCircle2, Briefcase,
   DollarSign, MessageCircle, Phone, Sparkles, Zap, Link2, Check, RefreshCw, Calendar, History,
+  ChevronDown, Users,
 } from "lucide-react"
-import { DndContext, closestCenter, SensorDescriptor, DragEndEvent } from "@dnd-kit/core"
-import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import type { CheckinRow } from "@/lib/supabase"
 import { C } from "@/utils/theme"
 import type { Mentorado, BriefingIA } from "../types"
 import AvisoPagamento from "../AvisoPagamento"
 import BadgeVariacao from "../BadgeVariacao"
 import CountdownDias from "../CountdownDias"
-import SortableMentoradoItem from "../SortableMentoradoItem"
 import PendenciasSection from "../PendenciasSection"
 import FinanceiroSection from "../FinanceiroSection"
 import ChatMentor from "../ChatMentor"
@@ -30,17 +29,12 @@ function variacao(historico: CheckinRow[], campo: keyof CheckinRow): number | nu
 type ActiveTab = "pendencias" | "financeiro" | "calls" | "chat" | "materiais"
 
 interface Props {
-  // Lista
   filtered: Mentorado[]
-  scoreMap?: Record<string, number>
   selectedId: string
   onSelect: (id: string) => void
   filtroSidebar: string
   setFiltroSidebar: (v: string) => void
   onNovoMentorado: () => void
-  sensors: SensorDescriptor<any>[]
-  onDragEnd: (e: DragEndEvent) => void
-  // Detalhe
   selected?: Mentorado
   checkin: CheckinRow | null
   historico: CheckinRow[]
@@ -53,7 +47,6 @@ interface Props {
   linkCopiado: boolean
   briefingLoading: boolean
   accent: string
-  // Callbacks
   onUploadFoto: (file: File, type: "mentor" | "mentorado", id: string) => void
   onCopiarLink: () => void
   onAtualizarCheckin: () => void
@@ -63,67 +56,107 @@ interface Props {
   onAnalisarCall: () => void
 }
 
-/** Esqueleto de pessoas para o estado vazio (evita conflito com lucide Users). */
-function UsersIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
-    </svg>
-  )
+function iniciais(nome: string) {
+  return nome.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()
 }
 
-/** View Mentorados: lista lateral ordenável por Score de Urgência + prontuário do aluno. */
+/** View Mentorados: SELETOR (dropdown) no topo + prontuário do aluno em largura total. */
 export default function MentoradosView({
-  filtered, scoreMap, selectedId, onSelect, filtroSidebar, setFiltroSidebar, onNovoMentorado,
-  sensors, onDragEnd, selected, checkin, historico, briefing, mentorId,
+  filtered, selectedId, onSelect, filtroSidebar, setFiltroSidebar, onNovoMentorado,
+  selected, checkin, historico, briefing, mentorId,
   activeTab, setActiveTab, tarefasVencidas, atualizando, linkCopiado, briefingLoading, accent,
   onUploadFoto, onCopiarLink, onAtualizarCheckin, onAgendarSessao, onIniciarChamada, onGerarBriefing, onAnalisarCall,
 }: Props) {
+  const [aberto, setAberto] = useState(false)
+
   return (
-    <div className="flex h-full">
-      {/* Lista lateral */}
-      <div className="w-72 shrink-0 flex flex-col h-full" style={{ background: C.card, borderRight: `1px solid ${C.border}` }}>
-        <div className="p-4" style={{ borderBottom: `1px solid ${C.border}` }}>
-          <div className="relative mb-3">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: C.muted }} />
-            <input value={filtroSidebar} onChange={e => setFiltroSidebar(e.target.value)}
-              placeholder="Buscar mentorado..."
-              className="w-full pl-9 pr-3 py-2 rounded-lg text-sm text-white placeholder-slate-600 focus:outline-none transition-all"
-              style={{ background: C.input, border: `1px solid ${C.border}` }}
-              onFocus={e => e.target.style.borderColor = accent}
-              onBlur={e => e.target.style.borderColor = C.border} />
-          </div>
-          <button onClick={onNovoMentorado}
-            className="w-full flex items-center justify-center gap-2 py-2 text-sm font-semibold rounded-xl transition-all"
-            style={{ background: `${accent}18`, border: `1px solid ${accent}44`, color: accent }}>
-            <UserPlus className="w-4 h-4" /> Novo Mentorado
+    <div className="flex flex-col h-full">
+      {/* ── SELETOR (dropdown) ── */}
+      <div className="shrink-0 px-6 py-3 flex items-center gap-3" style={{ background: C.card, borderBottom: `1px solid ${C.border}` }}>
+        <div className="relative flex-1 max-w-md">
+          <button onClick={() => setAberto(o => !o)}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all"
+            style={{ background: C.input, border: `1px solid ${aberto ? accent : C.border}` }}>
+            {selected ? (
+              <>
+                <div className="w-7 h-7 rounded-lg overflow-hidden shrink-0" style={{ border: `1px solid ${C.border}` }}>
+                  {selected.foto_url
+                    ? <img src={selected.foto_url} alt={selected.nome} className="w-full h-full object-cover" />
+                    : <div className="w-full h-full flex items-center justify-center text-[10px] font-bold text-white" style={{ background: C.card2 }}>{iniciais(selected.nome)}</div>}
+                </div>
+                <div className="flex-1 min-w-0 text-left">
+                  <p className="text-sm font-semibold text-white truncate">{selected.nome}</p>
+                  <p className="text-[10px] truncate" style={{ color: C.muted }}>{selected.nicho}</p>
+                </div>
+              </>
+            ) : (
+              <span className="flex-1 text-left text-sm" style={{ color: C.muted }}>Selecionar mentorado…</span>
+            )}
+            <ChevronDown className="w-4 h-4 shrink-0 transition-transform" style={{ color: C.muted, transform: aberto ? "rotate(180deg)" : "none" }} />
           </button>
-          {scoreMap && (
-            <p className="text-[10px] mt-2 text-center" style={{ color: C.muted }}>Ordenado por urgência</p>
+
+          {aberto && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setAberto(false)} />
+              <div className="absolute left-0 right-0 top-full mt-2 z-50 rounded-xl shadow-2xl overflow-hidden" style={{ background: C.card2, border: `1px solid ${C.border}` }}>
+                <div className="p-2" style={{ borderBottom: `1px solid ${C.border}` }}>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: C.muted }} />
+                    <input autoFocus value={filtroSidebar} onChange={e => setFiltroSidebar(e.target.value)}
+                      placeholder="Buscar mentorado..."
+                      className="w-full pl-9 pr-3 py-2 rounded-lg text-sm text-white placeholder-slate-600 focus:outline-none"
+                      style={{ background: C.input, border: `1px solid ${C.border}` }}
+                      onFocus={e => e.target.style.borderColor = accent} onBlur={e => e.target.style.borderColor = C.border} />
+                  </div>
+                </div>
+                <div className="max-h-72 overflow-y-auto p-1.5">
+                  {filtered.length === 0 ? (
+                    <p className="text-xs text-center py-4" style={{ color: C.muted }}>Nenhum mentorado</p>
+                  ) : filtered.map(m => {
+                    const sel = m.id === selectedId
+                    return (
+                      <button key={m.id} onClick={() => { onSelect(m.id); setAberto(false) }}
+                        className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition-colors"
+                        style={{ background: sel ? accent : "transparent" }}
+                        onMouseEnter={e => { if (!sel) (e.currentTarget as HTMLElement).style.background = C.input }}
+                        onMouseLeave={e => { if (!sel) (e.currentTarget as HTMLElement).style.background = "transparent" }}>
+                        <div className="w-7 h-7 rounded-lg overflow-hidden shrink-0" style={{ border: `1px solid ${C.border}` }}>
+                          {m.foto_url
+                            ? <img src={m.foto_url} alt={m.nome} className="w-full h-full object-cover" />
+                            : <div className="w-full h-full flex items-center justify-center text-[10px] font-bold text-white" style={{ background: C.input }}>{iniciais(m.nome)}</div>}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold truncate" style={{ color: sel ? C.input : "#fff" }}>{m.nome}</p>
+                          <p className="text-[10px] truncate" style={{ color: sel ? "#0a162899" : C.muted }}>{m.nicho}</p>
+                        </div>
+                        <span className="w-2 h-2 rounded-full shrink-0" style={{ background: m.status === "Ativo" ? (sel ? C.input : C.green) : C.border }} />
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            </>
           )}
         </div>
-        <div className="flex-1 overflow-y-auto p-3 space-y-1">
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-            <SortableContext items={filtered.map(m => m.id)} strategy={verticalListSortingStrategy}>
-              {filtered.map(m => (
-                <SortableMentoradoItem key={m.id} m={m} selectedId={selectedId} onClick={() => onSelect(m.id)} />
-              ))}
-            </SortableContext>
-          </DndContext>
-        </div>
+
+        <button onClick={onNovoMentorado}
+          className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl transition-all shrink-0"
+          style={{ background: `${accent}18`, border: `1px solid ${accent}44`, color: accent }}>
+          <UserPlus className="w-4 h-4" /> Novo Mentorado
+        </button>
       </div>
 
-      {/* Detalhe */}
+      {/* ── DETALHE (largura total) ── */}
       <div className="flex-1 overflow-y-auto p-6" style={{ background: C.bg }}>
         {!selected ? (
           <div className="h-full flex items-center justify-center" style={{ color: C.muted }}>
             <div className="text-center">
-              <UsersIcon className="w-12 h-12 mx-auto mb-3" />
-              <p className="text-sm">Selecione um mentorado</p>
+              <Users className="w-12 h-12 mx-auto mb-3" style={{ color: C.border }} />
+              <p className="text-sm">Selecione um mentorado no topo</p>
             </div>
           </div>
         ) : (
-          <div className="space-y-5">
+          <div className="space-y-5 max-w-6xl mx-auto">
             <AvisoPagamento key={`aviso-${selectedId}`} mentoradoId={selectedId} onIrFinanceiro={() => setActiveTab("financeiro")} />
 
             {/* Info Card */}
@@ -134,7 +167,7 @@ export default function MentoradosView({
                     {selected.foto_url
                       ? <img src={selected.foto_url} alt={selected.nome} className="w-full h-full object-cover" />
                       : <div className="w-full h-full bg-slate-900 flex items-center justify-center text-xl font-bold text-white">
-                          {selected.nome.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
+                          {iniciais(selected.nome)}
                         </div>}
                   </div>
                   <input type="file" accept="image/*" className="hidden" onChange={e => {

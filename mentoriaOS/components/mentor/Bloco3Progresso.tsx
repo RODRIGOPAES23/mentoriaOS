@@ -25,9 +25,9 @@ export function Bloco3Progresso({ alunoMaisAtrasado, progresoGeral }: Bloco3Prop
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-      className="rounded-2xl p-6" style={{ background: C.card, border: `1px solid ${C.border}` }}
+      className="rounded-2xl p-4" style={{ background: C.card, border: `1px solid ${C.border}` }}
     >
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-3 mb-3">
         <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${C.green}18`, border: `1px solid ${C.green}30` }}>
           <Target className="w-4 h-4" style={{ color: C.green }} />
         </div>
@@ -35,12 +35,12 @@ export function Bloco3Progresso({ alunoMaisAtrasado, progresoGeral }: Bloco3Prop
       </div>
 
       {alunoMaisAtrasado && (
-        <div className="mb-5 rounded-xl p-4" style={{ background: `${C.amber}10`, border: `1px solid ${C.amber}33` }}>
+        <div className="mb-3 rounded-xl p-3" style={{ background: `${C.amber}10`, border: `1px solid ${C.amber}33` }}>
           <div className="flex items-start gap-3">
             <Zap className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: C.amber }} />
             <div className="flex-1">
-              <p className="text-sm font-semibold mb-2" style={{ color: C.amber }}>Aluno Mais Atrasado</p>
-              <p className="text-lg font-bold text-white mb-2">{alunoMaisAtrasado.mentorado_nome}</p>
+              <p className="text-sm font-semibold mb-1.5" style={{ color: C.amber }}>Aluno Mais Atrasado</p>
+              <p className="text-base font-bold text-white mb-1.5">{alunoMaisAtrasado.mentorado_nome}</p>
               <div className="flex items-center gap-2">
                 <div className="flex-1 rounded-full h-2 overflow-hidden" style={{ background: C.border }}>
                   <div className="h-2 rounded-full" style={{ width: `${alunoMaisAtrasado.percentual_conclusao || 0}%`, background: C.amber }} />
@@ -60,9 +60,9 @@ export function Bloco3Progresso({ alunoMaisAtrasado, progresoGeral }: Bloco3Prop
           <p className="text-sm font-semibold mb-3" style={{ color: C.muted }}>
             Acompanhamento {alunosComAtraso.length === 1 ? "de 1 aluno" : `de ${alunosComAtraso.length} alunos`}
           </p>
-          <div className="space-y-3">
+          <div className="space-y-2">
             {alunosComAtraso.slice(0, 5).map((item) => (
-              <div key={item.mentorado_id} className="rounded-xl p-3" style={{ background: C.input, border: `1px solid ${C.border}` }}>
+              <div key={item.mentorado_id} className="rounded-xl p-2.5" style={{ background: C.input, border: `1px solid ${C.border}` }}>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium text-white">{item.mentorado_nome}</span>
                   <span className="text-xs" style={{ color: C.red }}>{item.tarefas_atrasadas} atrasadas</span>
