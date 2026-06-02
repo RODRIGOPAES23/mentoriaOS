@@ -1,7 +1,7 @@
 "use client"
 
 import { RefObject } from "react"
-import { AlertCircle, ChevronDown, User, Edit2, History, Settings, LogOut, Sparkles } from "lucide-react"
+import { AlertCircle, ChevronDown, User, Settings, LogOut, Sparkles } from "lucide-react"
 import { C } from "@/utils/theme"
 
 interface Props {
@@ -13,11 +13,8 @@ interface Props {
   showMenu: boolean
   setShowMenu: (v: boolean) => void
   menuRef: RefObject<HTMLDivElement>
-  podeEditarMentorado: boolean
   onVencidas: () => void
   onMeuPerfil: () => void
-  onEditarMentorado: () => void
-  onHistorico: () => void
   onConfiguracoes: () => void
   onSair: () => void
 }
@@ -25,15 +22,13 @@ interface Props {
 /** Barra superior do dashboard do mentor (presenter puro). */
 export default function DashboardHeader({
   moduleLabel, realtimeConnected, mentorNome, mentorFotoUrl, tarefasVencidas,
-  showMenu, setShowMenu, menuRef, podeEditarMentorado, onVencidas,
-  onMeuPerfil, onEditarMentorado, onHistorico, onConfiguracoes, onSair,
+  showMenu, setShowMenu, menuRef, onVencidas,
+  onMeuPerfil, onConfiguracoes, onSair,
 }: Props) {
   const itensMenu = [
-    { label: "Meu Perfil", icon: User, onClick: onMeuPerfil, show: true },
-    { label: "Editar Mentorado", icon: Edit2, onClick: onEditarMentorado, show: podeEditarMentorado },
-    { label: "Histórico", icon: History, onClick: onHistorico, show: true },
-    { label: "Configurações", icon: Settings, onClick: onConfiguracoes, show: true },
-  ].filter(i => i.show)
+    { label: "Meu Perfil", icon: User, onClick: onMeuPerfil },
+    { label: "Configurações", icon: Settings, onClick: onConfiguracoes },
+  ]
 
   return (
     <header className="relative px-6 py-3.5 flex items-center justify-between shrink-0" style={{ background: C.card, borderBottom: `1px solid ${C.border}` }}>

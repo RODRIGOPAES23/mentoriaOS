@@ -4,7 +4,7 @@ import { useState } from "react"
 import {
   Search, UserPlus, Target, BarChart3, TrendingUp, BookOpen, CheckCircle2, Briefcase,
   DollarSign, MessageCircle, Phone, Sparkles, Zap, Link2, Check, RefreshCw, Calendar, History,
-  ChevronDown, Users,
+  ChevronDown, Users, Pencil, SlidersHorizontal,
 } from "lucide-react"
 import type { CheckinRow } from "@/lib/supabase"
 import { C } from "@/utils/theme"
@@ -54,6 +54,9 @@ interface Props {
   onIniciarChamada: () => void
   onGerarBriefing: () => void
   onAnalisarCall: () => void
+  onEditarCadastro: () => void
+  onHistorico: () => void
+  onEditarRapido: () => void
 }
 
 function iniciais(nome: string) {
@@ -66,6 +69,7 @@ export default function MentoradosView({
   selected, checkin, historico, briefing, mentorId,
   activeTab, setActiveTab, tarefasVencidas, atualizando, linkCopiado, briefingLoading, accent,
   onUploadFoto, onCopiarLink, onAtualizarCheckin, onAgendarSessao, onIniciarChamada, onGerarBriefing, onAnalisarCall,
+  onEditarCadastro, onHistorico, onEditarRapido,
 }: Props) {
   const [aberto, setAberto] = useState(false)
 
@@ -232,16 +236,19 @@ export default function MentoradosView({
                 </div>
               </div>
 
-              <div className="flex gap-2 mt-5 pt-5" style={{ borderTop: `1px solid ${C.border}` }}>
+              <div className="flex flex-wrap gap-2 mt-5 pt-5" style={{ borderTop: `1px solid ${C.border}` }}>
                 <button onClick={onIniciarChamada}
                   className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-xl transition-all"
                   style={{ background: accent, color: C.input }}>
                   <Phone className="w-3.5 h-3.5" /> Iniciar Chamada
                 </button>
                 {[
+                  { icon: Pencil, label: "Editar cadastro", onClick: onEditarCadastro, color: C.violet },
+                  { icon: History, label: "Histórico", onClick: onHistorico, color: C.muted },
                   { icon: linkCopiado ? Check : Link2, label: linkCopiado ? "Copiado!" : "Copiar Convite", onClick: onCopiarLink, color: C.muted },
                   { icon: RefreshCw, label: "Atualizar", onClick: onAtualizarCheckin, color: C.muted },
                   { icon: Calendar, label: "Agendar Sessão", onClick: onAgendarSessao, color: C.blue },
+                  { icon: SlidersHorizontal, label: "Status / Excluir", onClick: onEditarRapido, color: C.muted },
                 ].map(btn => (
                   <button key={btn.label} onClick={btn.onClick}
                     className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl transition-all"

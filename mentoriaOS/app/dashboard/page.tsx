@@ -21,6 +21,7 @@ import SessaoModal from "@/components/ck/SessaoModal"
 import CallRoom from "@/components/ck/CallRoom"
 import AnalisarCallModal from "@/components/ck/AnalisarCallModal"
 import CadastroMentoradoModalFull from "@/components/ck/modals/CadastroMentoradoModalFull"
+import EditarCadastroModal from "@/components/ck/modals/EditarCadastroModal"
 import EditarMentoradoModal from "@/components/ck/modals/EditarMentoradoModal"
 import HistoricoModal from "@/components/ck/modals/HistoricoModal"
 
@@ -87,6 +88,7 @@ export default function DashboardPage() {
   const [configTab, setConfigTab] = useState<"geral" | "tema" | "empresa">("geral")
   const [showCadastro, setShowCadastro] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
+  const [showEditarCadastro, setShowEditarCadastro] = useState(false)
   const [showHistoricoModal, setShowHistoricoModal] = useState(false)
   const [showMenuPerfil, setShowMenuPerfil] = useState(false)
   const [showSessaoModal, setShowSessaoModal] = useState(false)
@@ -338,11 +340,8 @@ export default function DashboardPage() {
           showMenu={showMenuPerfil}
           setShowMenu={setShowMenuPerfil}
           menuRef={menuPerfilRef}
-          podeEditarMentorado={!!selected}
           onVencidas={() => setCkView("atividades")}
           onMeuPerfil={() => { setConfigTab("geral"); setCkView("configuracoes"); setShowMenuPerfil(false) }}
-          onEditarMentorado={() => { abrirEditarMentorado(); setShowMenuPerfil(false) }}
-          onHistorico={() => { setShowHistoricoModal(true); setShowMenuPerfil(false) }}
           onConfiguracoes={() => { setConfigTab("geral"); setCkView("configuracoes"); setShowMenuPerfil(false) }}
           onSair={logout}
         />
@@ -394,6 +393,9 @@ export default function DashboardPage() {
               onIniciarChamada={() => setShowCallRoom(true)}
               onGerarBriefing={gerarBriefingIA}
               onAnalisarCall={() => setShowAnalisarCall(true)}
+              onEditarCadastro={() => setShowEditarCadastro(true)}
+              onHistorico={() => setShowHistoricoModal(true)}
+              onEditarRapido={abrirEditarMentorado}
             />
           )}
 
@@ -448,6 +450,15 @@ export default function DashboardPage() {
           mentorId={mentorId}
           onClose={() => setShowCadastro(false)}
           onCriado={(id) => { setShowCadastro(false); if (id) setSelectedId(id); recarregarMentorados() }}
+        />
+      )}
+
+      {showEditarCadastro && selected && (
+        <EditarCadastroModal
+          mentoradoId={selectedId}
+          nome={selected.nome}
+          onClose={() => setShowEditarCadastro(false)}
+          onSalvo={() => { setShowEditarCadastro(false); recarregarMentorados() }}
         />
       )}
 
