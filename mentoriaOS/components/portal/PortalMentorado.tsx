@@ -4,12 +4,13 @@ import { useState, useEffect, useRef, useCallback } from "react"
 import dynamic from "next/dynamic"
 import {
   Send, CheckCircle2, Circle, MessageCircle, ClipboardList, BarChart3, Video,
-  Sparkles, Loader2, Phone, AlertCircle, Clock, History
+  Sparkles, Loader2, Phone, AlertCircle, Clock, History, UserCog
 } from "lucide-react"
 import { getRealtimeClient } from "@/lib/supabase-realtime"
 import { C } from "@/utils/theme"
 import { HistoricoCallsMentorado } from "@/components/mentorado/HistoricoCallsMentorado"
 import { TarefasPontuaisMentorado } from "@/components/mentorado/TarefasPontuaisMentorado"
+import { FormCadastroMentorado } from "@/components/forms/FormCadastroMentorado"
 
 const JitsiMeeting = dynamic(() => import("@jitsi/react-sdk").then(m => m.JitsiMeeting), { ssr: false })
 
@@ -21,7 +22,7 @@ interface Mentor { id: string; nome: string; foto_url?: string; nicho_foco?: str
 interface Tarefa { id: string; texto: string; status: string; data_vencimento: string | null }
 interface Mensagem { id: string; autor: string; texto: string; created_at: string }
 
-type Aba = "checkin" | "tarefas" | "jornada" | "chat" | "call"
+type Aba = "checkin" | "tarefas" | "jornada" | "chat" | "call" | "cadastro"
 
 function parseDateLocal(s: string) { const [y,m,d] = s.split("T")[0].split("-").map(Number); return new Date(y, m-1, d) }
 
@@ -69,6 +70,7 @@ export default function PortalMentorado({ mentorado, mentor }: { mentorado: Ment
           )}
           {aba === "chat"    && <AbaChat mentorado={mentorado} mentor={mentor} />}
           {aba === "call"    && <AbaCall mentorado={mentorado} mentor={mentor} />}
+          {aba === "cadastro" && <AbaMeuCadastro mentorado={mentorado} />}
         </div>
       </main>
 
@@ -80,6 +82,7 @@ export default function PortalMentorado({ mentorado, mentor }: { mentorado: Ment
           { id: "jornada", label: "Jornada",  icon: History },
           { id: "chat",    label: "Chat",     icon: MessageCircle },
           { id: "call",    label: "Call",     icon: Video },
+          { id: "cadastro", label: "Cadastro", icon: UserCog },
         ] as const).map(t => (
           <button key={t.id} onClick={() => setAba(t.id)}
             className="flex-1 flex flex-col items-center gap-1 py-2.5 transition-all"
@@ -89,6 +92,46 @@ export default function PortalMentorado({ mentorado, mentor }: { mentorado: Ment
           </button>
         ))}
       </nav>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ABA MEU CADASTRO — mentorado completa/edita o cadastro (19 campos). Mentor vê.
+// ─────────────────────────────────────────────────────────────────────────────
+function AbaMeuCadastro({ mentorado }: { mentorado: Mentorado }) {
+  const [initial, setInitial] = useState<any | null>(null)
+  const [erro, setErro] = useState("")
+
+  useEffect(() => {
+    fetch(`/api/dashboard/mentorados/${mentorado.id}?t=${Date.now()}`)
+      .then(r => r.json())
+      .then(j => setInitial(j.mentorado || {}))
+      .catch(() => setErro("Não foi possível carregar seu cadastro."))
+  }, [mentorado.id])
+
+  const salvar = async (data: any) => {
+    const res = await fetch(`/api/dashboard/mentorados/${mentorado.id}`, {
+      method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data),
+    })
+    const json = await res.json()
+    if (!res.ok) throw new Error(json.error || "Erro ao salvar")
+  }
+
+  if (erro) return <p className="text-sm text-center py-10" style={{ color: C.red }}>{erro}</p>
+  if (!initial) return (
+    <div className="flex items-center justify-center py-16">
+      <Loader2 className="w-6 h-6 animate-spin" style={{ color: C.green }} />
+    </div>
+  )
+
+  return (
+    <div className="space-y-3">
+      <div className="rounded-xl px-4 py-3" style={{ background: `${C.blue}12`, border: `1px solid ${C.blue}33` }}>
+        <p className="text-sm font-semibold text-white">Complete seu cadastro</p>
+        <p className="text-[11px]" style={{ color: C.muted }}>Esses dados ajudam seu mentor a personalizar a mentoria. Você pode editar quando quiser.</p>
+      </div>
+      <FormCadastroMentorado mentoradoId={mentorado.id} initialData={initial} onSave={salvar} />
     </div>
   )
 }

@@ -21,10 +21,9 @@ import ConfiguracoesView from "@/components/ck/views/ConfiguracoesView"
 import SessaoModal from "@/components/ck/SessaoModal"
 import CallRoom from "@/components/ck/CallRoom"
 import AnalisarCallModal from "@/components/ck/AnalisarCallModal"
-import CadastroMentoradoModal from "@/components/ck/modals/CadastroMentoradoModal"
+import CadastroMentoradoModalFull from "@/components/ck/modals/CadastroMentoradoModalFull"
 import EditarMentoradoModal from "@/components/ck/modals/EditarMentoradoModal"
 import HistoricoModal from "@/components/ck/modals/HistoricoModal"
-import PerfilMentorModal from "@/components/ck/modals/PerfilMentorModal"
 
 // ── Helpers de domínio ────────────────────────────────────────────────────────
 function gerarBriefing(m: Mentorado, c: CheckinRow): BriefingIA {
@@ -79,19 +78,16 @@ export default function DashboardPage() {
   const [atualizando, setAtualizando] = useState(false)
   const [briefingLoading, setBriefingLoading] = useState(false)
   const [linkCopiado, setLinkCopiado] = useState(false)
-  const [salvando, setSalvando] = useState(false)
   const [editando, setEditando] = useState(false)
   const [salvandoPerfil, setSalvandoPerfil] = useState(false)
 
   // Formulários / modais
-  const [novo, setNovo] = useState({ nome: "", nicho: "", foco_macro: "", data_inicio: "" })
   const [editData, setEditData] = useState({ nome: "", nicho: "", foco_macro: "", status: "Ativo", cidade: "", data_fim: "", faturamento_atual: "", meta_faturamento: "", meta_atual: "" })
   const [perfilEdit, setPerfilEdit] = useState({ nome: "", nicho_foco: "", metodo_trabalho: "", filosofia: "" })
-  const [editandoPerfil, setEditandoPerfil] = useState(false)
+  const [configTab, setConfigTab] = useState<"geral" | "tema" | "empresa">("geral")
   const [showCadastro, setShowCadastro] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [showHistoricoModal, setShowHistoricoModal] = useState(false)
-  const [showPerfilModal, setShowPerfilModal] = useState(false)
   const [showMenuPerfil, setShowMenuPerfil] = useState(false)
   const [showSessaoModal, setShowSessaoModal] = useState(false)
   const [showCallRoom, setShowCallRoom] = useState(false)
@@ -198,7 +194,7 @@ export default function DashboardPage() {
       const res = await fetch(`/api/mentor/info?mentorId=${mentorId}`, {
         method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(perfilEdit),
       })
-      if (res.ok) { setEditandoPerfil(false); recarregarMentorados() }
+      if (res.ok) { recarregarMentorados() }
     } finally { setSalvandoPerfil(false) }
   }, [mentorId, perfilEdit])
 
@@ -269,25 +265,18 @@ export default function DashboardPage() {
     } finally { setBriefingLoading(false) }
   }, [checkin, selectedId, mentorId])
 
-  // ── CRUD MENTORADO ───────────────────────────────────────────────────────────
-  const cadastrarMentorado = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!mentorId || !novo.nome.trim()) return
-    setSalvando(true)
-    try {
-      const res = await fetch("/api/dashboard/mentorados", {
-        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...novo, mentorId }),
-      })
-      const json = await res.json()
-      if (res.ok) {
-        setShowCadastro(false)
-        setNovo({ nome: "", nicho: "", foco_macro: "", data_inicio: "" })
-        if (json.mentorado?.id) setSelectedId(json.mentorado.id)
-        recarregarMentorados()
-      }
-    } finally { setSalvando(false) }
-  }, [novo, mentorId, recarregarMentorados])
+  // Seed do perfil do mentor (uma vez) para a aba Config › Meu Perfil
+  useEffect(() => {
+    if (!mentorDados) return
+    setPerfilEdit(p => (p.nome || p.nicho_foco || p.metodo_trabalho || p.filosofia) ? p : {
+      nome: mentorDados.nome || "",
+      nicho_foco: mentorDados.nicho_foco || "",
+      metodo_trabalho: mentorDados.metodo_trabalho || "",
+      filosofia: mentorDados.filosofia || "",
+    })
+  }, [mentorDados])
 
+  // ── CRUD MENTORADO ───────────────────────────────────────────────────────────
   const editarMentorado = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
     if (!selectedId) return
@@ -367,10 +356,10 @@ export default function DashboardPage() {
           setShowMenu={setShowMenuPerfil}
           menuRef={menuPerfilRef}
           podeEditarMentorado={!!selected}
-          onMeuPerfil={() => { setShowPerfilModal(true); setShowMenuPerfil(false) }}
+          onMeuPerfil={() => { setConfigTab("geral"); setCkView("configuracoes"); setShowMenuPerfil(false) }}
           onEditarMentorado={() => { abrirEditarMentorado(); setShowMenuPerfil(false) }}
           onHistorico={() => { setShowHistoricoModal(true); setShowMenuPerfil(false) }}
-          onConfiguracoes={() => { setCkView("configuracoes"); setShowMenuPerfil(false) }}
+          onConfiguracoes={() => { setConfigTab("geral"); setCkView("configuracoes"); setShowMenuPerfil(false) }}
           onSair={logout}
         />
 
@@ -427,15 +416,19 @@ export default function DashboardPage() {
 
           {ckView === "configuracoes" && mentorId && (
             <ConfiguracoesView
+              key={`config-${configTab}`}
               mentorId={mentorId}
               accent={accent}
               isAdmin={isAdmin}
               mentorNome={mentorNome}
+              mentorDados={mentorDados}
               perfilEdit={perfilEdit}
               setPerfilEdit={setPerfilEdit}
               salvandoPerfil={salvandoPerfil}
               onSalvarPerfil={salvarPerfil}
+              onUploadFoto={uploadFoto}
               onAbrirMentorado={(id) => { setSelectedId(id); setCkView("mentorados") }}
+              initialTab={configTab}
             />
           )}
         </main>
@@ -462,9 +455,12 @@ export default function DashboardPage() {
           onClose={() => setShowAnalisarCall(false)} onTarefasCriadas={() => setActiveTab("pendencias")} />
       )}
 
-      {showCadastro && (
-        <CadastroMentoradoModal novo={novo} setNovo={setNovo} salvando={salvando}
-          onSubmit={cadastrarMentorado} onClose={() => setShowCadastro(false)} />
+      {showCadastro && mentorId && (
+        <CadastroMentoradoModalFull
+          mentorId={mentorId}
+          onClose={() => setShowCadastro(false)}
+          onCriado={(id) => { setShowCadastro(false); if (id) setSelectedId(id); recarregarMentorados() }}
+        />
       )}
 
       {showEditModal && selected && (
@@ -476,14 +472,6 @@ export default function DashboardPage() {
 
       {showHistoricoModal && selected && (
         <HistoricoModal selected={selected} historico={historico} onClose={() => setShowHistoricoModal(false)} />
-      )}
-
-      {showPerfilModal && (
-        <PerfilMentorModal
-          mentorDados={mentorDados} mentorNome={mentorNome} mentorId={mentorId}
-          editandoPerfil={editandoPerfil} setEditandoPerfil={setEditandoPerfil}
-          perfilEdit={perfilEdit} setPerfilEdit={setPerfilEdit} salvandoPerfil={salvandoPerfil}
-          onSalvar={salvarPerfil} onUploadFoto={uploadFoto} onClose={() => setShowPerfilModal(false)} />
       )}
     </div>
   )

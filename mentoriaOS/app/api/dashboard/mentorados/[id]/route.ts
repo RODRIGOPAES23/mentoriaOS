@@ -57,6 +57,18 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     if (body.meta_faturamento !== undefined) update.meta_faturamento = body.meta_faturamento ? Number(body.meta_faturamento) : null
     if (body.meta_atual !== undefined) update.meta_atual = body.meta_atual || null
 
+    // Campos expandidos do cadastro completo (v7) — persistidos no edit / "Meu Cadastro"
+    const camposExpandidos = [
+      "email", "cel", "contato_emergencia", "tempo_mercado", "formacao",
+      "tem_clinica", "experiencia_mentoria", "experiencia_trafego", "experiencia_agencia_mkt",
+      "expectativa_30_dias", "expectativa_90_dias", "expectativa_6_meses", "expectativa_12_meses",
+      "faturamento_medio_3m", "atua_trafego", "investimento_trafego_mensal", "tem_vendedora_time",
+      "instagram_handle",
+    ]
+    for (const k of camposExpandidos) {
+      if (body[k] !== undefined) update[k] = body[k] === "" ? null : body[k]
+    }
+
     const { data, error } = await supabase
       .from("mentorados")
       .update(update)

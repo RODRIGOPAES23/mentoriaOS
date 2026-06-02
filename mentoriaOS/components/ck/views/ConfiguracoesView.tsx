@@ -10,26 +10,36 @@ interface Props {
   accent: string
   isAdmin: boolean
   mentorNome: string
+  mentorDados: { foto_url?: string } | null
   perfilEdit: { nome: string; nicho_foco: string; metodo_trabalho: string; filosofia: string }
   setPerfilEdit: (fn: (p: any) => any) => void
   salvandoPerfil: boolean
   onSalvarPerfil: () => void
+  onUploadFoto: (file: File, type: "mentor" | "mentorado", id: string) => void
   onAbrirMentorado: (id: string) => void
+  initialTab?: Aba
 }
 
 type Aba = "geral" | "tema" | "empresa"
 
-/** Central de configurações com abas internas. Empresa (AdminView) vive aqui. */
+const inputCls = "w-full px-3.5 py-2.5 rounded-lg text-sm text-white focus:outline-none transition-all"
+
+/** Central única de configurações. Geral = perfil do mentor (ex-"Meu Perfil"). Empresa (AdminView) vive aqui. */
 export default function ConfiguracoesView({
-  mentorId, accent, isAdmin, mentorNome, perfilEdit, setPerfilEdit, salvandoPerfil, onSalvarPerfil, onAbrirMentorado,
+  mentorId, accent, isAdmin, mentorNome, mentorDados, perfilEdit, setPerfilEdit,
+  salvandoPerfil, onSalvarPerfil, onUploadFoto, onAbrirMentorado, initialTab = "geral",
 }: Props) {
-  const [aba, setAba] = useState<Aba>("geral")
+  const [aba, setAba] = useState<Aba>(initialTab)
 
   const abas = [
-    { id: "geral" as const, label: "Geral", icon: User, show: true },
+    { id: "geral" as const, label: "Meu Perfil", icon: User, show: true },
     { id: "tema" as const, label: "Tema", icon: Moon, show: true },
     { id: "empresa" as const, label: "Empresa", icon: Building2, show: isAdmin },
   ].filter(a => a.show)
+
+  const inputStyle = { background: C.input, border: `1px solid ${C.border}` }
+  const focus = (e: any) => (e.target.style.borderColor = accent)
+  const blur = (e: any) => (e.target.style.borderColor = C.border)
 
   return (
     <div className="p-6">
@@ -45,21 +55,44 @@ export default function ConfiguracoesView({
 
       {aba === "geral" && (
         <div className="max-w-lg rounded-2xl p-6 space-y-4" style={{ background: C.card, border: `1px solid ${C.border}` }}>
-          <h3 className="font-semibold text-white">Perfil do Mentor</h3>
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: C.muted }}>Nome</label>
-            <input value={perfilEdit.nome || mentorNome} onChange={e => setPerfilEdit(p => ({ ...p, nome: e.target.value }))}
-              className="w-full px-3.5 py-2.5 rounded-lg text-sm text-white focus:outline-none transition-all"
-              style={{ background: C.input, border: `1px solid ${C.border}` }}
-              onFocus={e => e.target.style.borderColor = accent} onBlur={e => e.target.style.borderColor = C.border} />
+          <div className="flex items-center gap-4">
+            <label className="cursor-pointer shrink-0">
+              <div className="w-16 h-16 rounded-2xl overflow-hidden ring-2 transition-all" style={{ borderColor: C.border }}>
+                {mentorDados?.foto_url
+                  ? <img src={mentorDados.foto_url} alt={mentorNome} className="w-full h-full object-cover" />
+                  : <div className="w-full h-full flex items-center justify-center text-xl font-bold text-white" style={{ background: C.input }}>{mentorNome.slice(0, 2).toUpperCase()}</div>}
+              </div>
+              <input type="file" accept="image/*" className="hidden" onChange={e => {
+                const file = e.target.files?.[0]
+                if (file) onUploadFoto(file, "mentor", mentorId)
+              }} />
+            </label>
+            <div>
+              <h3 className="font-semibold text-white">Perfil do Mentor</h3>
+              <p className="text-xs" style={{ color: C.muted }}>Clique na foto para trocar</p>
+            </div>
           </div>
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: C.muted }}>Nicho Foco</label>
-            <input value={perfilEdit.nicho_foco} onChange={e => setPerfilEdit(p => ({ ...p, nicho_foco: e.target.value }))}
-              className="w-full px-3.5 py-2.5 rounded-lg text-sm text-white focus:outline-none transition-all"
-              style={{ background: C.input, border: `1px solid ${C.border}` }}
-              onFocus={e => e.target.style.borderColor = accent} onBlur={e => e.target.style.borderColor = C.border} />
-          </div>
+
+          {[
+            { k: "nome", label: "Nome", ph: mentorNome, area: false },
+            { k: "nicho_foco", label: "Nicho Foco", ph: "Ex: Marketing e Tráfego", area: false },
+            { k: "metodo_trabalho", label: "Método de Trabalho", ph: "Ex: 4 pilares de conversão", area: true },
+            { k: "filosofia", label: "Filosofia de Mentoria", ph: "Ex: Resultado antes de escala", area: true },
+          ].map(f => (
+            <div key={f.k}>
+              <label className="block text-xs font-semibold uppercase tracking-wide mb-1.5" style={{ color: C.muted }}>{f.label}</label>
+              {f.area ? (
+                <textarea rows={3} value={(perfilEdit as any)[f.k]} placeholder={f.ph}
+                  onChange={e => setPerfilEdit(p => ({ ...p, [f.k]: e.target.value }))}
+                  className={inputCls + " resize-none leading-relaxed"} style={inputStyle} onFocus={focus} onBlur={blur} />
+              ) : (
+                <input value={f.k === "nome" ? (perfilEdit.nome || mentorNome) : (perfilEdit as any)[f.k]} placeholder={f.ph}
+                  onChange={e => setPerfilEdit(p => ({ ...p, [f.k]: e.target.value }))}
+                  className={inputCls} style={inputStyle} onFocus={focus} onBlur={blur} />
+              )}
+            </div>
+          ))}
+
           <button onClick={onSalvarPerfil} disabled={salvandoPerfil}
             className="w-full py-2.5 text-sm font-semibold rounded-xl disabled:opacity-50 transition-colors"
             style={{ background: accent, color: C.input }}>

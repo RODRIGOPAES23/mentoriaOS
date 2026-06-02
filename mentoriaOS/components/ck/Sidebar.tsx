@@ -1,9 +1,10 @@
 "use client"
 
-import { LayoutDashboard, Users, Calendar, Sparkles, LogOut, ChevronLeft, ChevronRight, DollarSign, Settings } from "lucide-react"
+import { LayoutDashboard, Users, Calendar, Sparkles, LogOut, ChevronLeft, ChevronRight, DollarSign } from "lucide-react"
 import { C } from "@/utils/theme"
 import PoweredBy from "./PoweredBy"
 
+// "configuracoes" continua válido como view, mas é acessado pelo menu do avatar (não fica na sidebar)
 export type CkView = "visao-geral" | "financeiro" | "mentorados" | "calendario" | "configuracoes"
 
 const ITENS: { id: CkView; label: string; icon: typeof LayoutDashboard; adminOnly?: boolean }[] = [
@@ -11,7 +12,6 @@ const ITENS: { id: CkView; label: string; icon: typeof LayoutDashboard; adminOnl
   { id: "financeiro", label: "Financeiro", icon: DollarSign },
   { id: "mentorados", label: "Mentorados", icon: Users },
   { id: "calendario", label: "Calendário", icon: Calendar },
-  { id: "configuracoes", label: "Configurações", icon: Settings },
 ]
 
 interface Props {
