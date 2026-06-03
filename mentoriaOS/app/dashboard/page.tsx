@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState, useCallback, useRef } from "react"
+import { createBrowserClient } from "@supabase/ssr"
 import type { CheckinRow } from "@/lib/supabase"
 import { getRealtimeClient } from "@/lib/supabase-realtime"
 import { useLocalStorage } from "@/hooks/useLocalStorage"
@@ -38,6 +39,11 @@ function gerarBriefing(m: Mentorado, c: CheckinRow): BriefingIA {
   }
 }
 
+const sbAuth = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
 const MODULE_LABELS: Record<CkView, string> = {
   "visao-geral": "Visão Geral",
   "financeiro": "Financeiro",
@@ -60,6 +66,7 @@ export default function DashboardPage() {
   const [briefing, setBriefing] = useState<BriefingIA | null>(null)
   const [mentorNome, setMentorNome] = useState<string>("CKlareza")
   const [mentorId, setMentorId] = useState<string | null>(null)
+  const [mentorLocked, setMentorLocked] = useState(false)
   const [mentorDados, setMentorDados] = useState<{ id?: string; nome: string; metodo_trabalho?: string; filosofia?: string; nicho_foco?: string; foto_url?: string } | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
 
@@ -96,11 +103,23 @@ export default function DashboardPage() {
   const accent = empresa.cor_primaria
   const menuPerfilRef = useRef<HTMLDivElement>(null)
 
-  // ── INIT ────────────────────────────────────────────────────────────────────
+  // ── INIT (auth) ──────────────────────────────────────────────────────────────
   useEffect(() => {
-    const mentorSel = localStorage.getItem("mentorSelecionado")
-    if (!mentorSel) { if (typeof window !== "undefined") window.location.href = "/"; return }
-    setMentorId(mentorSel)
+    fetch("/api/me").then(r => r.json()).then(me => {
+      if (!me.authenticated) { window.location.href = "/login?next=/dashboard"; return }
+      if (me.role === "mentor") {
+        // Mentor: travado no PRÓPRIO registro (não escolhe outros)
+        setMentorId(me.mentorId); setMentorLocked(true); return
+      }
+      if (me.role === "super_admin") {
+        // Super-admin: pode escolher qualquer mentor (seletor da home)
+        const sel = localStorage.getItem("mentorSelecionado")
+        if (!sel) { window.location.href = "/"; return }
+        setMentorId(sel); return
+      }
+      // Logado mas sem papel
+      window.location.href = "/login?error=sem_acesso"
+    }).catch(() => { window.location.href = "/login?next=/dashboard" })
   }, [])
 
   useEffect(() => {
@@ -299,7 +318,17 @@ export default function DashboardPage() {
   const filtered = [...base].sort((a, b) => (scoreMap[b.id] || 0) - (scoreMap[a.id] || 0))
   const selected = mentorados.find(m => m.id === selectedId)
 
-  const logout = () => { localStorage.removeItem("mentorSelecionado"); window.location.href = "/" }
+  const sair = async () => {
+    try { await sbAuth.auth.signOut() } catch {}
+    localStorage.removeItem("mentorSelecionado")
+    window.location.href = "/login"
+  }
+  // "Trocar mentor": super-admin volta ao seletor; mentor (travado) só pode sair
+  const logout = () => {
+    if (mentorLocked) { sair(); return }
+    localStorage.removeItem("mentorSelecionado")
+    window.location.href = "/"
+  }
 
   // ── RENDER ───────────────────────────────────────────────────────────────────
   return (
@@ -316,6 +345,7 @@ export default function DashboardPage() {
         esconderMarca={empresa.esconder_marca}
         isAdmin={isAdmin}
         onLogout={logout}
+        logoutLabel={mentorLocked ? "Sair" : "Trocar mentor"}
       />
 
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -332,7 +362,7 @@ export default function DashboardPage() {
           onVencidas={() => setCkView("atividades")}
           onCobrancasVencidas={() => setCkView("financeiro")}
           onConfiguracoes={() => { setConfigTab("geral"); setCkView("configuracoes"); setShowMenuPerfil(false) }}
-          onSair={logout}
+          onSair={sair}
         />
 
         <main className="flex-1 overflow-y-auto">

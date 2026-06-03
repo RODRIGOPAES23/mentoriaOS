@@ -37,6 +37,7 @@ export default function HomePage() {
   }, [empresaLoading, empresa.slug])
   const [mentores, setMentores] = useState<Mentor[]>([])
   const [carregando, setCarregando] = useState(true)
+  const [podeEscolher, setPodeEscolher] = useState(false)  // só super-admin vê o seletor
   const [showSetup, setShowSetup] = useState(false)
   const [form, setForm] = useState({ nome: "", email: "", nicho: "", metodo: "", filosofia: "" })
   const [salvando, setSalvando] = useState(false)
@@ -47,6 +48,16 @@ export default function HomePage() {
     fetch(`/api/mentors/list${qs}`, { cache: "no-store" })
       .then(r => r.json()).then(j => setMentores(j.mentores || []))
       .catch(() => {}).finally(() => setCarregando(false))
+  }, [])
+
+  // Gate de auth: só super-admin escolhe mentor; mentor vai direto; sem login → /login
+  useEffect(() => {
+    fetch("/api/me").then(r => r.json()).then(me => {
+      if (!me.authenticated) { window.location.href = "/login"; return }
+      if (me.role === "mentor") { window.location.href = "/dashboard"; return }
+      if (me.role === "super_admin") { setPodeEscolher(true); return }
+      window.location.href = "/login?error=sem_acesso"
+    }).catch(() => { window.location.href = "/login" })
   }, [])
 
   const selecionarMentor = (id: string) => {
@@ -80,7 +91,7 @@ export default function HomePage() {
     <SplashEmpresa nome={marca} logoUrl={empresa.logo_url} accent={accent} onFinish={() => setShowSplash(false)} />
   ) : null
 
-  if (carregando) return (
+  if (carregando || !podeEscolher) return (
     <>
       {splash}
       <div style={{ background: C.bg }} className="min-h-screen flex items-center justify-center">

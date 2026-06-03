@@ -19,6 +19,7 @@ interface Props {
   active: CkView
   onChange: (v: CkView) => void
   onLogout?: () => void
+  logoutLabel?: string
   collapsed?: boolean
   onToggle?: () => void
   marca?: string          // nome da empresa (white label)
@@ -28,7 +29,7 @@ interface Props {
   isAdmin?: boolean       // mostra aba Empresa só para admin
 }
 
-export default function Sidebar({ active, onChange, onLogout, collapsed = false, onToggle, marca = "CKlareza", accent = C.green, logoUrl = null, esconderMarca = false, isAdmin = false }: Props) {
+export default function Sidebar({ active, onChange, onLogout, logoutLabel = "Trocar mentor", collapsed = false, onToggle, marca = "CKlareza", accent = C.green, logoUrl = null, esconderMarca = false, isAdmin = false }: Props) {
   const itens = ITENS.filter(i => !i.adminOnly || isAdmin)
   return (
     <aside
@@ -89,14 +90,14 @@ export default function Sidebar({ active, onChange, onLogout, collapsed = false,
       <div className={`pb-4 pt-3 ${collapsed ? "px-2" : "px-3"}`} style={{ borderTop: `1px solid ${C.border}` }}>
         <button
           onClick={onLogout}
-          title={collapsed ? "Trocar mentor" : undefined}
+          title={collapsed ? logoutLabel : undefined}
           className={`w-full flex items-center transition-all rounded-xl ${collapsed ? "justify-center p-2.5" : "gap-3 px-3.5 py-2.5"}`}
           style={{ color: C.muted }}
           onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = C.card2; (e.currentTarget as HTMLElement).style.color = "#fff" }}
           onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = C.muted }}
         >
           <LogOut className="w-[18px] h-[18px] shrink-0" />
-          {!collapsed && <span className="text-sm font-semibold">Trocar mentor</span>}
+          {!collapsed && <span className="text-sm font-semibold">{logoutLabel}</span>}
         </button>
         {!collapsed && <div className="mt-3"><PoweredBy size="xs" /></div>}
       </div>
