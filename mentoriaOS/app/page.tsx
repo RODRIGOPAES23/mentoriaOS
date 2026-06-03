@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import {
   Sparkles, LayoutDashboard, DollarSign, KanbanSquare, Brain,
   Building2, ArrowRight, Check, Phone, ShieldCheck, Star, Globe, Heart,
@@ -223,8 +224,9 @@ export default function LandingPage() {
 
         <div className="relative max-w-3xl mx-auto px-5 pb-4">
           <div className="rounded-2xl p-1.5 overflow-hidden" style={{ background: CARD, border: `1px solid ${GOLD}33`, boxShadow: `0 30px 90px -20px ${GOLD}40` }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.jpg" alt="CKlareza — Lifetime Value" className="w-full rounded-xl block" />
+            <Image src="/logo.jpg" alt="CKlareza — plataforma de mentoria white-label, Lifetime Value"
+              width={1200} height={655} priority sizes="(max-width: 768px) 100vw, 768px"
+              className="w-full h-auto rounded-xl block" />
           </div>
         </div>
       </section>
