@@ -47,6 +47,13 @@ const T: Record<Lang, any> = {
     propText: "Não vendemos software — damos ao mentor o tempo e a clareza para fazer o que importa: transformar a vida de quem confia nele. Cada recurso aqui existe para isso.",
     ctaT: "Pronto para elevar sua mentoria?", ctaS: "Entre agora e veja sua operação organizada em minutos.", ctaBtn: "Acessar o sistema",
     foot: "Entrar →",
+    faqT: "Perguntas frequentes",
+    faq: [
+      ["O que é o CKlareza?", "É uma plataforma de mentoria white-label: você organiza o financeiro, as atividades e as calls dos seus mentorados num só lugar, com a sua marca e uma inteligência que mostra quem precisa de atenção agora."],
+      ["O CKlareza é white-label?", "Sim. Você usa o seu logo, as suas cores e o seu domínio próprio. Seus clientes veem a sua empresa — o motor é o CKlareza."],
+      ["Para quem é o CKlareza?", "Para mentores e empresas de mentoria que querem profissionalizar o acompanhamento e aumentar a retenção (Lifetime Value) dos mentorados."],
+      ["Preciso instalar algo?", "Não. É 100% web, sem instalação. Você acessa pelo navegador e pode testar sem cartão."],
+    ],
   },
   en: {
     nav: ["Features", "White-label", "Purpose", "Plans"], entrar: "Sign in",
@@ -74,6 +81,13 @@ const T: Record<Lang, any> = {
     propText: "We don't sell software — we give mentors the time and clarity to do what matters: transform the life of those who trust them. Every feature here exists for that.",
     ctaT: "Ready to elevate your mentorship?", ctaS: "Sign in now and see your operation organized in minutes.", ctaBtn: "Access the system",
     foot: "Sign in →",
+    faqT: "Frequently asked questions",
+    faq: [
+      ["What is CKlareza?", "A white-label mentorship platform: organize your mentees' finances, tasks and calls in one place, under your brand, with intelligence that shows who needs attention now."],
+      ["Is CKlareza white-label?", "Yes. Use your own logo, colors and domain. Your clients see your company — the engine is CKlareza."],
+      ["Who is CKlareza for?", "For mentors and mentorship companies that want to professionalize follow-up and increase mentee retention (Lifetime Value)."],
+      ["Do I need to install anything?", "No. It's 100% web, no install. Access it from the browser and try it without a card."],
+    ],
   },
   es: {
     nav: ["Recursos", "White-label", "Propósito", "Planes"], entrar: "Entrar",
@@ -101,6 +115,13 @@ const T: Record<Lang, any> = {
     propText: "No vendemos software — le damos al mentor el tiempo y la claridad para hacer lo que importa: transformar la vida de quien confía en él.",
     ctaT: "¿Listo para elevar tu mentoría?", ctaS: "Entra ahora y ve tu operación organizada en minutos.", ctaBtn: "Acceder al sistema",
     foot: "Entrar →",
+    faqT: "Preguntas frecuentes",
+    faq: [
+      ["¿Qué es CKlareza?", "Una plataforma de mentoría white-label: organiza las finanzas, tareas y calls de tus mentoreados en un solo lugar, con tu marca e inteligencia que muestra quién necesita atención ahora."],
+      ["¿CKlareza es white-label?", "Sí. Usa tu logo, tus colores y tu dominio propio. Tus clientes ven tu empresa — el motor es CKlareza."],
+      ["¿Para quién es CKlareza?", "Para mentores y empresas de mentoría que quieren profesionalizar el seguimiento y aumentar la retención (Lifetime Value)."],
+      ["¿Necesito instalar algo?", "No. Es 100% web, sin instalación. Accede desde el navegador y pruébalo sin tarjeta."],
+    ],
   },
 }
 
@@ -259,6 +280,25 @@ export default function LandingPage() {
             <p className="mt-2 text-sm" style={{ color: MUTED }}>{t.wlCardD}</p>
           </div>
         </div>
+      </section>
+
+      {/* FAQ (AI Overviews / featured snippets) */}
+      <section id="faq" className="max-w-3xl mx-auto px-5 py-16">
+        <h2 className="text-2xl md:text-3xl font-bold text-center mb-8">{t.faqT}</h2>
+        <div className="space-y-3">
+          {t.faq.map((qa: string[], i: number) => (
+            <details key={i} className="rounded-xl p-5" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+              <summary className="font-semibold cursor-pointer list-none flex items-center justify-between gap-3">
+                {qa[0]}<span className="text-xl shrink-0" style={{ color: GOLD }}>+</span>
+              </summary>
+              <p className="mt-3 text-sm leading-relaxed" style={{ color: MUTED }}>{qa[1]}</p>
+            </details>
+          ))}
+        </div>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          "@context": "https://schema.org", "@type": "FAQPage",
+          mainEntity: t.faq.map((qa: string[]) => ({ "@type": "Question", name: qa[0], acceptedAnswer: { "@type": "Answer", text: qa[1] } })),
+        }) }} />
       </section>
 
       {/* CTA */}
