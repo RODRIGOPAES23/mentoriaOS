@@ -1,12 +1,12 @@
 import { adminClient } from "@/lib/supabase-server"
-import { checkAdminKey, adminUnauthorized } from "@/lib/admin-auth"
+import { isAdminAuthorized, adminUnauthorized } from "@/lib/admin-auth"
 
 export const dynamic = "force-dynamic"
 const NO_CACHE = { "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0" }
 
 // GET → empresa + seus mentores (com contagem de mentorados)
 export async function GET(req: Request, { params }: { params: { id: string } }) {
-  if (!checkAdminKey(req)) return adminUnauthorized()
+  if (!(await isAdminAuthorized(req))) return adminUnauthorized()
   const sb = adminClient()
   const { data: empresa, error } = await sb.from("empresas").select("*").eq("id", params.id).single()
   if (error || !empresa) return Response.json({ error: "Empresa não encontrada" }, { status: 404, headers: NO_CACHE })
@@ -25,7 +25,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 
 // PATCH → edita campos da empresa (marca, cor, domínio, ativo)
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
-  if (!checkAdminKey(req)) return adminUnauthorized()
+  if (!(await isAdminAuthorized(req))) return adminUnauthorized()
   let body: any
   try { body = await req.json() } catch { return Response.json({ error: "Body inválido" }, { status: 400 }) }
   const sb = adminClient()

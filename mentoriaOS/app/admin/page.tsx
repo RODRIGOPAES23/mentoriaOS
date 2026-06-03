@@ -1,13 +1,17 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
+import { createBrowserClient } from "@supabase/ssr"
 import {
-  Building2, Users, GraduationCap, ShieldCheck, Plus, X, Lock, Loader2,
-  Power, PenLine, ChevronRight, Globe, Brain, AlertTriangle, Sparkles, CheckCircle2,
+  Building2, Users, GraduationCap, ShieldCheck, Plus, X, Loader2,
+  Power, PenLine, ChevronRight, Globe, Brain, AlertTriangle, Sparkles, CheckCircle2, LogIn,
 } from "lucide-react"
 import { C } from "@/utils/theme"
 
-const KEY_STORE = "ck_admin_key"
+const supabase = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 interface Empresa {
   id: string; nome: string; slug: string; ativo: boolean
@@ -17,72 +21,67 @@ interface Empresa {
 }
 
 export default function SuperAdminPage() {
-  const [adminKey, setAdminKey] = useState<string>("")
-  const [keyInput, setKeyInput] = useState("")
-  const [autorizado, setAutorizado] = useState(false)
+  const [estado, setEstado] = useState<"checando" | "deslogado" | "semacesso" | "ok">("checando")
+  const [userEmail, setUserEmail] = useState("")
   const [loading, setLoading] = useState(false)
-  const [erro, setErro] = useState("")
   const [kpis, setKpis] = useState<any>(null)
   const [empresas, setEmpresas] = useState<Empresa[]>([])
   const [gratidao, setGratidao] = useState<any>(null)
   const [showNova, setShowNova] = useState(false)
   const [detalhe, setDetalhe] = useState<Empresa | null>(null)
 
-  const api = useCallback(async (path: string, opts: RequestInit = {}, key?: string) => {
-    const res = await fetch(path, {
-      ...opts,
-      headers: { "Content-Type": "application/json", "x-admin-key": key || adminKey, ...(opts.headers || {}) },
-    })
-    return res
-  }, [adminKey])
+  const api = useCallback(async (path: string, opts: RequestInit = {}) => {
+    return fetch(path, { ...opts, headers: { "Content-Type": "application/json", ...(opts.headers || {}) } })
+  }, [])
 
-  const carregar = useCallback(async (key: string) => {
-    setLoading(true); setErro("")
+  const carregar = useCallback(async () => {
+    setLoading(true)
     try {
-      const res = await api("/api/admin/overview", {}, key)
-      if (res.status === 401) { setErro("Chave inválida."); setAutorizado(false); return }
+      const res = await api("/api/admin/overview")
+      if (res.status === 401) { setEstado("semacesso"); return }
       const j = await res.json()
-      setKpis(j.kpis); setEmpresas(j.empresas || [])
-      setAutorizado(true); setAdminKey(key)
-      sessionStorage.setItem(KEY_STORE, key)
-      api("/api/admin/gratidao", {}, key).then(r => r.ok ? r.json() : null).then(g => g && setGratidao(g)).catch(() => {})
-    } catch { setErro("Erro ao carregar.") }
-    finally { setLoading(false) }
+      setKpis(j.kpis); setEmpresas(j.empresas || []); setEstado("ok")
+      api("/api/admin/gratidao").then(r => r.ok ? r.json() : null).then(g => g && setGratidao(g)).catch(() => {})
+    } finally { setLoading(false) }
   }, [api])
 
   useEffect(() => {
-    const saved = sessionStorage.getItem(KEY_STORE)
-    if (saved) carregar(saved)
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) { setEstado("deslogado"); return }
+      setUserEmail(user.email || "")
+      carregar()
+    })
   }, [carregar])
 
-  // ─── GATE ───
-  if (!autorizado) {
+  const irLogin = () => { window.location.href = "/login?next=/admin" }
+  const sair = async () => { await supabase.auth.signOut(); window.location.href = "/login" }
+
+  // ─── GATES ───
+  if (estado === "checando") {
+    return <div className="min-h-screen flex items-center justify-center" style={{ background: C.bg }}><Loader2 className="w-7 h-7 animate-spin" style={{ color: C.gold }} /></div>
+  }
+  if (estado === "deslogado" || estado === "semacesso") {
     return (
       <div className="min-h-screen flex items-center justify-center p-4" style={{ background: C.bg }}>
-        <div className="w-full max-w-sm rounded-2xl p-8" style={{ background: C.card, border: `1px solid ${C.border}` }}>
-          <div className="flex flex-col items-center text-center mb-6">
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-3" style={{ background: `${C.gold}18`, border: `1px solid ${C.gold}44` }}>
-              <ShieldCheck className="w-6 h-6" style={{ color: C.gold }} />
-            </div>
-            <h1 className="text-lg font-bold text-white">CKlareza · Super-Admin</h1>
-            <p className="text-xs mt-1" style={{ color: C.muted }}>Central de gestão white-label</p>
+        <div className="w-full max-w-sm rounded-2xl p-8 text-center" style={{ background: C.card, border: `1px solid ${C.border}` }}>
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-3 mx-auto" style={{ background: `${C.gold}18`, border: `1px solid ${C.gold}44` }}>
+            <ShieldCheck className="w-6 h-6" style={{ color: C.gold }} />
           </div>
-          <form onSubmit={e => { e.preventDefault(); carregar(keyInput) }} className="space-y-3">
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: C.muted }} />
-              <input type="password" autoFocus value={keyInput} onChange={e => setKeyInput(e.target.value)}
-                placeholder="Chave de administrador"
-                className="w-full pl-9 pr-3 py-2.5 rounded-lg text-sm text-white focus:outline-none"
-                style={{ background: C.input, border: `1px solid ${C.border}` }} />
-            </div>
-            {erro && <p className="text-xs" style={{ color: C.red }}>{erro}</p>}
-            <button type="submit" disabled={loading}
-              className="w-full py-2.5 rounded-lg text-sm font-bold disabled:opacity-50"
-              style={{ background: C.gold, color: "#1a1407" }}>
-              {loading ? "Verificando..." : "Entrar"}
-            </button>
-          </form>
-          <p className="text-[10px] text-center mt-4" style={{ color: C.muted }}>Acesso temporário por chave · será migrado p/ login Google/e-mail</p>
+          <h1 className="text-lg font-bold text-white">CKlareza · Super-Admin</h1>
+          {estado === "deslogado" ? (
+            <>
+              <p className="text-xs mt-1 mb-5" style={{ color: C.muted }}>Faça login para acessar a central.</p>
+              <button onClick={irLogin} className="w-full py-2.5 rounded-lg text-sm font-bold flex items-center justify-center gap-2" style={{ background: C.gold, color: "#1a1407" }}>
+                <LogIn className="w-4 h-4" /> Entrar
+              </button>
+            </>
+          ) : (
+            <>
+              <p className="text-xs mt-1 mb-1" style={{ color: C.muted }}>Logado como <b className="text-white">{userEmail}</b></p>
+              <p className="text-xs mb-5" style={{ color: C.red }}>Esta conta não tem acesso de super-admin.</p>
+              <button onClick={sair} className="w-full py-2.5 rounded-lg text-sm font-bold" style={{ background: C.card2, color: C.muted, border: `1px solid ${C.border}` }}>Trocar conta</button>
+            </>
+          )}
         </div>
       </div>
     )
@@ -98,7 +97,7 @@ export default function SuperAdminPage() {
 
   const toggleAtivo = async (e: Empresa) => {
     await api(`/api/admin/empresas/${e.id}`, { method: "PATCH", body: JSON.stringify({ ativo: !e.ativo }) })
-    carregar(adminKey)
+    carregar()
   }
 
   return (
@@ -115,7 +114,7 @@ export default function SuperAdminPage() {
             style={{ background: C.gold, color: "#1a1407" }}>
             <Plus className="w-4 h-4" /> Nova empresa
           </button>
-          <button onClick={() => { sessionStorage.removeItem(KEY_STORE); setAutorizado(false); setAdminKey("") }}
+          <button onClick={sair}
             className="text-sm" style={{ color: C.muted }}>Sair</button>
         </div>
       </header>
@@ -243,8 +242,8 @@ export default function SuperAdminPage() {
         </div>
       </main>
 
-      {showNova && <NovaEmpresaModal api={api} onClose={() => setShowNova(false)} onCriada={() => { setShowNova(false); carregar(adminKey) }} />}
-      {detalhe && <DetalheEmpresaModal api={api} empresa={detalhe} onClose={() => setDetalhe(null)} onSalvo={() => { setDetalhe(null); carregar(adminKey) }} />}
+      {showNova && <NovaEmpresaModal api={api} onClose={() => setShowNova(false)} onCriada={() => { setShowNova(false); carregar() }} />}
+      {detalhe && <DetalheEmpresaModal api={api} empresa={detalhe} onClose={() => setDetalhe(null)} onSalvo={() => { setDetalhe(null); carregar() }} />}
     </div>
   )
 }

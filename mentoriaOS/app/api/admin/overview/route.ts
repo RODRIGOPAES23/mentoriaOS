@@ -1,12 +1,12 @@
 import { adminClient } from "@/lib/supabase-server"
-import { checkAdminKey, adminUnauthorized } from "@/lib/admin-auth"
+import { isAdminAuthorized, adminUnauthorized } from "@/lib/admin-auth"
 
 export const dynamic = "force-dynamic"
 const NO_CACHE = { "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0" }
 
 // GET /api/admin/overview → KPIs globais + empresas com contagens (super-admin)
 export async function GET(req: Request) {
-  if (!checkAdminKey(req)) return adminUnauthorized()
+  if (!(await isAdminAuthorized(req))) return adminUnauthorized()
   const sb = adminClient()
 
   const [{ data: empresas }, { data: mentors }, { data: mentorados }] = await Promise.all([

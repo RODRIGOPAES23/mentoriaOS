@@ -1,5 +1,5 @@
 import { adminClient } from "@/lib/supabase-server"
-import { checkAdminKey, adminUnauthorized } from "@/lib/admin-auth"
+import { isAdminAuthorized, adminUnauthorized } from "@/lib/admin-auth"
 
 export const dynamic = "force-dynamic"
 const NO_CACHE = { "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0" }
@@ -11,7 +11,7 @@ function slugify(s: string) {
 
 // POST /api/admin/empresas → cria nova empresa (cliente white-label)
 export async function POST(req: Request) {
-  if (!checkAdminKey(req)) return adminUnauthorized()
+  if (!(await isAdminAuthorized(req))) return adminUnauthorized()
   let body: any
   try { body = await req.json() } catch { return Response.json({ error: "Body inválido" }, { status: 400 }) }
 
