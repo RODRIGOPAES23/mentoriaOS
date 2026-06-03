@@ -114,7 +114,7 @@ export default function DashboardPage() {
       if (me.role === "super_admin") {
         // Super-admin: pode escolher qualquer mentor (seletor da home)
         const sel = localStorage.getItem("mentorSelecionado")
-        if (!sel) { window.location.href = "/"; return }
+        if (!sel) { window.location.href = "/selecionar"; return }
         setMentorId(sel); return
       }
       // Logado mas sem papel
@@ -327,7 +327,7 @@ export default function DashboardPage() {
   const logout = () => {
     if (mentorLocked) { sair(); return }
     localStorage.removeItem("mentorSelecionado")
-    window.location.href = "/"
+    window.location.href = "/selecionar"
   }
 
   // ── RENDER ───────────────────────────────────────────────────────────────────
