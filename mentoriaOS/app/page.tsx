@@ -200,16 +200,10 @@ export default function LandingPage() {
           </div>
         </div>
 
-        <div className="relative max-w-4xl mx-auto px-5 pb-4">
-          <div className="rounded-2xl p-2" style={{ background: CARD, border: `1px solid ${BORDER}`, boxShadow: `0 30px 80px -20px ${TEAL}33` }}>
-            <div className="rounded-xl p-5 grid grid-cols-2 md:grid-cols-4 gap-3" style={{ background: BG }}>
-              {[{ v: "R$ 12.4k", c: "#22c55e" }, { v: "8", c: "#4c9aff" }, { v: "3", c: "#ff5470" }, { v: "24", c: GOLD }].map((k, i) => (
-                <div key={i} className="rounded-lg p-4" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
-                  <p className="text-2xl font-bold" style={{ color: k.c }}>{k.v}</p>
-                  <p className="text-[11px] mt-1" style={{ color: MUTED }}>{t.mock[i]}</p>
-                </div>
-              ))}
-            </div>
+        <div className="relative max-w-3xl mx-auto px-5 pb-4">
+          <div className="rounded-2xl p-1.5 overflow-hidden" style={{ background: CARD, border: `1px solid ${GOLD}33`, boxShadow: `0 30px 90px -20px ${GOLD}40` }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.jpg" alt="CKlareza — Lifetime Value" className="w-full rounded-xl block" />
           </div>
         </div>
       </section>
