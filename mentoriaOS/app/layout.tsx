@@ -59,6 +59,14 @@ const JSONLD = {
       logo: `${SITE}/logo.jpg`,
       slogan: "Lifetime Value",
       description: DESC,
+      email: "contactus@cklareza.com",
+      contactPoint: {
+        "@type": "ContactPoint",
+        contactType: "sales",
+        email: "contactus@cklareza.com",
+        telephone: "+5548974001405",
+        availableLanguage: ["Portuguese", "English", "Spanish"],
+      },
     },
     {
       "@type": "WebSite",

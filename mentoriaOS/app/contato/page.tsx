@@ -9,7 +9,9 @@ export const metadata: Metadata = {
   alternates: { canonical: "/contato" },
 }
 
-const EMAIL = "contato@cklareza.com"
+const EMAIL = "contactus@cklareza.com"
+const WHATS = "5548974001405"
+const WHATS_LABEL = "+55 48 97400-1405"
 
 export default function Contato() {
   return (
@@ -34,10 +36,10 @@ export default function Contato() {
           <p className="font-bold">Agende uma demo</p>
           <p className="text-sm mt-1" style={{ color: SC.muted }}>30 min, sob medida</p>
         </a>
-        <a href="#" className="rounded-2xl p-7 text-center transition-all hover:-translate-y-1" style={{ background: SC.card, border: `1px solid ${SC.border}` }}>
+        <a href={`https://wa.me/${WHATS}?text=Ol%C3%A1!%20Quero%20conhecer%20a%20CKlareza.`} target="_blank" rel="noopener noreferrer" className="rounded-2xl p-7 text-center transition-all hover:-translate-y-1" style={{ background: SC.card, border: `1px solid ${SC.border}` }}>
           <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3" style={{ background: "#22c55e18", border: "1px solid #22c55e33" }}><MessageCircle className="w-6 h-6" style={{ color: "#22c55e" }} /></div>
           <p className="font-bold">WhatsApp</p>
-          <p className="text-sm mt-1" style={{ color: SC.muted }}>em breve</p>
+          <p className="text-sm mt-1" style={{ color: SC.muted }}>{WHATS_LABEL}</p>
         </a>
       </section>
 
