@@ -166,10 +166,11 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
           <Logo />
           <nav className="hidden md:flex items-center gap-7 text-sm" style={{ color: MUTED }}>
-            <a href="#recursos" className="hover:text-white transition-colors">{t.nav[0]}</a>
-            <a href="#whitelabel" className="hover:text-white transition-colors">{t.nav[1]}</a>
-            <a href="#proposito" className="hover:text-white transition-colors">{t.nav[2]}</a>
-            <a href="#planos" className="hover:text-white transition-colors">{t.nav[3]}</a>
+            <Link href="/recursos" className="hover:text-white transition-colors">{t.nav[0]}</Link>
+            <Link href="/precos" className="hover:text-white transition-colors">{t.nav[3]}</Link>
+            <Link href="/sobre" className="hover:text-white transition-colors">{t.nav[2]}</Link>
+            <Link href="/blog" className="hover:text-white transition-colors">Blog</Link>
+            <Link href="/contato" className="hover:text-white transition-colors">Contato</Link>
           </nav>
           <div className="flex items-center gap-3">
             {/* Seletor de idioma */}
