@@ -60,6 +60,7 @@ const JSONLD = {
       slogan: "Lifetime Value",
       description: DESC,
       email: "contactus@cklareza.com",
+      sameAs: ["https://www.linkedin.com/in/cklareza-lifetime-value"],
       contactPoint: {
         "@type": "ContactPoint",
         contactType: "sales",

@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { Mail, MessageCircle, Calendar, ArrowRight } from "lucide-react"
+import { Mail, MessageCircle, Calendar, ArrowRight, Linkedin } from "lucide-react"
 import { SiteHeader, SiteFooter, SC } from "@/components/site/SiteChrome"
 
 export const metadata: Metadata = {
@@ -25,7 +25,7 @@ export default function Contato() {
         </p>
       </section>
 
-      <section className="max-w-4xl mx-auto px-5 pb-12 grid md:grid-cols-3 gap-5">
+      <section className="max-w-5xl mx-auto px-5 pb-12 grid grid-cols-2 md:grid-cols-4 gap-5">
         <a href={`mailto:${EMAIL}?subject=Quero%20conhecer%20a%20CKlareza`} className="rounded-2xl p-7 text-center transition-all hover:-translate-y-1" style={{ background: SC.card, border: `1px solid ${SC.border}` }}>
           <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3" style={{ background: `${SC.gold}18`, border: `1px solid ${SC.gold}33` }}><Mail className="w-6 h-6" style={{ color: SC.gold }} /></div>
           <p className="font-bold">E-mail</p>
@@ -40,6 +40,11 @@ export default function Contato() {
           <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3" style={{ background: "#22c55e18", border: "1px solid #22c55e33" }}><MessageCircle className="w-6 h-6" style={{ color: "#22c55e" }} /></div>
           <p className="font-bold">WhatsApp</p>
           <p className="text-sm mt-1" style={{ color: SC.muted }}>{WHATS_LABEL}</p>
+        </a>
+        <a href="https://www.linkedin.com/in/cklareza-lifetime-value" target="_blank" rel="noopener noreferrer" className="rounded-2xl p-7 text-center transition-all hover:-translate-y-1" style={{ background: SC.card, border: `1px solid ${SC.border}` }}>
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3" style={{ background: "#0a66c218", border: "1px solid #0a66c244" }}><Linkedin className="w-6 h-6" style={{ color: "#4c9aff" }} /></div>
+          <p className="font-bold">LinkedIn</p>
+          <p className="text-sm mt-1" style={{ color: SC.muted }}>/cklareza</p>
         </a>
       </section>
 

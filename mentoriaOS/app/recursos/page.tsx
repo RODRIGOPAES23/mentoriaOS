@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
+import Image from "next/image"
 import { LayoutDashboard, DollarSign, KanbanSquare, Brain, Phone, Building2, ArrowRight, Check } from "lucide-react"
 import { SiteHeader, SiteFooter, SC } from "@/components/site/SiteChrome"
 
@@ -37,6 +38,26 @@ export default function Recursos() {
             <p className="mt-2 leading-relaxed" style={{ color: SC.muted }}>{f.d}</p>
           </div>
         ))}
+      </section>
+
+      {/* Por dentro do produto (telas reais) */}
+      <section className="max-w-5xl mx-auto px-5 pb-16">
+        <div className="text-center mb-10">
+          <h2 className="text-3xl md:text-4xl font-bold">Por dentro do produto</h2>
+          <p className="text-lg mt-2" style={{ color: SC.muted }}>Telas reais da plataforma — sem mockup.</p>
+        </div>
+        <div className="space-y-8">
+          {[
+            ["produto-dashboard", "Dashboard de operação: pendências, calls, progresso e renovações numa tela."],
+            ["produto-atividades", "Atividades em Kanban: a fazer, atrasadas e concluídas — de todos os mentorados."],
+            ["produto-financeiro", "Financeiro: cobranças, inadimplência e projeção, com cada pagamento editável."],
+          ].map(([img, cap]) => (
+            <figure key={img} className="rounded-2xl p-1.5 overflow-hidden" style={{ background: SC.card, border: `1px solid ${SC.border}`, boxShadow: `0 24px 70px -28px ${SC.teal}40` }}>
+              <Image src={`/${img}.jpg`} alt={cap} width={1440} height={880} sizes="(max-width: 1024px) 100vw, 1024px" className="w-full h-auto rounded-xl block" />
+              <figcaption className="text-center text-sm py-3 px-4" style={{ color: SC.muted }}>{cap}</figcaption>
+            </figure>
+          ))}
+        </div>
       </section>
 
       {/* Caso real */}

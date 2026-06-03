@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Sparkles, ArrowRight } from "lucide-react"
+import { Sparkles, ArrowRight, Linkedin } from "lucide-react"
 
 export const SC = {
   bg: "#0a1420", card: "#0f2030", card2: "#112a4a", border: "#1e3450",
@@ -46,6 +46,9 @@ export function SiteFooter() {
             <span className="font-bold" style={{ background: `linear-gradient(180deg, ${SC.goldL}, ${SC.gold})`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>CKlareza</span>
           </div>
           <p className="text-xs mt-3" style={{ color: SC.muted }}>Plataforma de mentoria white-label. Transformar vidas com clareza.</p>
+          <a href="https://www.linkedin.com/in/cklareza-lifetime-value" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn da CKlareza" className="inline-flex items-center justify-center w-9 h-9 rounded-lg mt-4 transition-colors" style={{ background: SC.card, border: `1px solid ${SC.border}`, color: SC.muted }}>
+            <Linkedin className="w-4 h-4" />
+          </a>
         </div>
         <FooterCol title="Produto" links={[["Recursos", "/recursos"], ["Preços", "/precos"], ["Entrar", "/login"]]} />
         <FooterCol title="Empresa" links={[["Sobre", "/sobre"], ["Blog", "/blog"], ["Contato", "/contato"]]} />
