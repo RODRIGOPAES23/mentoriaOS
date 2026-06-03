@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import {
   Building2, Users, GraduationCap, ShieldCheck, Plus, X, Lock, Loader2,
-  Power, PenLine, ChevronRight, Globe,
+  Power, PenLine, ChevronRight, Globe, Brain, AlertTriangle, Sparkles, CheckCircle2,
 } from "lucide-react"
 import { C } from "@/utils/theme"
 
@@ -24,6 +24,7 @@ export default function SuperAdminPage() {
   const [erro, setErro] = useState("")
   const [kpis, setKpis] = useState<any>(null)
   const [empresas, setEmpresas] = useState<Empresa[]>([])
+  const [gratidao, setGratidao] = useState<any>(null)
   const [showNova, setShowNova] = useState(false)
   const [detalhe, setDetalhe] = useState<Empresa | null>(null)
 
@@ -44,6 +45,7 @@ export default function SuperAdminPage() {
       setKpis(j.kpis); setEmpresas(j.empresas || [])
       setAutorizado(true); setAdminKey(key)
       sessionStorage.setItem(KEY_STORE, key)
+      api("/api/admin/gratidao", {}, key).then(r => r.ok ? r.json() : null).then(g => g && setGratidao(g)).catch(() => {})
     } catch { setErro("Erro ao carregar.") }
     finally { setLoading(false) }
   }, [api])
@@ -171,6 +173,71 @@ export default function SuperAdminPage() {
                   </button>
                 </div>
               ))}
+            </div>
+          )}
+        </div>
+
+        {/* ─── GRATIDÃO — cérebro cognitivo ─── */}
+        <div className="rounded-2xl overflow-hidden" style={{ background: C.card, border: `1px solid ${C.violet}33` }}>
+          <div className="px-5 py-4 flex items-center gap-2" style={{ borderBottom: `1px solid ${C.border}` }}>
+            <Brain className="w-4 h-4" style={{ color: C.violet }} />
+            <h2 className="text-sm font-bold text-white">GRATIDÃO · cérebro cognitivo</h2>
+            {gratidao && (
+              <div className="ml-auto flex items-center gap-3 text-[11px]" style={{ color: C.muted }}>
+                <span><b className="text-white">{gratidao.resumo?.total_regras ?? 0}</b> regras</span>
+                <span style={{ color: (gratidao.resumo?.total_alertas || 0) > 0 ? C.amber : C.green }}>
+                  <b>{gratidao.resumo?.total_alertas ?? 0}</b> alertas
+                </span>
+              </div>
+            )}
+          </div>
+
+          {!gratidao ? (
+            <div className="flex justify-center py-8"><Loader2 className="w-5 h-5 animate-spin" style={{ color: C.violet }} /></div>
+          ) : (
+            <div className="p-5 grid grid-cols-1 lg:grid-cols-2 gap-5">
+              {/* Oversight dos usuários */}
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest mb-3" style={{ color: C.muted }}>Oversight dos usuários (por empresa)</p>
+                <div className="space-y-2">
+                  {(gratidao.oversight || []).map((o: any) => {
+                    const cor = o.saude === "ok" ? C.green : o.saude === "atencao" ? C.amber : C.red
+                    return (
+                      <div key={o.empresa_id} className="flex items-center gap-3 px-3 py-2.5 rounded-xl" style={{ background: C.input, border: `1px solid ${C.border}` }}>
+                        {o.saude === "ok" ? <CheckCircle2 className="w-4 h-4 shrink-0" style={{ color: cor }} /> : <AlertTriangle className="w-4 h-4 shrink-0" style={{ color: cor }} />}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-white truncate">{o.nome}</p>
+                          <p className="text-[11px]" style={{ color: C.muted }}>{o.mentores} mentores · {o.mentorados} mentorados</p>
+                        </div>
+                        <div className="text-right">
+                          {o.alertas === 0
+                            ? <span className="text-[11px] font-bold" style={{ color: C.green }}>tudo ok</span>
+                            : <span className="text-[11px]" style={{ color: cor }}>{o.cobrancas_vencidas} cobr. · {o.tarefas_vencidas} tarefas vencidas</span>}
+                        </div>
+                      </div>
+                    )
+                  })}
+                  {(gratidao.oversight || []).length === 0 && <p className="text-xs" style={{ color: C.muted }}>Sem empresas monitoradas.</p>}
+                </div>
+              </div>
+
+              {/* Regras de Ouro (memória vitalícia) */}
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest mb-3" style={{ color: C.muted }}>Regras de Ouro (memória vitalícia)</p>
+                <div className="space-y-1.5 max-h-72 overflow-y-auto pr-1">
+                  {(gratidao.regras || []).map((r: any) => (
+                    <div key={r.id} className="flex items-start gap-2.5 px-3 py-2 rounded-lg" style={{ background: C.input, border: `1px solid ${C.border}` }}>
+                      <Sparkles className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: r.tipo_regra === "SUCESSO" ? C.green : C.amber }} />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-white leading-snug">{r.regra_de_ouro}</p>
+                        {r.categoria_nicho && <p className="text-[10px] mt-0.5" style={{ color: C.muted }}>{r.categoria_nicho}</p>}
+                      </div>
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0" style={{ background: `${C.violet}22`, color: C.violet }}>P{r.prioridade}</span>
+                    </div>
+                  ))}
+                  {(gratidao.regras || []).length === 0 && <p className="text-xs" style={{ color: C.muted }}>Memória vazia.</p>}
+                </div>
+              </div>
             </div>
           )}
         </div>
