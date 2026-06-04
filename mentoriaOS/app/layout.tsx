@@ -100,6 +100,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="pt-BR" suppressHydrationWarning className={inter.variable}>
       <head>
+        {/* hreflang — indica ao Google as versões por idioma */}
+        <link rel="alternate" hrefLang="pt-BR" href="https://cklareza.com/" />
+        <link rel="alternate" hrefLang="en"    href="https://cklareza.com/" />
+        <link rel="alternate" hrefLang="es"    href="https://cklareza.com/" />
+        <link rel="alternate" hrefLang="x-default" href="https://cklareza.com/" />
         {/* PWA — iOS Safari (não lê manifest.json, precisa de meta tags próprias) */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />

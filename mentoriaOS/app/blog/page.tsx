@@ -12,11 +12,32 @@ export const metadata: Metadata = {
 
 const POSTS = [
   {
+    slug: "/blog/software-para-mentores-guia-completo",
+    cat: "Ferramentas",
+    titulo: "Software para Mentores: Guia Completo para Escolher em 2026",
+    resumo: "O que avaliar ao escolher um software para mentores: financeiro, acompanhamento, IA e white-label. Checklist com 7 perguntas.",
+    data: "04 jun 2026",
+  },
+  {
+    slug: "/blog/como-fazer-checkin-semanal-com-mentorados",
+    cat: "Acompanhamento",
+    titulo: "Check-in Semanal com Mentorados: Como Fazer de Forma Eficiente",
+    resumo: "Quais métricas pedir, como transformar o check-in em briefing de call com IA, e como garantir adesão do aluno semana após semana.",
+    data: "04 jun 2026",
+  },
+  {
     slug: "/blog/como-aumentar-a-retencao-de-mentorados",
     cat: "Retenção",
     titulo: "Como aumentar a retenção de mentorados (e o Lifetime Value)",
     resumo: "5 alavancas práticas para reter mentorados, reduzir cancelamentos e aumentar o valor de cada aluno ao longo do tempo.",
     data: "03 jun 2026",
+  },
+  {
+    slug: "/blog/mentorship-software-guide",
+    cat: "Tools (EN)",
+    titulo: "Best Mentorship Management Software in 2026",
+    resumo: "How to choose mentorship software: financial tracking, student portal, AI briefing, white-label. Practical guide for professional mentors.",
+    data: "04 jun 2026",
   },
 ]
 
