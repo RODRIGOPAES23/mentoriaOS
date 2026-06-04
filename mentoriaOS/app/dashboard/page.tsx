@@ -319,8 +319,11 @@ export default function DashboardPage() {
   const selected = mentorados.find(m => m.id === selectedId)
 
   const sair = async () => {
-    try { await sbAuth.auth.signOut() } catch {}
     localStorage.removeItem("mentorSelecionado")
+    // POST para a rota server-side — limpa os cookies HttpOnly do Supabase
+    try {
+      await fetch("/api/auth/signout", { method: "POST" })
+    } catch {}
     window.location.href = "/login"
   }
   // "Trocar mentor": super-admin volta ao seletor; mentor (travado) só pode sair

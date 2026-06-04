@@ -13,6 +13,15 @@ export default function LoginPage() {
   const [erro, setErro] = useState("")
   const [magicSent, setMagicSent] = useState(false)
 
+  // Lê erros da URL (ex: ?error=sem_acesso vindos do redirect)
+  const erroUrl = typeof window !== "undefined"
+    ? new URLSearchParams(window.location.search).get("error")
+    : null
+  const erroMsgs: Record<string, string> = {
+    sem_acesso: "Este e-mail não tem acesso. Peça ao administrador para criar seu cadastro.",
+    auth_failed: "Falha na autenticação. Tente novamente.",
+  }
+
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -26,7 +35,10 @@ export default function LoginPage() {
     setLoading("google"); setErro("")
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextParam)}` },
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextParam)}`,
+        queryParams: { prompt: "select_account" },  // sempre mostra seletor de conta
+      },
     })
     if (error) { setErro(error.message); setLoading(null) }
   }
@@ -62,6 +74,12 @@ export default function LoginPage() {
           <h1 className="text-2xl font-bold text-white">CKlareza</h1>
           <p className="text-sm mt-1" style={{ color: C.muted }}>Acesse sua conta</p>
         </div>
+
+        {erroUrl && erroMsgs[erroUrl] && (
+          <div className="rounded-xl px-4 py-3 mb-4 text-sm" style={{ background: `${C.red}18`, border: `1px solid ${C.red}44`, color: C.red }}>
+            {erroMsgs[erroUrl]}
+          </div>
+        )}
 
         <div className="rounded-2xl p-7" style={{ background: C.card, border: `1px solid ${C.border}` }}>
           {magicSent ? (
