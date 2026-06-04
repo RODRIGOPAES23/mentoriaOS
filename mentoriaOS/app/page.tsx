@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import Image from "next/image"
 import {
   Sparkles, LayoutDashboard, DollarSign, KanbanSquare, Brain,
   Building2, ArrowRight, Check, Phone, ShieldCheck, Star, Globe, Heart,
@@ -10,12 +9,13 @@ import {
 
 const GOLD = "#d4af37"
 const GOLD_LIGHT = "#f0d97d"
-const TEAL = "#13a3a3"
+const GOLD_DEEP = "#9a7916"   // ouro legível sobre fundo branco (texto)
+const TEAL = "#0f8a8a"        // teal mais escuro p/ contraste em texto
 const BG = "#ffffff"
 const CARD = "#f8f9fa"
 const BORDER = "#e5e7eb"
-const MUTED = "#6b7280"
-const INK = "#111827"
+const MUTED = "#5f6368"        // cinza Google (corpo de texto)
+const INK = "#1f2937"          // tinta escura (títulos)
 
 type Lang = "pt" | "en" | "es"
 const LANGS: { code: Lang; label: string }[] = [
@@ -134,8 +134,7 @@ function Logo({ size = "md" }: { size?: "md" | "sm" }) {
       <div className="leading-none">
         <span className="font-bold tracking-tight" style={{
           fontSize: size === "sm" ? 18 : 22,
-          background: `linear-gradient(180deg, ${GOLD_LIGHT} 0%, ${GOLD} 55%, #9c7d2e 100%)`,
-          WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent",
+          color: GOLD_DEEP,
         }}>CKlareza</span>
         {size === "md" && <span className="block text-[9px] tracking-[0.25em] mt-0.5" style={{ color: TEAL }}>LIFETIME VALUE</span>}
       </div>
@@ -144,7 +143,11 @@ function Logo({ size = "md" }: { size?: "md" | "sm" }) {
 }
 
 const FEAT_ICONS = [LayoutDashboard, DollarSign, KanbanSquare, Brain, Phone, Building2]
-const FEAT_CORES = [TEAL, "#22c55e", "#4c9aff", "#a855f7", GOLD, TEAL]
+const FEAT_CORES = [TEAL, "#22c55e", "#4c9aff", "#a855f7", GOLD_DEEP, TEAL]
+
+const MOCK_ICONS = [DollarSign, Phone, KanbanSquare, Building2]
+const MOCK_CORES = ["#22c55e", "#4c9aff", GOLD_DEEP, TEAL]
+const MOCK_VALS = ["R$ 4,2k", "12", "3", "28"]
 
 export default function LandingPage() {
   const [lang, setLang] = useState<Lang>("pt")
@@ -203,12 +206,12 @@ export default function LandingPage() {
       <section className="relative overflow-hidden">
         <div className="absolute inset-0" style={{ background: `radial-gradient(60% 50% at 50% 0%, ${TEAL}22 0%, transparent 70%)` }} />
         <div className="relative max-w-4xl mx-auto px-5 pt-20 pb-14 text-center">
-          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs mb-6" style={{ background: `${GOLD}14`, border: `1px solid ${GOLD}33`, color: GOLD_LIGHT }}>
-            <Star className="w-3.5 h-3.5" /> {t.badge}
+          <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold mb-6" style={{ background: `${GOLD}18`, border: `1px solid ${GOLD}40`, color: GOLD_DEEP }}>
+            <Star className="w-3.5 h-3.5" style={{ color: GOLD_DEEP }} /> {t.badge}
           </span>
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight leading-[1.05]">
+          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.05]" style={{ color: INK }}>
             {t.h1a}<br />
-            <span style={{ background: `linear-gradient(90deg, ${GOLD_LIGHT}, ${GOLD})`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{t.h1b}</span>
+            <span style={{ color: GOLD_DEEP }}>{t.h1b}</span>
           </h1>
           <p className="text-lg md:text-xl mt-6 max-w-2xl mx-auto leading-relaxed" style={{ color: MUTED }}>
             {t.sub}<span className="font-semibold" style={{ color: INK }}>{t.subStrong}</span>
@@ -224,11 +227,46 @@ export default function LandingPage() {
           </div>
         </div>
 
-        <div className="relative max-w-3xl mx-auto px-5 pb-4">
-          <div className="rounded-2xl p-1.5 overflow-hidden" style={{ background: CARD, border: `1px solid ${GOLD}33`, boxShadow: `0 30px 90px -20px ${GOLD}40` }}>
-            <Image src="/logo.jpg" alt="CKlareza — plataforma de mentoria white-label, Lifetime Value"
-              width={1200} height={655} priority sizes="(max-width: 768px) 100vw, 768px"
-              className="w-full h-auto rounded-xl block" />
+        {/* PREVIEW DO PRODUTO — mockup limpo estilo Google */}
+        <div className="relative max-w-3xl mx-auto px-5 pb-8">
+          <div className="rounded-2xl overflow-hidden" style={{ background: BG, border: `1px solid ${BORDER}`, boxShadow: "0 30px 80px -28px rgba(17,24,39,0.25)" }}>
+            {/* barra de janela */}
+            <div className="flex items-center gap-2 px-4 h-11" style={{ borderBottom: `1px solid ${BORDER}`, background: CARD }}>
+              <span className="w-3 h-3 rounded-full" style={{ background: "#ff5f57" }} />
+              <span className="w-3 h-3 rounded-full" style={{ background: "#febc2e" }} />
+              <span className="w-3 h-3 rounded-full" style={{ background: "#28c840" }} />
+              <div className="ml-3 flex items-center gap-2">
+                <Sparkles className="w-3.5 h-3.5" style={{ color: GOLD }} />
+                <span className="text-xs font-semibold" style={{ color: INK }}>CKlareza · Dashboard</span>
+              </div>
+            </div>
+            {/* corpo com 4 cards de métrica */}
+            <div className="p-5 md:p-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {t.mock.map((label: string, i: number) => {
+                  const Icon = MOCK_ICONS[i]; const cor = MOCK_CORES[i]
+                  return (
+                    <div key={i} className="rounded-xl p-4 text-left" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center mb-3" style={{ background: `${cor}1a` }}>
+                        <Icon className="w-4 h-4" style={{ color: cor }} />
+                      </div>
+                      <div className="text-xl font-bold" style={{ color: INK }}>{MOCK_VALS[i]}</div>
+                      <div className="text-[11px] mt-0.5 leading-tight" style={{ color: MUTED }}>{label}</div>
+                    </div>
+                  )
+                })}
+              </div>
+              {/* linhas de "lista" decorativas */}
+              <div className="mt-4 space-y-2.5">
+                {[0, 1, 2].map(i => (
+                  <div key={i} className="flex items-center gap-3 rounded-lg px-3 py-2.5" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+                    <span className="w-2 h-2 rounded-full shrink-0" style={{ background: [TEAL, "#22c55e", GOLD][i] }} />
+                    <span className="h-2 rounded-full" style={{ background: BORDER, width: ["55%", "40%", "65%"][i] }} />
+                    <span className="ml-auto h-2 w-10 rounded-full" style={{ background: BORDER }} />
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -262,7 +300,7 @@ export default function LandingPage() {
             <Heart className="w-6 h-6" style={{ color: GOLD }} />
           </div>
           <span className="text-xs font-bold tracking-[0.3em]" style={{ color: TEAL }}>{t.propLabel}</span>
-          <h2 className="text-4xl md:text-5xl font-bold mt-3" style={{ background: `linear-gradient(90deg, ${GOLD_LIGHT}, ${GOLD})`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{t.propT}</h2>
+          <h2 className="text-4xl md:text-5xl font-extrabold mt-3" style={{ color: GOLD_DEEP }}>{t.propT}</h2>
           <p className="mt-5 text-lg leading-relaxed" style={{ color: MUTED }}>{t.propText}</p>
         </div>
       </section>
@@ -359,7 +397,7 @@ export default function LandingPage() {
             <div className="flex items-center gap-1.5" style={{ opacity: 0.65 }}>
               <span className="text-[9px]" style={{ color: MUTED, letterSpacing: "0.08em" }}>POWERED BY</span>
               <Sparkles className="w-2.5 h-2.5" style={{ color: GOLD }} />
-              <span className="text-[10px] font-bold" style={{ background: `linear-gradient(180deg, ${GOLD}, #9c7d2e)`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>CKlareza</span>
+              <span className="text-[10px] font-bold" style={{ color: GOLD_DEEP }}>CKlareza</span>
               <span className="text-[9px]" style={{ color: MUTED }}>·</span>
               <Brain className="w-2.5 h-2.5" style={{ color: TEAL }} />
               <span className="text-[10px] font-bold" style={{ color: TEAL, letterSpacing: "0.04em" }}>GRATIDÃO</span>
