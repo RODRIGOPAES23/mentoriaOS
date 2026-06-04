@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { Sparkles, ArrowRight } from "lucide-react"
 
-const C = { bg: "#0a1420", card: "#0f2030", border: "#1e3450", muted: "#7fa0bd", gold: "#d4af37", goldL: "#f0d97d", teal: "#13a3a3" }
+const C = { bg: "#ffffff", card: "#f8f9fa", border: "#e5e7eb", muted: "#6b7280", gold: "#d4af37", goldL: "#f0d97d", teal: "#13a3a3" }
 
 export const metadata: Metadata = {
   title: "Blog — Gestão e Retenção em Mentoria",
@@ -43,7 +43,7 @@ const POSTS = [
 
 export default function BlogIndex() {
   return (
-    <div style={{ background: C.bg, color: "#fff" }} className="min-h-screen">
+    <div style={{ background: C.bg, color: "#1f2937" }} className="min-h-screen">
       <header className="px-5 h-16 flex items-center justify-between max-w-4xl mx-auto">
         <Link href="/" className="flex items-center gap-2">
           <Sparkles className="w-5 h-5" style={{ color: C.gold }} />
@@ -64,7 +64,7 @@ export default function BlogIndex() {
                 <span className="px-2 py-0.5 rounded-full" style={{ background: `${C.teal}18`, color: C.teal }}>{p.cat}</span>
                 <span>{p.data}</span>
               </div>
-              <h2 className="text-xl font-bold text-white">{p.titulo}</h2>
+              <h2 className="text-xl font-bold text-gray-900">{p.titulo}</h2>
               <p className="mt-2 text-sm leading-relaxed" style={{ color: C.muted }}>{p.resumo}</p>
               <span className="inline-flex items-center gap-1.5 text-sm font-semibold mt-4" style={{ color: C.goldL }}>Ler artigo <ArrowRight className="w-4 h-4" /></span>
             </Link>

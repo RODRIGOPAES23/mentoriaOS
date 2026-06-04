@@ -28,7 +28,7 @@ const PLANOS = [
 
 export default function Precos() {
   return (
-    <div style={{ background: SC.bg, color: "#fff" }} className="min-h-screen">
+    <div style={{ background: SC.bg, color: "#1f2937" }} className="min-h-screen">
       <SiteHeader />
       <section className="max-w-4xl mx-auto px-5 pt-16 pb-10 text-center">
         <h1 className="text-4xl md:text-5xl font-bold tracking-tight">Planos sob medida</h1>
@@ -48,7 +48,7 @@ export default function Precos() {
               {p.feats.map(f => <li key={f} className="flex items-start gap-2 text-sm"><Check className="w-4 h-4 mt-0.5 shrink-0" style={{ color: SC.teal }} /> {f}</li>)}
             </ul>
             <Link href="/contato" className="mt-6 w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl font-bold transition-all"
-              style={p.destaque ? { background: SC.gold, color: "#1a1407" } : { background: SC.bg, border: `1px solid ${SC.border}`, color: "#fff" }}>
+              style={p.destaque ? { background: SC.gold, color: "#1a1407" } : { background: SC.bg, border: `1px solid ${SC.border}`, color: "#1f2937" }}>
               Falar com a gente <ArrowRight className="w-4 h-4" />
             </Link>
           </div>

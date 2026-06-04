@@ -1,7 +1,8 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { ShieldCheck, Lock, Database, Download, FileText, CheckCircle, ArrowRight } from "lucide-react"
-import { SiteHeader, SiteFooter, SC } from "@/components/site/SiteChrome"
+import { SiteHeader, SiteFooter } from "@/components/site/SiteChrome"
+import { SC_LIGHT as SC } from "@/lib/colors-light"
 
 export const metadata: Metadata = {
   title: "Segurança & Conformidade — CKlareza",

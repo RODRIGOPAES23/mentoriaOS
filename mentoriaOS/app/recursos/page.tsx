@@ -21,7 +21,7 @@ const FEATURES = [
 
 export default function Recursos() {
   return (
-    <div style={{ background: SC.bg, color: "#fff" }} className="min-h-screen">
+    <div style={{ background: SC.bg, color: "#1f2937" }} className="min-h-screen">
       <SiteHeader />
       <section className="max-w-4xl mx-auto px-5 pt-16 pb-10 text-center">
         <h1 className="text-4xl md:text-5xl font-bold tracking-tight">Tudo para operar sua mentoria</h1>
@@ -80,7 +80,7 @@ export default function Recursos() {
         <h2 className="text-3xl md:text-4xl font-bold">Pronto para ver na prática?</h2>
         <div className="flex flex-col sm:flex-row gap-3 justify-center mt-7">
           <Link href="/contato" className="px-6 py-3.5 rounded-xl font-bold inline-flex items-center justify-center gap-2" style={{ background: SC.gold, color: "#1a1407" }}>Agende uma demonstração <ArrowRight className="w-5 h-5" /></Link>
-          <Link href="/login" className="px-6 py-3.5 rounded-xl font-semibold" style={{ background: SC.card, border: `1px solid ${SC.border}`, color: "#fff" }}>Acessar o sistema</Link>
+          <Link href="/login" className="px-6 py-3.5 rounded-xl font-semibold" style={{ background: SC.card, border: `1px solid ${SC.border}`, color: "#1f2937" }}>Acessar o sistema</Link>
         </div>
       </section>
       <SiteFooter />

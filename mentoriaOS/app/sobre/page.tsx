@@ -17,7 +17,7 @@ const VALORES = [
 
 export default function Sobre() {
   return (
-    <div style={{ background: SC.bg, color: "#fff" }} className="min-h-screen">
+    <div style={{ background: SC.bg, color: "#1f2937" }} className="min-h-screen">
       <SiteHeader />
 
       <section className="max-w-3xl mx-auto px-5 pt-20 pb-12 text-center">
@@ -28,7 +28,7 @@ export default function Sobre() {
         <h1 className="text-4xl md:text-6xl font-bold mt-4" style={{ background: `linear-gradient(90deg, ${SC.goldL}, ${SC.gold})`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>Transformar vidas.</h1>
         <p className="text-lg md:text-xl mt-6 leading-relaxed" style={{ color: SC.muted }}>
           A CKlareza não nasceu para vender software. Nasceu para devolver ao mentor o recurso mais escasso que ele tem —
-          <strong className="text-white"> tempo e clareza</strong> — para fazer o que realmente importa: transformar a vida de quem confia nele.
+          <strong className="text-gray-900"> tempo e clareza</strong> — para fazer o que realmente importa: transformar a vida de quem confia nele.
         </p>
       </section>
 

@@ -15,7 +15,7 @@ const WHATS_LABEL = "+55 48 97400-1405"
 
 export default function Contato() {
   return (
-    <div style={{ background: SC.bg, color: "#fff" }} className="min-h-screen">
+    <div style={{ background: SC.bg, color: "#1f2937" }} className="min-h-screen">
       <SiteHeader />
 
       <section className="max-w-3xl mx-auto px-5 pt-20 pb-10 text-center">
