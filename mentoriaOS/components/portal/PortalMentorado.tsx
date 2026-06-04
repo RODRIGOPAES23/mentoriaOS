@@ -26,6 +26,13 @@ type Aba = "checkin" | "tarefas" | "jornada" | "chat" | "call" | "cadastro"
 
 function parseDateLocal(s: string) { const [y,m,d] = s.split("T")[0].split("-").map(Number); return new Date(y, m-1, d) }
 
+// Envia o código do portal como header de autenticação em todas as chamadas às APIs protegidas.
+function portalFetch(url: string, init?: RequestInit): Promise<Response> {
+  let codigo = ""
+  try { codigo = (typeof localStorage !== "undefined" ? localStorage.getItem("ck:mentorado-codigo") : "") || "" } catch {}
+  return fetch(url, { ...init, headers: { ...(init?.headers as Record<string,string> ?? {}), "x-portal-codigo": codigo } })
+}
+
 export default function PortalMentorado({ mentorado, mentor }: { mentorado: Mentorado; mentor: Mentor | null }) {
   const [aba, setAba] = useState<Aba>("checkin")
 
@@ -104,14 +111,14 @@ function AbaMeuCadastro({ mentorado }: { mentorado: Mentorado }) {
   const [erro, setErro] = useState("")
 
   useEffect(() => {
-    fetch(`/api/dashboard/mentorados/${mentorado.id}?t=${Date.now()}`)
+    portalFetch(`/api/dashboard/mentorados/${mentorado.id}?t=${Date.now()}`)
       .then(r => r.json())
       .then(j => setInitial(j.mentorado || {}))
       .catch(() => setErro("Não foi possível carregar seu cadastro."))
   }, [mentorado.id])
 
   const salvar = async (data: any) => {
-    const res = await fetch(`/api/dashboard/mentorados/${mentorado.id}`, {
+    const res = await portalFetch(`/api/dashboard/mentorados/${mentorado.id}`, {
       method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data),
     })
     const json = await res.json()
@@ -230,8 +237,8 @@ function AbaTarefas({ mentorado }: { mentorado: Mentorado }) {
 
   const buscar = useCallback(async () => {
     const [p, c] = await Promise.all([
-      fetch(`/api/dashboard/tarefas?mentoradoId=${mentorado.id}&status=pending&t=${Date.now()}`).then(r => r.json()),
-      fetch(`/api/dashboard/tarefas?mentoradoId=${mentorado.id}&status=completed&t=${Date.now()}`).then(r => r.json()),
+      portalFetch(`/api/dashboard/tarefas?mentoradoId=${mentorado.id}&status=pending&t=${Date.now()}`).then(r => r.json()),
+      portalFetch(`/api/dashboard/tarefas?mentoradoId=${mentorado.id}&status=completed&t=${Date.now()}`).then(r => r.json()),
     ])
     setTarefas([...(p.tarefas || []), ...(c.tarefas || [])])
     setLoading(false)
@@ -249,7 +256,7 @@ function AbaTarefas({ mentorado }: { mentorado: Mentorado }) {
   }, [mentorado.id, buscar])
 
   const toggle = async (id: string, status: string) => {
-    await fetch(`/api/dashboard/tarefas/${id}`, {
+    await portalFetch(`/api/dashboard/tarefas/${id}`, {
       method: "PATCH", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: status === "completed" ? "pending" : "completed" }),
     })
@@ -340,7 +347,7 @@ function AbaChat({ mentorado, mentor }: { mentorado: Mentorado; mentor: Mentor |
   const fimRef = useRef<HTMLDivElement>(null)
 
   const buscar = useCallback(async () => {
-    const j = await fetch(`/api/dashboard/mensagens?mentoradoId=${mentorado.id}&t=${Date.now()}`).then(r => r.json())
+    const j = await portalFetch(`/api/dashboard/mensagens?mentoradoId=${mentorado.id}&t=${Date.now()}`).then(r => r.json())
     setMsgs(j.mensagens || [])
   }, [mentorado.id])
 
@@ -363,7 +370,7 @@ function AbaChat({ mentorado, mentor }: { mentorado: Mentorado; mentor: Mentor |
     setEnviando(true)
     const t = texto.trim()
     setTexto("")
-    await fetch("/api/dashboard/mensagens", {
+    await portalFetch("/api/dashboard/mensagens", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ mentoradoId: mentorado.id, mentorId: mentorado.mentor_id, autor: "mentorado", texto: t }),
     })

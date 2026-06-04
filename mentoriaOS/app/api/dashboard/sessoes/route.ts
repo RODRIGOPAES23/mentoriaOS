@@ -1,14 +1,17 @@
 import { adminClient } from "@/lib/supabase-server"
+import { sessaoMentorValida, mentorAutorizado, naoAutorizado } from "@/lib/auth-guards"
 
 export const dynamic = "force-dynamic"
 const NO_CACHE = { "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0" }
 
 export async function GET(request: Request) {
+  if (!await sessaoMentorValida()) return naoAutorizado()
+
   const supabase = adminClient()
   const url = new URL(request.url)
   const mentorId = url.searchParams.get("mentorId")
   const mentoradoId = url.searchParams.get("mentoradoId")
-  const proximas = url.searchParams.get("proximas") // "1" = só futuras
+  const proximas = url.searchParams.get("proximas")
 
   let query = supabase
     .from("sessoes")
@@ -18,14 +21,11 @@ export async function GET(request: Request) {
   if (mentoradoId) query = query.eq("mentorado_id", mentoradoId)
   else if (mentorId) query = query.eq("mentor_id", mentorId)
 
-  if (proximas === "1") {
-    query = query.gte("data_hora", new Date().toISOString()).eq("status", "agendada")
-  }
+  if (proximas === "1") query = query.gte("data_hora", new Date().toISOString()).eq("status", "agendada")
 
   const { data, error } = await query
   if (error) return Response.json({ error: error.message }, { status: 500, headers: NO_CACHE })
 
-  // Enriquecer com nome do mentorado
   const ids = Array.from(new Set((data || []).map(s => s.mentorado_id)))
   let nomes: Record<string, { nome: string; foto_url: string | null }> = {}
   if (ids.length > 0) {
@@ -48,9 +48,10 @@ export async function POST(request: Request) {
   catch { return Response.json({ error: "Body inválido" }, { status: 400 }) }
 
   const { mentoradoId, mentorId, titulo, data_hora, duracao_min, link_call } = body
-  if (!mentoradoId || !mentorId || !data_hora) {
+  if (!mentoradoId || !mentorId || !data_hora)
     return Response.json({ error: "mentoradoId, mentorId e data_hora obrigatórios" }, { status: 400 })
-  }
+
+  if (!await mentorAutorizado(mentorId)) return naoAutorizado()
 
   const supabase = adminClient()
   const { data, error } = await supabase

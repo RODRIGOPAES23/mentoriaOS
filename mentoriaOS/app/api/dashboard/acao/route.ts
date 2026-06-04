@@ -1,4 +1,5 @@
 import { adminClient } from "@/lib/supabase-server"
+import { mentorAutorizado, naoAutorizado } from "@/lib/auth-guards"
 
 export const dynamic = "force-dynamic"
 const NO_CACHE = { "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0" }
@@ -19,6 +20,8 @@ export async function GET(request: Request) {
   const url = new URL(request.url)
   const mentorId = url.searchParams.get("mentorId")
   if (!mentorId) return Response.json({ error: "mentorId obrigatório" }, { status: 400, headers: NO_CACHE })
+
+  if (!await mentorAutorizado(mentorId)) return naoAutorizado()
 
   // Quem pede + empresa
   const { data: solicitante } = await supabase

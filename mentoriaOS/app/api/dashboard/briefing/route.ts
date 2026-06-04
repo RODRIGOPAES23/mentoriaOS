@@ -1,5 +1,6 @@
 import { adminClient } from "@/lib/supabase-server"
 import { gerarBriefingIA } from "@/lib/briefing-ia"
+import { sessaoMentorValida, naoAutorizado } from "@/lib/auth-guards"
 
 /**
  * POST /api/dashboard/briefing
@@ -18,14 +19,15 @@ export const fetchCache = "force-no-store"
 const NO_CACHE = { "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0" }
 
 export async function POST(request: Request) {
+  if (!await sessaoMentorValida()) return naoAutorizado()
+
   let body: any
   try { body = await request.json() }
   catch { return Response.json({ error: "Body inválido" }, { status: 400, headers: NO_CACHE }) }
 
   const { mentoradoId, checkinId } = body
-  if (!mentoradoId || !checkinId) {
+  if (!mentoradoId || !checkinId)
     return Response.json({ error: "mentoradoId e checkinId obrigatórios" }, { status: 400, headers: NO_CACHE })
-  }
 
   const supabase = adminClient()
 

@@ -1,28 +1,20 @@
-import { createClient } from "@supabase/supabase-js"
+import { adminClient } from "@/lib/supabase-server"
+import { sessaoMentorValida, naoAutorizado } from "@/lib/auth-guards"
 
-// Server-side: usa service role (ignora RLS) para carregar o checkin mais recente.
 export const dynamic = "force-dynamic"
 export const revalidate = 0
 export const fetchCache = "force-no-store"
 
-const NO_CACHE = {
-  "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
-}
+const NO_CACHE = { "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0" }
 
 export async function GET(request: Request) {
+  if (!await sessaoMentorValida()) return naoAutorizado()
+
   const { searchParams } = new URL(request.url)
   const mentoradoId = searchParams.get("mentoradoId")
+  if (!mentoradoId) return Response.json({ error: "mentoradoId obrigatório" }, { status: 400, headers: NO_CACHE })
 
-  if (!mentoradoId) {
-    return Response.json({ error: "mentoradoId obrigatório" }, { status: 400, headers: NO_CACHE })
-  }
-
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-
-  const supabase = createClient(url, serviceKey, {
-    auth: { persistSession: false },
-  })
+  const supabase = adminClient()
 
   // Últimos 8 check-ins (mais recente primeiro): [0] = atual, resto = histórico p/ comparação.
   const { data, error } = await supabase

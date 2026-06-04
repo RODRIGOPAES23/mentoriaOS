@@ -1,10 +1,12 @@
 import { adminClient } from "@/lib/supabase-server"
+import { sessaoMentorValida, mentorAutorizado, naoAutorizado } from "@/lib/auth-guards"
 
 export const dynamic = "force-dynamic"
 const NO_CACHE = { "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0" }
 
-// GET — carrega a nota mais recente do mentorado
 export async function GET(request: Request) {
+  if (!await sessaoMentorValida()) return naoAutorizado()
+
   const supabase = adminClient()
   const url = new URL(request.url)
   const mentoradoId = url.searchParams.get("mentoradoId")
@@ -20,7 +22,6 @@ export async function GET(request: Request) {
   return Response.json({ nota: data?.[0] || null }, { headers: NO_CACHE })
 }
 
-// PUT — salva (upsert) a nota. Chamado com debounce pelo client.
 export async function PUT(request: Request) {
   const supabase = adminClient()
   let body: any
@@ -28,9 +29,10 @@ export async function PUT(request: Request) {
   catch { return Response.json({ error: "Body inválido" }, { status: 400, headers: NO_CACHE }) }
 
   const { mentoradoId, mentorId, conteudo, id } = body
-  if (!mentoradoId || !mentorId) {
+  if (!mentoradoId || !mentorId)
     return Response.json({ error: "mentoradoId e mentorId obrigatórios" }, { status: 400, headers: NO_CACHE })
-  }
+
+  if (!await mentorAutorizado(mentorId)) return naoAutorizado()
 
   // Se já tem id → update; senão verifica se existe nota, ou cria
   if (id) {

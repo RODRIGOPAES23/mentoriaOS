@@ -1,15 +1,17 @@
 import { adminClient } from "@/lib/supabase-server"
+import { rotaCompartilhadaAutorizada, naoAutorizado } from "@/lib/auth-guards"
 
 export const dynamic = "force-dynamic"
 const NO_CACHE = { "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0" }
 
-// GET /api/dashboard/mensagens?mentoradoId=X → histórico do chat
 export async function GET(request: Request) {
-  const supabase = adminClient()
   const url = new URL(request.url)
   const mentoradoId = url.searchParams.get("mentoradoId")
   if (!mentoradoId) return Response.json({ error: "mentoradoId obrigatório" }, { status: 400, headers: NO_CACHE })
 
+  if (!await rotaCompartilhadaAutorizada(mentoradoId, request)) return naoAutorizado()
+
+  const supabase = adminClient()
   const { data, error } = await supabase
     .from("mensagens")
     .select("id, autor, texto, lida, created_at")
@@ -21,7 +23,6 @@ export async function GET(request: Request) {
   return Response.json({ mensagens: data || [] }, { headers: NO_CACHE })
 }
 
-// POST → envia mensagem (autor: 'mentor' ou 'mentorado')
 export async function POST(request: Request) {
   const supabase = adminClient()
   let body: any
@@ -29,12 +30,12 @@ export async function POST(request: Request) {
   catch { return Response.json({ error: "Body inválido" }, { status: 400, headers: NO_CACHE }) }
 
   const { mentoradoId, mentorId, autor, texto } = body
-  if (!mentoradoId || !mentorId || !autor || !texto?.trim()) {
+  if (!mentoradoId || !mentorId || !autor || !texto?.trim())
     return Response.json({ error: "Campos obrigatórios faltando" }, { status: 400, headers: NO_CACHE })
-  }
-  if (autor !== "mentor" && autor !== "mentorado") {
+  if (autor !== "mentor" && autor !== "mentorado")
     return Response.json({ error: "autor inválido" }, { status: 400, headers: NO_CACHE })
-  }
+
+  if (!await rotaCompartilhadaAutorizada(mentoradoId, request)) return naoAutorizado()
 
   const { data, error } = await supabase
     .from("mensagens")

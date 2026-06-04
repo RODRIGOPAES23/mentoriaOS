@@ -1,4 +1,5 @@
 import { adminClient } from "@/lib/supabase-server"
+import { mentorAutorizado, sessaoMentorValida, naoAutorizado } from "@/lib/auth-guards"
 
 export const dynamic = "force-dynamic"
 const NO_CACHE = { "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0" }
@@ -53,10 +54,10 @@ export async function POST(request: Request) {
   catch { return Response.json({ error: "Body inválido" }, { status: 400 }) }
 
   const { mentoradoId, mentorId, transcricao, fonte } = body
-
-  if (!mentoradoId || !mentorId || !transcricao?.trim()) {
+  if (!mentoradoId || !mentorId || !transcricao?.trim())
     return Response.json({ error: "mentoradoId, mentorId e transcricao obrigatórios" }, { status: 400 })
-  }
+
+  if (!await mentorAutorizado(mentorId)) return naoAutorizado()
 
   const supabase = adminClient()
 
@@ -118,6 +119,8 @@ export async function POST(request: Request) {
 }
 
 export async function GET(request: Request) {
+  if (!await sessaoMentorValida()) return naoAutorizado()
+
   const supabase = adminClient()
   const url = new URL(request.url)
   const mentoradoId = url.searchParams.get("mentoradoId")

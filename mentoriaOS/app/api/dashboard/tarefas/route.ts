@@ -1,4 +1,5 @@
 import { adminClient } from "@/lib/supabase-server"
+import { rotaCompartilhadaAutorizada, mentorAutorizado, naoAutorizado } from "@/lib/auth-guards"
 
 export const dynamic = "force-dynamic"
 export const revalidate = 0
@@ -7,12 +8,14 @@ export const fetchCache = "force-no-store"
 const NO_CACHE = { "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0" }
 
 export async function GET(request: Request) {
-  const supabase = adminClient()
   const url = new URL(request.url)
   const mentoradoId = url.searchParams.get("mentoradoId")
-  const status = url.searchParams.get("status") || "pending"
-
   if (!mentoradoId) return Response.json({ error: "mentoradoId obrigatório" }, { status: 400, headers: NO_CACHE })
+
+  if (!await rotaCompartilhadaAutorizada(mentoradoId, request)) return naoAutorizado()
+
+  const supabase = adminClient()
+  const status = url.searchParams.get("status") || "pending"
 
   let query = supabase
     .from("tarefas")
@@ -36,6 +39,9 @@ export async function POST(request: Request) {
 
   const { mentoradoId, mentorId, texto, data_vencimento } = body
   if (!mentoradoId || !mentorId) return Response.json({ error: "mentoradoId e mentorId obrigatórios" }, { status: 400 })
+
+  // Criar tarefa é operação exclusiva do mentor (portal não cria tarefas)
+  if (!await mentorAutorizado(mentorId)) return naoAutorizado()
 
   const textoTrimmed = String(texto || "").trim()
   if (!textoTrimmed) return Response.json({ error: "Texto obrigatório" }, { status: 400 })

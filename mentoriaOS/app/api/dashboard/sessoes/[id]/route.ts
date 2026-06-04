@@ -1,9 +1,12 @@
 import { adminClient } from "@/lib/supabase-server"
+import { mentorAutorizadoPorEntidade, naoAutorizado } from "@/lib/auth-guards"
 
 export const dynamic = "force-dynamic"
 const NO_CACHE = { "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0" }
 
 export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+  if (!await mentorAutorizadoPorEntidade("sessoes", params.id)) return naoAutorizado()
+
   const supabase = adminClient()
   try {
     const body = await request.json()
@@ -20,6 +23,8 @@ export async function PATCH(request: Request, { params }: { params: { id: string
 }
 
 export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
+  if (!await mentorAutorizadoPorEntidade("sessoes", params.id)) return naoAutorizado()
+
   const supabase = adminClient()
   const { error } = await supabase.from("sessoes").delete().eq("id", params.id)
   if (error) return Response.json({ error: error.message }, { status: 500 })

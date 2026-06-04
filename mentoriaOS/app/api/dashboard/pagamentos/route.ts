@@ -1,9 +1,12 @@
 import { adminClient } from "@/lib/supabase-server"
+import { sessaoMentorValida, mentorAutorizado, naoAutorizado } from "@/lib/auth-guards"
 
 export const dynamic = "force-dynamic"
 const NO_CACHE = { "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0" }
 
 export async function GET(request: Request) {
+  if (!await sessaoMentorValida()) return naoAutorizado()
+
   const supabase = adminClient()
   const url = new URL(request.url)
   const mentoradoId = url.searchParams.get("mentoradoId")
@@ -28,9 +31,10 @@ export async function POST(request: Request) {
   catch { return Response.json({ error: "Body inválido" }, { status: 400 }) }
 
   const { mentoradoId, mentorId, valor, data_vencimento, descricao, parcela } = body
-  if (!mentoradoId || !mentorId || !data_vencimento) {
+  if (!mentoradoId || !mentorId || !data_vencimento)
     return Response.json({ error: "mentoradoId, mentorId e data_vencimento obrigatórios" }, { status: 400 })
-  }
+
+  if (!await mentorAutorizado(mentorId)) return naoAutorizado()
 
   const supabase = adminClient()
   const { data, error } = await supabase
