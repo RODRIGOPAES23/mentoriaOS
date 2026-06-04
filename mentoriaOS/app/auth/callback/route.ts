@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
 import { NextResponse, type NextRequest } from "next/server"
 
-const URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 export async function GET(request: NextRequest) {
@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
 
   if (code) {
     const cookieStore = cookies()
-    const supabase = createServerClient(URL, ANON, {
+    const supabase = createServerClient(SUPA_URL, ANON, {
       cookies: {
         getAll() { return cookieStore.getAll() },
         setAll(cookiesToSet) {
