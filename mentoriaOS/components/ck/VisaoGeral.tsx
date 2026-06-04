@@ -2,18 +2,7 @@
 
 import DonutProgress from "./DonutProgress"
 import { Calendar, Clock, Target, Sparkles, CheckCircle2, Circle, ArrowRight, Video, AlertTriangle, ChevronRight, TrendingUp } from "lucide-react"
-
-const C = {
-  bg:     "#0c1c2c",
-  card:   "#0f2540",
-  card2:  "#112a4a",
-  border: "#1e3a5f",
-  muted:  "#4d7fa8",
-  green:  "#00d68f",
-  blue:   "#4c9aff",
-  amber:  "#f59e0b",
-  red:    "#f05252",
-}
+import { C } from "@/utils/theme"
 
 interface Mentorado {
   id: string; nome: string; nicho: string; foto_url?: string | null

@@ -8,7 +8,7 @@ const TITLE = "Best Mentorship Management Software in 2026: Complete Guide"
 const DESC = "How to choose mentorship software for your coaching business: financial tracking, student portal, AI briefing, white-label. Practical guide for professional mentors."
 const DATE = "2026-06-04"
 
-const C = { bg: "#0a1420", card: "#0f2030", border: "#1e3450", muted: "#7fa0bd", gold: "#d4af37", goldL: "#f0d97d", teal: "#13a3a3" }
+const C = { bg: "#ffffff", card: "#f8f9fa", border: "#e5e7eb", muted: "#6b7280", gold: "#d4af37", goldL: "#f0d97d", teal: "#13a3a3" }
 
 export const metadata: Metadata = {
   title: TITLE,

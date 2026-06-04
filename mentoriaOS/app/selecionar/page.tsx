@@ -6,15 +6,7 @@ import { useRouter } from "next/navigation"
 import { useEmpresa, resolverSlug } from "@/hooks/useEmpresa"
 import SplashEmpresa from "@/components/ck/SplashEmpresa"
 import PoweredBy from "@/components/ck/PoweredBy"
-
-const C = {
-  bg:     "#0c1c2c",
-  card:   "#0f2540",
-  card2:  "#112a4a",
-  border: "#1e3a5f",
-  muted:  "#4d7fa8",
-  blue:   "#4c9aff",
-}
+import { C } from "@/utils/theme"
 
 interface Mentor { id: string; nome: string; nicho_foco?: string; foto_url?: string }
 

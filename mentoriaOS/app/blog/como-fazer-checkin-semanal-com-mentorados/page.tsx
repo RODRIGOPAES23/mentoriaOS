@@ -8,7 +8,7 @@ const TITLE = "Check-in Semanal com Mentorados: Como Fazer de Forma Eficiente"
 const DESC = "Guia prático para implementar check-ins semanais na sua mentoria: quais métricas pedir, como usar os dados na call e como a IA pode gerar o briefing automaticamente."
 const DATE = "2026-06-04"
 
-const C = { bg: "#0a1420", card: "#0f2030", border: "#1e3450", muted: "#7fa0bd", gold: "#d4af37", goldL: "#f0d97d", teal: "#13a3a3" }
+const C = { bg: "#ffffff", card: "#f8f9fa", border: "#e5e7eb", muted: "#6b7280", gold: "#d4af37", goldL: "#f0d97d", teal: "#13a3a3" }
 
 export const metadata: Metadata = {
   title: TITLE,

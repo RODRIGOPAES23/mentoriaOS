@@ -9,9 +9,14 @@
 # Next.js
 /.next
 /out
+tsconfig.tsbuildinfo
 
 # Production
 /build
+
+# Build artifacts & service workers
+public/swe-worker-*.js
+public/workbox-*.js
 
 # Misc
 .DS_Store

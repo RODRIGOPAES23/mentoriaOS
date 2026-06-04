@@ -3,8 +3,7 @@
 import { useState } from "react"
 import { createBrowserClient } from "@supabase/ssr"
 import { Sparkles, Mail, Lock, ArrowRight, Loader2 } from "lucide-react"
-
-const C = { bg: "#0c1c2c", card: "#0f2540", card2: "#112a4a", border: "#1e3a5f", muted: "#4d7fa8", green: "#00d68f", red: "#ff5470" }
+import { C } from "@/utils/theme"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
