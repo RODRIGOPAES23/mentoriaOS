@@ -44,6 +44,7 @@ export const metadata: Metadata = {
     index: true, follow: true,
     googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
   },
+  verification: { google: "I1MFavBSn25MdEPJkXDWWYi3URoBX1THuwlbSkhBuT0" },
 }
 
 export const viewport = { width: "device-width", initialScale: 1, themeColor: "#0a1420" }
