@@ -40,7 +40,7 @@ export function Bloco2Mentorados({ total, prox_30_dias, prox_60_dias, ultimo_mes
         <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${C.blue}18`, border: `1px solid ${C.blue}30` }}>
           <Users className="w-4 h-4" style={{ color: C.blue }} />
         </div>
-        <h2 className="text-base font-semibold text-white">Mentorados Ativos</h2>
+        <h2 className="text-base font-semibold" style={{ color: C.text }}>Mentorados Ativos</h2>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
@@ -49,7 +49,7 @@ export function Bloco2Mentorados({ total, prox_30_dias, prox_60_dias, ultimo_mes
             className="rounded-xl p-2.5 text-left transition-all hover:-translate-y-0.5"
             style={{ background: `${c.cor}14`, border: `1px solid ${c.cor}33` }}>
             <p className="text-[11px] mb-0.5" style={{ color: c.cor }}>{c.label}</p>
-            <p className="text-xl font-bold text-white">{c.valor}</p>
+            <p className="text-xl font-bold" style={{ color: c.cor }}>{c.valor}</p>
           </button>
         ))}
       </div>

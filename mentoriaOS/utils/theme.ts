@@ -6,8 +6,9 @@ export const C = {
   bg:     "#ffffff",   // body
   card:   "#f8f9fa",   // superfícies primárias
   card2:  "#f3f4f6",   // superfícies secundárias / hover
-  input:  "#ffffff",   // fundo de inputs (branco)
+  input:  "#fafbfc",   // fundo de inputs (branco com toque)
   border: "#e5e7eb",   // bordas sutis
+  text:   "#1f2937",   // texto primário (títulos)
   muted:  "#6b7280",   // texto secundário
   green:  "#10b981",   // sucesso / ativo
   blue:   "#3b82f6",   // destaque / info

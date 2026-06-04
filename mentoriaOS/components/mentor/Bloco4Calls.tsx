@@ -39,7 +39,7 @@ export function Bloco4Calls({ calls, accent = C.violet, onAbrirMentorado }: Bloc
         <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${accent}18`, border: `1px solid ${accent}30` }}>
           <Calendar className="w-4 h-4" style={{ color: accent }} />
         </div>
-        <h2 className="text-base font-semibold text-white">Próximas Calls</h2>
+        <h2 className="text-base font-semibold" style={{ color: C.text }}>Próximas Calls</h2>
       </div>
 
       {callsFormatadas.length === 0 ? (
@@ -63,10 +63,10 @@ export function Bloco4Calls({ calls, accent = C.violet, onAbrirMentorado }: Bloc
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <Clock className="w-4 h-4" style={{ color: C.muted }} />
-                    <span className="font-semibold text-white">{call.hora_formatada}</span>
+                    <span className="font-semibold" style={{ color: C.text }}>{call.hora_formatada}</span>
                     <span className="text-xs" style={{ color: C.muted }}>{call.titulo || "Call com mentorado"}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm" style={{ color: "#94b4cc" }}>
+                  <div className="flex items-center gap-2 text-sm" style={{ color: C.muted }}>
                     <User className="w-4 h-4" />
                     {call.mentorado_nome}
                   </div>

@@ -56,7 +56,7 @@ export function Bloco1Financeiro({ vence_24h, vence_2_dias, vence_3_dias, total_
           <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${C.red}18`, border: `1px solid ${C.red}30` }}>
             <TrendingDown className="w-4 h-4" style={{ color: C.red }} />
           </div>
-          <h2 className="text-base font-semibold text-white">Pendências Financeiras</h2>
+          <h2 className="text-base font-semibold" style={{ color: C.text }}>Pendências Financeiras</h2>
         </div>
         <div className="text-right">
           <p className="text-[10px] uppercase tracking-widest" style={{ color: C.muted }}>Total a receber</p>
@@ -93,7 +93,7 @@ export function Bloco1Financeiro({ vence_24h, vence_2_dias, vence_3_dias, total_
                 onMouseLeave={e => (e.currentTarget as HTMLElement).style.borderColor = C.border}>
                 <div className="w-1.5 h-8 rounded-full shrink-0" style={{ background: cor }} />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-white truncate">{p.nome}</p>
+                  <p className="text-sm font-semibold truncate" style={{ color: C.text }}>{p.nome}</p>
                   <p className="text-[11px]" style={{ color: cor }}>{prazoLabel(p)}</p>
                 </div>
                 <p className="text-sm font-bold text-white shrink-0">{fmt(p.valor)}</p>
