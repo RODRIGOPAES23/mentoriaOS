@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react"
 import dynamic from "next/dynamic"
 import {
   Send, CheckCircle2, Circle, MessageCircle, ClipboardList, BarChart3, Video,
-  Sparkles, Loader2, Phone, AlertCircle, Clock, History, UserCog
+  Sparkles, Loader2, Phone, AlertCircle, Clock, History, UserCog, ShieldCheck, Download, Trash2
 } from "lucide-react"
 import { getRealtimeClient } from "@/lib/supabase-realtime"
 import { C } from "@/utils/theme"
@@ -33,8 +33,43 @@ function portalFetch(url: string, init?: RequestInit): Promise<Response> {
   return fetch(url, { ...init, headers: { ...(init?.headers as Record<string,string> ?? {}), "x-portal-codigo": codigo } })
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// BANNER DE CONSENTIMENTO LGPD (mostrado uma vez no primeiro acesso)
+// ─────────────────────────────────────────────────────────────────────────────
+function ConsentoBanner({ onAceitar }: { onAceitar: () => void }) {
+  return (
+    <div className="fixed bottom-16 left-0 right-0 z-50 px-4 pb-2">
+      <div className="max-w-2xl mx-auto rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3"
+        style={{ background: "#0f2540", border: "1px solid #1e3a5f", boxShadow: "0 -4px 30px #00000060" }}>
+        <ShieldCheck className="w-5 h-5 shrink-0 mt-0.5 sm:mt-0" style={{ color: C.green }} />
+        <p className="text-xs flex-1 leading-relaxed" style={{ color: "#94b4cc" }}>
+          Seus dados são usados exclusivamente para gestão da sua mentoria e compartilhados apenas com seu mentor.{" "}
+          <a href="/privacidade" target="_blank" rel="noopener" className="underline" style={{ color: C.green }}>Ver política de privacidade</a>
+        </p>
+        <button onClick={onAceitar}
+          className="shrink-0 px-4 py-1.5 rounded-lg text-xs font-bold"
+          style={{ background: C.green, color: "#0c1c2c" }}>
+          Entendido
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export default function PortalMentorado({ mentorado, mentor }: { mentorado: Mentorado; mentor: Mentor | null }) {
   const [aba, setAba] = useState<Aba>("checkin")
+  const [showConsento, setShowConsento] = useState(false)
+
+  useEffect(() => {
+    try {
+      if (!localStorage.getItem("ck:lgpd-aceite")) setShowConsento(true)
+    } catch {}
+  }, [])
+
+  const aceitarConsento = () => {
+    try { localStorage.setItem("ck:lgpd-aceite", new Date().toISOString()) } catch {}
+    setShowConsento(false)
+  }
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: C.bg }}>
@@ -80,6 +115,8 @@ export default function PortalMentorado({ mentorado, mentor }: { mentorado: Ment
           {aba === "cadastro" && <AbaMeuCadastro mentorado={mentorado} />}
         </div>
       </main>
+
+      {showConsento && <ConsentoBanner onAceitar={aceitarConsento} />}
 
       {/* Bottom Nav (mobile-first) */}
       <nav className="fixed bottom-0 left-0 right-0 flex shrink-0" style={{ background: C.card, borderTop: `1px solid ${C.border}` }}>
@@ -139,6 +176,91 @@ function AbaMeuCadastro({ mentorado }: { mentorado: Mentorado }) {
         <p className="text-[11px]" style={{ color: C.muted }}>Esses dados ajudam seu mentor a personalizar a mentoria. Você pode editar quando quiser.</p>
       </div>
       <FormCadastroMentorado mentoradoId={mentorado.id} initialData={initial} onSave={salvar} />
+      <DadosLgpdMentorado mentoradoId={mentorado.id} />
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BLOCO LGPD — exportar / apagar dados (aparece no final da aba Cadastro)
+// ─────────────────────────────────────────────────────────────────────────────
+function DadosLgpdMentorado({ mentoradoId }: { mentoradoId: string }) {
+  const [exportando, setExportando] = useState(false)
+  const [apagando, setApagando] = useState(false)
+  const [confirmar, setConfirmar] = useState(false)
+  const [msg, setMsg] = useState("")
+
+  const exportar = async () => {
+    setExportando(true)
+    try {
+      const res = await portalFetch(`/api/lgpd/exportar?mentoradoId=${mentoradoId}`)
+      if (!res.ok) { setMsg("Erro ao exportar dados."); return }
+      const blob = await res.blob()
+      const a = document.createElement("a")
+      a.href = URL.createObjectURL(blob)
+      a.download = `meus-dados-${new Date().toISOString().slice(0,10)}.json`
+      a.click()
+    } catch { setMsg("Erro ao exportar dados.") }
+    finally { setExportando(false) }
+  }
+
+  const anonimizar = async () => {
+    setApagando(true)
+    try {
+      const res = await portalFetch("/api/lgpd/apagar", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mentoradoId, tipo: "anonimizar" }),
+      })
+      const j = await res.json()
+      if (res.ok) setMsg(j.mensagem || "Dados anonimizados.")
+      else setMsg(j.error || "Erro ao anonimizar.")
+    } catch { setMsg("Erro ao anonimizar.") }
+    finally { setApagando(false); setConfirmar(false) }
+  }
+
+  return (
+    <div className="rounded-2xl p-5 space-y-4 mt-2" style={{ background: C.card, border: `1px solid ${C.border}` }}>
+      <div className="flex items-center gap-2">
+        <ShieldCheck className="w-4 h-4" style={{ color: C.green }} />
+        <p className="text-sm font-semibold text-white">Meus dados (LGPD)</p>
+      </div>
+      <p className="text-xs leading-relaxed" style={{ color: C.muted }}>
+        Você tem direito de exportar ou apagar seus dados pessoais a qualquer momento.{" "}
+        <a href="/privacidade" target="_blank" rel="noopener" className="underline" style={{ color: C.green }}>Política de privacidade</a>
+      </p>
+
+      {msg && <p className="text-xs px-3 py-2 rounded-lg" style={{ background: `${C.green}12`, border: `1px solid ${C.green}33`, color: C.green }}>{msg}</p>}
+
+      <div className="flex flex-col gap-2">
+        <button onClick={exportar} disabled={exportando}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold disabled:opacity-50"
+          style={{ background: `${C.blue}18`, border: `1px solid ${C.blue}44`, color: C.blue }}>
+          {exportando ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+          Exportar meus dados (JSON)
+        </button>
+
+        {!confirmar ? (
+          <button onClick={() => setConfirmar(true)}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold"
+            style={{ background: `${C.red}10`, border: `1px solid ${C.red}33`, color: C.red }}>
+            <Trash2 className="w-4 h-4" /> Anonimizar meus dados pessoais
+          </button>
+        ) : (
+          <div className="rounded-xl p-3 space-y-2" style={{ background: `${C.red}10`, border: `1px solid ${C.red}33` }}>
+            <p className="text-xs" style={{ color: C.red }}>Isso substituirá nome, e-mail, telefone e foto por placeholders. Dados financeiros são mantidos por 5 anos por exigência legal.</p>
+            <div className="flex gap-2">
+              <button onClick={anonimizar} disabled={apagando}
+                className="px-3 py-1.5 rounded-lg text-xs font-bold disabled:opacity-50"
+                style={{ background: C.red, color: "#fff" }}>
+                {apagando ? "Apagando..." : "Confirmar"}
+              </button>
+              <button onClick={() => setConfirmar(false)} className="px-3 py-1.5 rounded-lg text-xs" style={{ color: C.muted }}>
+                Cancelar
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

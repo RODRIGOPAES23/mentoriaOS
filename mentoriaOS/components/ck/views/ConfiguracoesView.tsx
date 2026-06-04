@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { User, Moon, Building2, Check } from "lucide-react"
+import { User, Moon, Building2, Check, ShieldCheck, Download, Loader2 } from "lucide-react"
 import { C } from "@/utils/theme"
 import AdminView from "../AdminView"
 
@@ -19,7 +19,7 @@ interface Props {
   initialTab?: Aba
 }
 
-type Aba = "geral" | "tema" | "empresa"
+type Aba = "geral" | "tema" | "empresa" | "lgpd"
 
 const inputCls = "w-full px-3.5 py-2.5 rounded-lg text-sm text-white focus:outline-none transition-all"
 
@@ -34,6 +34,7 @@ export default function ConfiguracoesView({
     { id: "geral" as const, label: "Meu Perfil", icon: User },
     { id: "tema" as const, label: "Tema", icon: Moon },
     { id: "empresa" as const, label: "Empresa", icon: Building2 },
+    { id: "lgpd" as const, label: "Dados", icon: ShieldCheck },
   ]
 
   const inputStyle = { background: C.input, border: `1px solid ${C.border}` }
@@ -124,6 +125,72 @@ export default function ConfiguracoesView({
       {aba === "empresa" && (
         <AdminView mentorId={mentorId} accent={accent} onAbrirMentorado={onAbrirMentorado} />
       )}
+
+      {aba === "lgpd" && (
+        <LgpdView mentorId={mentorId} accent={accent} />
+      )}
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ABA DADOS & LGPD — exportar dados do mentor
+// ─────────────────────────────────────────────────────────────────────────────
+function LgpdView({ mentorId, accent }: { mentorId: string; accent: string }) {
+  const [exportando, setExportando] = useState(false)
+  const [msg, setMsg] = useState("")
+  const C2 = { card: "#0f2540", input: "#0c1c2c", border: "#1e3a5f", muted: "#4d7fa8", blue: "#4c9aff", green: "#00d68f" }
+
+  const exportar = async () => {
+    setExportando(true); setMsg("")
+    try {
+      const res = await fetch(`/api/lgpd/exportar?mentorId=${mentorId}`)
+      if (!res.ok) { setMsg("Erro ao exportar."); return }
+      const blob = await res.blob()
+      const a = document.createElement("a")
+      a.href = URL.createObjectURL(blob)
+      a.download = `dados-mentor-${new Date().toISOString().slice(0,10)}.json`
+      a.click()
+    } catch { setMsg("Erro ao exportar.") }
+    finally { setExportando(false) }
+  }
+
+  return (
+    <div className="max-w-lg space-y-5">
+      <div className="rounded-2xl p-6 space-y-4" style={{ background: C2.card, border: `1px solid ${C2.border}` }}>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${C2.green}18`, border: `1px solid ${C2.green}33` }}>
+            <ShieldCheck className="w-5 h-5" style={{ color: C2.green }} />
+          </div>
+          <div>
+            <h3 className="font-semibold text-white text-sm">Proteção de dados (LGPD)</h3>
+            <p className="text-xs mt-0.5" style={{ color: C2.muted }}>Lei 13.709/2018 · Seus direitos como titular</p>
+          </div>
+        </div>
+
+        <div className="text-xs space-y-2 leading-relaxed" style={{ color: C2.muted }}>
+          <p>Os dados da sua conta (nome, e-mail, metodologia) e o registro dos seus mentorados são tratados pela CKlareza exclusivamente para a prestação do serviço de gestão de mentoria.</p>
+          <p>Você é o <strong className="text-white">controlador dos dados dos seus mentorados</strong> perante a LGPD — e nós somos o operador. Cada mentorado também pode exportar e anonimizar os próprios dados pelo portal.</p>
+        </div>
+
+        {msg && <p className="text-xs px-3 py-2 rounded-lg" style={{ background: `${C2.green}12`, border: `1px solid ${C2.green}33`, color: C2.green }}>{msg}</p>}
+
+        <button onClick={exportar} disabled={exportando}
+          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold disabled:opacity-50 transition-all"
+          style={{ background: `${C2.blue}18`, border: `1px solid ${C2.blue}44`, color: C2.blue }}>
+          {exportando ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+          Exportar meus dados (JSON)
+        </button>
+
+        <div className="text-xs rounded-xl px-4 py-3 space-y-1" style={{ background: C2.input, border: `1px solid ${C2.border}` }}>
+          <p className="font-semibold text-white">Solicitar exclusão da conta</p>
+          <p style={{ color: C2.muted }}>Envie um e-mail para <strong className="text-white">contactus@cklareza.com</strong> com o assunto <strong className="text-white">"[LGPD] Exclusão de conta"</strong>. Responderemos em até 15 dias úteis.</p>
+        </div>
+
+        <a href="/privacidade" target="_blank" rel="noopener" className="block text-center text-xs underline" style={{ color: C2.muted }}>
+          Ver política de privacidade completa
+        </a>
+      </div>
     </div>
   )
 }

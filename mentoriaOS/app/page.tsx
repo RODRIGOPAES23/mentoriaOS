@@ -319,7 +319,10 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto px-5 py-10 flex flex-col md:flex-row items-center justify-between gap-4">
           <Logo size="sm" />
           <p className="text-xs" style={{ color: MUTED }}>© {new Date().getFullYear()} CKlareza · Lifetime Value · cklareza.com</p>
-          <Link href="/login" className="text-sm font-semibold" style={{ color: GOLD }}>{t.foot}</Link>
+          <div className="flex items-center gap-4">
+            <Link href="/privacidade" className="text-xs" style={{ color: MUTED }}>Privacidade</Link>
+            <Link href="/login" className="text-sm font-semibold" style={{ color: GOLD }}>{t.foot}</Link>
+          </div>
         </div>
       </footer>
     </div>
