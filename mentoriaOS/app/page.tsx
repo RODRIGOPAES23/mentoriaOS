@@ -41,7 +41,7 @@ const T: Record<Lang, any> = {
       ["White-label de verdade", "Sua marca, suas cores, seu domínio. O motor é nosso, a identidade é da sua empresa."],
     ],
     wlLabel: "WHITE-LABEL", wlT: "Sua marca. Nosso motor.",
-    wlText: "Coloque seu logo, suas cores e seu domínio. Seus clientes veem a sua empresa — e você entrega uma experiência de mentoria de nível enterprise sem construir nada.",
+    wlText: "Seus clientes com CKlareza na sua marca, seu estilo, seu método e sua filosofia.",
     wlBullets: ["Logo, cores e domínio próprios", "Vários mentores por empresa", "Cada um vê só o que é seu", "Revenda para outros clientes"],
     wlCardT: "Painel de controle do dono", wlCardD: "Gerencie todas as empresas, mentores e mentorados num só lugar.",
     propLabel: "NOSSO PROPÓSITO", propT: "Transformar vidas.",
