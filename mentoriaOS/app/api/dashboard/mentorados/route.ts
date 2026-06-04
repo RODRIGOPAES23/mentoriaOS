@@ -1,4 +1,5 @@
 import { adminClient } from "@/lib/supabase-server"
+import { mentorAutorizado, naoAutorizado } from "@/lib/auth-guards"
 
 export const dynamic = "force-dynamic"
 export const revalidate = 0
@@ -12,6 +13,8 @@ export async function GET(request: Request) {
   const supabase = admin()
   const url = new URL(request.url)
   const mentorId = url.searchParams.get("mentorId")
+
+  if (!(await mentorAutorizado(mentorId))) return naoAutorizado()
 
   let query = supabase
     .from("mentorados")
