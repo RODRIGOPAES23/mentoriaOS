@@ -1,10 +1,8 @@
 import Link from "next/link"
 import { Sparkles, ArrowRight, Linkedin, Brain } from "lucide-react"
+import { SC_LIGHT } from "@/lib/colors-light"
 
-export const SC = {
-  bg: "#0a1420", card: "#0f2030", card2: "#112a4a", border: "#1e3450",
-  muted: "#7fa0bd", gold: "#d4af37", goldL: "#f0d97d", teal: "#13a3a3",
-}
+export const SC = SC_LIGHT
 
 const NAV = [
   { label: "Recursos", href: "/recursos" },
@@ -16,7 +14,7 @@ const NAV = [
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-40 backdrop-blur-md" style={{ background: `${SC.bg}cc`, borderBottom: `1px solid ${SC.border}` }}>
+    <header className="sticky top-0 z-40 backdrop-blur-md" style={{ background: `${SC.bg}f0`, borderBottom: `1px solid ${SC.border}` }}>
       <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
           <Sparkles className="w-[22px] h-[22px]" style={{ color: SC.gold }} />
@@ -26,9 +24,9 @@ export function SiteHeader() {
           </div>
         </Link>
         <nav className="hidden md:flex items-center gap-7 text-sm" style={{ color: SC.muted }}>
-          {NAV.map(n => <Link key={n.href} href={n.href} className="hover:text-white transition-colors">{n.label}</Link>)}
+          {NAV.map(n => <Link key={n.href} href={n.href} className="hover:text-black transition-colors">{n.label}</Link>)}
         </nav>
-        <Link href="/login" className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold" style={{ background: SC.gold, color: "#1a1407" }}>
+        <Link href="/login" className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold" style={{ background: SC.teal, color: "#ffffff" }}>
           Entrar <ArrowRight className="w-4 h-4" />
         </Link>
       </div>
@@ -38,7 +36,7 @@ export function SiteHeader() {
 
 export function SiteFooter() {
   return (
-    <footer style={{ borderTop: `1px solid ${SC.border}`, background: SC.bg }}>
+    <footer style={{ borderTop: `1px solid ${SC.border}`, background: "#f9fafb" }}>
       <div className="max-w-6xl mx-auto px-5 py-12 grid md:grid-cols-4 gap-8">
         <div className="md:col-span-1">
           <div className="flex items-center gap-2">

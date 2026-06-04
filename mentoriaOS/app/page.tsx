@@ -11,10 +11,10 @@ import {
 const GOLD = "#d4af37"
 const GOLD_LIGHT = "#f0d97d"
 const TEAL = "#13a3a3"
-const BG = "#0a1420"
-const CARD = "#0f2030"
-const BORDER = "#1e3450"
-const MUTED = "#7fa0bd"
+const BG = "#ffffff"
+const CARD = "#f8f9fa"
+const BORDER = "#e5e7eb"
+const MUTED = "#6b7280"
 
 type Lang = "pt" | "en" | "es"
 const LANGS: { code: Lang; label: string }[] = [
