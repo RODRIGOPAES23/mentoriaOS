@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
+import { CookieBanner } from "@/components/site/CookieBanner"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" })
 
@@ -98,6 +99,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="antialiased text-white" style={{ background: "#0a1420" }}>
         {children}
+        <CookieBanner />
       </body>
     </html>
   )
