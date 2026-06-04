@@ -48,7 +48,12 @@ export const metadata: Metadata = {
   verification: { google: "I1MFavBSn25MdEPJkXDWWYi3URoBX1THuwlbSkhBuT0" },
 }
 
-export const viewport = { width: "device-width", initialScale: 1, themeColor: "#0a1420" }
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: "#0a1420",
+}
 
 const JSONLD = {
   "@context": "https://schema.org",
@@ -95,6 +100,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="pt-BR" suppressHydrationWarning className={inter.variable}>
       <head>
+        {/* PWA — iOS Safari (não lê manifest.json, precisa de meta tags próprias) */}
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="CKlareza" />
+        <link rel="apple-touch-icon" href="/icon.png" />
+        {/* PWA — Android Chrome */}
+        <meta name="mobile-web-app-capable" content="yes" />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(JSONLD) }} />
       </head>
       <body className="antialiased text-white" style={{ background: "#0a1420" }}>
