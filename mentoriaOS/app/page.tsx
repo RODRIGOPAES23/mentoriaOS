@@ -304,6 +304,41 @@ export default function LandingPage() {
         }) }} />
       </section>
 
+      {/* CONFIANÇA & SEGURANÇA */}
+      <section className="py-20" style={{ background: CARD, borderTop: `1px solid ${BORDER}`, borderBottom: `1px solid ${BORDER}` }}>
+        <div className="max-w-4xl mx-auto px-5">
+          <div className="text-center mb-12">
+            <ShieldCheck className="w-10 h-10 mx-auto mb-4" style={{ color: TEAL }} />
+            <span className="text-xs font-bold tracking-[0.3em]" style={{ color: TEAL }}>CONFIANÇA</span>
+            <h2 className="text-3xl font-bold mt-3">Segurança em primeiro lugar</h2>
+            <p className="mt-3 text-lg" style={{ color: MUTED }}>Construída para empresas que levam privacidade e proteção de dados a sério.</p>
+          </div>
+          <div className="grid md:grid-cols-2 gap-4 mb-8">
+            <div className="flex items-start gap-3 rounded-xl p-4" style={{ background: `${TEAL}11`, border: `1px solid ${TEAL}33` }}>
+              <Check className="w-5 h-5 shrink-0 mt-1" style={{ color: TEAL }} />
+              <span className="text-sm">100 em SEO e Boas Práticas — Google PageSpeed</span>
+            </div>
+            <div className="flex items-start gap-3 rounded-xl p-4" style={{ background: `${TEAL}11`, border: `1px solid ${TEAL}33` }}>
+              <Check className="w-5 h-5 shrink-0 mt-1" style={{ color: TEAL }} />
+              <span className="text-sm">Conforme à LGPD (Lei 13.709/2018)</span>
+            </div>
+            <div className="flex items-start gap-3 rounded-xl p-4" style={{ background: `${TEAL}11`, border: `1px solid ${TEAL}33` }}>
+              <Check className="w-5 h-5 shrink-0 mt-1" style={{ color: TEAL }} />
+              <span className="text-sm">Dados criptografados (em trânsito e repouso)</span>
+            </div>
+            <div className="flex items-start gap-3 rounded-xl p-4" style={{ background: `${TEAL}11`, border: `1px solid ${TEAL}33` }}>
+              <Check className="w-5 h-5 shrink-0 mt-1" style={{ color: TEAL }} />
+              <span className="text-sm">Isolamento de dados por papel e empresa</span>
+            </div>
+          </div>
+          <div className="text-center">
+            <Link href="/seguranca" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm" style={{ background: `${TEAL}18`, color: TEAL, border: `1px solid ${TEAL}44` }}>
+              Saiba mais sobre segurança <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section id="planos" className="max-w-3xl mx-auto px-5 py-24 text-center">
         <Brain className="w-10 h-10 mx-auto mb-4" style={{ color: "#a855f7" }} />

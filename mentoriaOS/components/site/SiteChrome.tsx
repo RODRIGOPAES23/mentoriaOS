@@ -51,7 +51,7 @@ export function SiteFooter() {
           </a>
         </div>
         <FooterCol title="Produto" links={[["Recursos", "/recursos"], ["Preços", "/precos"], ["Entrar", "/login"]]} />
-        <FooterCol title="Empresa" links={[["Sobre", "/sobre"], ["Blog", "/blog"], ["Contato", "/contato"], ["Privacidade", "/privacidade"]]} />
+        <FooterCol title="Empresa" links={[["Sobre", "/sobre"], ["Segurança", "/seguranca"], ["Blog", "/blog"], ["Contato", "/contato"], ["Privacidade", "/privacidade"]]} />
         <FooterCol title="Comece" links={[["Agende uma demo", "/contato"], ["Acessar o sistema", "/login"]]} />
       </div>
       <div className="max-w-6xl mx-auto px-5 py-5 text-xs flex flex-col md:flex-row items-center justify-between gap-3" style={{ borderTop: `1px solid ${SC.border}`, color: SC.muted }}>
