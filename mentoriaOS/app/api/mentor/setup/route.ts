@@ -1,10 +1,12 @@
 import { createClient } from "@supabase/supabase-js"
+import { isAdminAuthorized, adminUnauthorized } from "@/lib/admin-auth"
 
 export const dynamic = "force-dynamic"
 
 const NO_CACHE = { "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0" }
 
 export async function POST(request: Request) {
+  if (!await isAdminAuthorized(request)) return adminUnauthorized()
   let body: any
   try {
     body = await request.json()

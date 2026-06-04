@@ -1,10 +1,10 @@
 import { adminClient } from "@/lib/supabase-server"
+import { sessaoMentorValida, naoAutorizado } from "@/lib/auth-guards"
 
 export const dynamic = "force-dynamic"
 
-// PATCH /api/dashboard/mentorados/reorder
-// Body: { items: [{id: string, ordem: number}] }
 export async function PATCH(request: Request) {
+  if (!await sessaoMentorValida()) return naoAutorizado()
   let body: any
   try { body = await request.json() }
   catch { return Response.json({ error: "Body inválido" }, { status: 400 }) }

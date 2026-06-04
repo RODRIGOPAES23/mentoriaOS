@@ -1,9 +1,12 @@
 import { adminClient } from "@/lib/supabase-server"
+import { mentorAutorizado, sessaoMentorValida, naoAutorizado } from "@/lib/auth-guards"
 
 export const dynamic = "force-dynamic"
 const NO_CACHE = { "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0" }
 
 export async function GET(request: Request) {
+  if (!await sessaoMentorValida()) return naoAutorizado()
+
   const supabase = adminClient()
   try {
     const url = new URL(request.url)
@@ -28,6 +31,8 @@ export async function PATCH(request: Request) {
     const url = new URL(request.url)
     const mentorId = url.searchParams.get("mentorId")
     if (!mentorId) return Response.json({ error: "mentorId obrigatório" }, { status: 400 })
+
+    if (!await mentorAutorizado(mentorId)) return naoAutorizado()
 
     const body = await request.json()
     const { nome, nicho_foco, metodo_trabalho, filosofia } = body

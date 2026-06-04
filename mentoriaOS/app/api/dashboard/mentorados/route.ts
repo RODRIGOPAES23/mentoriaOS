@@ -81,6 +81,8 @@ export async function POST(request: Request) {
   const url = new URL(request.url)
   const mentorId = body.mentor_id || url.searchParams.get("mentorId")
 
+  if (!(await mentorAutorizado(mentorId))) return naoAutorizado()
+
   const supabase = admin()
   // Código de acesso único do portal do mentorado (8 chars, sem ambíguos)
   const gerarCodigo = () => {
