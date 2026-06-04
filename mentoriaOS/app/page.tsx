@@ -133,8 +133,8 @@ function Logo({ size = "md" }: { size?: "md" | "sm" }) {
       <div className="leading-none">
         <span className="font-bold tracking-tight" style={{
           fontSize: size === "sm" ? 18 : 22,
-          background: `linear-gradient(180deg, ${GOLD_LIGHT} 0%, ${GOLD} 55%, #9c7d2e 100%)`,
-          WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent",
+          color: GOLD,
+          textShadow: `0 2px 4px rgba(0,0,0,0.1)`,
         }}>CKlareza</span>
         {size === "md" && <span className="block text-[9px] tracking-[0.25em] mt-0.5" style={{ color: TEAL }}>LIFETIME VALUE</span>}
       </div>
@@ -206,15 +206,13 @@ export default function LandingPage() {
             <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs mb-8 font-bold" style={{ background: `${GOLD}18`, border: `2px solid ${GOLD}44`, color: GOLD_LIGHT, boxShadow: `0 10px 40px ${GOLD}22` }}>
               <Star className="w-4 h-4 animate-pulse" /> {t.badge}
             </span>
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[0.95]" style={{ transform: "translateZ(20px)", textShadow: `0 20px 40px ${GOLD}40` }}>
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[0.95]" style={{ transform: "translateZ(20px)", color: "#0f172a" }}>
               {t.h1a}<br />
               <span style={{
-                background: `linear-gradient(135deg, ${GOLD_LIGHT}, ${GOLD}, ${GOLD_LIGHT})`,
-                WebkitBackgroundClip: "text",
-                backgroundClip: "text",
-                color: "transparent",
+                color: GOLD,
+                fontWeight: 900,
                 display: "inline-block",
-                filter: "drop-shadow(0 10px 30px " + GOLD + "44)"
+                textShadow: `0 2px 4px rgba(0,0,0,0.1), 0 10px 30px ${GOLD}44`
               }}>{t.h1b}</span>
             </h1>
             <p className="text-xl md:text-2xl mt-8 max-w-3xl mx-auto leading-relaxed font-light" style={{ color: MUTED, transform: "translateZ(10px)" }}>
@@ -301,13 +299,9 @@ export default function LandingPage() {
           </div>
           <span className="inline-block text-xs font-bold tracking-[0.3em] px-4 py-2 rounded-full" style={{ color: TEAL, background: `${TEAL}11`, border: `1px solid ${TEAL}33`, transform: "translateZ(10px)" }}>{t.propLabel}</span>
           <h2 className="text-5xl md:text-6xl font-black mt-6 tracking-tight" style={{
-            background: `linear-gradient(135deg, ${GOLD_LIGHT}, ${GOLD}, ${GOLD_LIGHT})`,
-            WebkitBackgroundClip: "text",
-            backgroundClip: "text",
-            color: "transparent",
+            color: GOLD,
             transform: "translateZ(12px)",
-            textShadow: "0 20px 40px " + GOLD + "33",
-            filter: "drop-shadow(0 10px 25px " + GOLD + "44)"
+            textShadow: `0 2px 4px rgba(0,0,0,0.1), 0 15px 40px ${GOLD}44`
           }}>{t.propT}</h2>
           <p className="mt-6 text-xl leading-relaxed max-w-2xl mx-auto font-light" style={{ color: MUTED, transform: "translateZ(8px)" }}>{t.propText}</p>
         </div>
@@ -444,7 +438,7 @@ export default function LandingPage() {
             <div className="flex items-center gap-1.5" style={{ opacity: 0.65 }}>
               <span className="text-[9px]" style={{ color: MUTED, letterSpacing: "0.08em" }}>POWERED BY</span>
               <Sparkles className="w-2.5 h-2.5" style={{ color: GOLD }} />
-              <span className="text-[10px] font-bold" style={{ background: `linear-gradient(180deg, ${GOLD}, #9c7d2e)`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>CKlareza</span>
+              <span className="text-[10px] font-bold" style={{ color: GOLD }}>CKlareza</span>
               <span className="text-[9px]" style={{ color: MUTED }}>·</span>
               <Brain className="w-2.5 h-2.5" style={{ color: TEAL }} />
               <span className="text-[10px] font-bold" style={{ color: TEAL, letterSpacing: "0.04em" }}>GRATIDÃO</span>
