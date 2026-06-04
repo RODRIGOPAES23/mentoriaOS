@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, useScroll, useSpring, useInView, AnimatePresence } from 'framer-motion';
 import { Search, ArrowRight, CheckCircle2, Sparkles, Layout, Users, Zap, ShieldCheck } from 'lucide-react';
