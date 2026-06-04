@@ -75,7 +75,7 @@ const T: Record<Lang, any> = {
       ["True white-label", "Your brand, your colors, your domain. The engine is ours, the identity is your company's."],
     ],
     wlLabel: "WHITE-LABEL", wlT: "Your brand. Our engine.",
-    wlText: "Add your logo, colors and domain. Your clients see your company — and you deliver an enterprise-grade mentorship experience without building anything.",
+    wlText: "Your clients experience CKlareza under your brand, your style, your method and your philosophy.",
     wlBullets: ["Own logo, colors and domain", "Multiple mentors per company", "Each sees only what's theirs", "Resell to other clients"],
     wlCardT: "Owner control panel", wlCardD: "Manage all companies, mentors and mentees in one place.",
     propLabel: "OUR PURPOSE", propT: "Transform lives.",
@@ -109,7 +109,7 @@ const T: Record<Lang, any> = {
       ["White-label real", "Tu marca, tus colores, tu dominio. El motor es nuestro, la identidad es de tu empresa."],
     ],
     wlLabel: "WHITE-LABEL", wlT: "Tu marca. Nuestro motor.",
-    wlText: "Pon tu logo, colores y dominio. Tus clientes ven tu empresa — y entregas una experiencia de mentoría enterprise sin construir nada.",
+    wlText: "Tus clientes con CKlareza en tu marca, tu estilo, tu método y tu filosofía.",
     wlBullets: ["Logo, colores y dominio propios", "Varios mentores por empresa", "Cada uno ve solo lo suyo", "Revende a otros clientes"],
     wlCardT: "Panel de control del dueño", wlCardD: "Gestiona todas las empresas, mentores y mentoreados en un solo lugar.",
     propLabel: "NUESTRO PROPÓSITO", propT: "Transformar vidas.",
@@ -318,7 +318,17 @@ export default function LandingPage() {
       <footer style={{ borderTop: `1px solid ${BORDER}` }}>
         <div className="max-w-6xl mx-auto px-5 py-10 flex flex-col md:flex-row items-center justify-between gap-4">
           <Logo size="sm" />
-          <p className="text-xs" style={{ color: MUTED }}>© {new Date().getFullYear()} CKlareza · Lifetime Value · cklareza.com</p>
+          <div className="flex flex-col items-center gap-1.5">
+            <p className="text-xs" style={{ color: MUTED }}>© {new Date().getFullYear()} CKlareza · Lifetime Value · cklareza.com</p>
+            <div className="flex items-center gap-1.5" style={{ opacity: 0.65 }}>
+              <span className="text-[9px]" style={{ color: MUTED, letterSpacing: "0.08em" }}>POWERED BY</span>
+              <Sparkles className="w-2.5 h-2.5" style={{ color: GOLD }} />
+              <span className="text-[10px] font-bold" style={{ background: `linear-gradient(180deg, ${GOLD}, #9c7d2e)`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>CKlareza</span>
+              <span className="text-[9px]" style={{ color: MUTED }}>·</span>
+              <Brain className="w-2.5 h-2.5" style={{ color: TEAL }} />
+              <span className="text-[10px] font-bold" style={{ color: TEAL, letterSpacing: "0.04em" }}>GRATIDÃO</span>
+            </div>
+          </div>
           <div className="flex items-center gap-4">
             <Link href="/privacidade" className="text-xs" style={{ color: MUTED }}>Privacidade</Link>
             <Link href="/login" className="text-sm font-semibold" style={{ color: GOLD }}>{t.foot}</Link>

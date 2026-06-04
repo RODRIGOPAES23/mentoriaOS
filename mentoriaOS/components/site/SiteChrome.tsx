@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Sparkles, ArrowRight, Linkedin } from "lucide-react"
+import { Sparkles, ArrowRight, Linkedin, Brain } from "lucide-react"
 
 export const SC = {
   bg: "#0a1420", card: "#0f2030", card2: "#112a4a", border: "#1e3450",
@@ -54,8 +54,16 @@ export function SiteFooter() {
         <FooterCol title="Empresa" links={[["Sobre", "/sobre"], ["Blog", "/blog"], ["Contato", "/contato"], ["Privacidade", "/privacidade"]]} />
         <FooterCol title="Comece" links={[["Agende uma demo", "/contato"], ["Acessar o sistema", "/login"]]} />
       </div>
-      <div className="max-w-6xl mx-auto px-5 py-5 text-xs flex flex-col md:flex-row items-center justify-between gap-2" style={{ borderTop: `1px solid ${SC.border}`, color: SC.muted }}>
+      <div className="max-w-6xl mx-auto px-5 py-5 text-xs flex flex-col md:flex-row items-center justify-between gap-3" style={{ borderTop: `1px solid ${SC.border}`, color: SC.muted }}>
         <span>© {new Date().getFullYear()} CKlareza · Lifetime Value</span>
+        <div className="flex items-center gap-1.5" style={{ opacity: 0.72 }}>
+          <span style={{ letterSpacing: "0.08em" }}>POWERED BY</span>
+          <Sparkles className="w-3 h-3" style={{ color: SC.gold }} />
+          <span className="font-bold" style={{ background: `linear-gradient(180deg, ${SC.goldL}, ${SC.gold})`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>CKlareza</span>
+          <span>·</span>
+          <Brain className="w-3 h-3" style={{ color: SC.teal }} />
+          <span className="font-bold" style={{ color: SC.teal, letterSpacing: "0.04em" }}>GRATIDÃO</span>
+        </div>
         <span>cklareza.com</span>
       </div>
     </footer>
