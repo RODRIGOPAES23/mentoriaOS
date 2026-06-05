@@ -12,6 +12,30 @@
   --accent-blue:   #4c9aff;
   --accent-gold:   #f59e0b;
   --accent-red:    #f05252;
+
+  /* ── Site (marketing) — tema LIGHT (Google-Clean) ── */
+  --sc-bg: #ffffff;        --sc-bg-rgb: 255,255,255;
+  --sc-card: #f8f9fa;
+  --sc-card2: #f9fafb;
+  --sc-border: #e5e7eb;
+  --sc-muted: #6b7280;
+  --sc-text: #1f2937;
+  --sc-gold: #d4af37;      --sc-gold-rgb: 212,175,55;
+  --sc-goldl: #9a7916;     /* ouro legível p/ links em fundo claro */
+  --sc-teal: #13a3a3;      --sc-teal-rgb: 19,163,163;
+}
+
+/* ── Site (marketing) — tema DARK cyberpunk (neon ciano + verde) ── */
+html.dark {
+  --sc-bg: #060913;        --sc-bg-rgb: 6,9,19;
+  --sc-card: #0c1322;
+  --sc-card2: #0a1020;
+  --sc-border: #1e3a5f;
+  --sc-muted: #8aa0c0;
+  --sc-text: #e8f1ff;
+  --sc-gold: #e8c24a;      --sc-gold-rgb: 232,194,74;
+  --sc-goldl: #67e8f9;     /* ciano neon p/ links no dark */
+  --sc-teal: #22d3ee;      --sc-teal-rgb: 34,211,238;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }

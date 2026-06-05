@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { SiteHeader, SiteFooter } from "@/components/site/SiteChrome"
+import { SiteHeader, SiteFooter, LifetimeValueCTA } from "@/components/site/SiteChrome"
 
 export const metadata = {
   title: "Política de Privacidade — CKlareza",
@@ -10,17 +10,17 @@ const UPDATED = "04 de junho de 2026"
 
 export default function PrivacidadePage() {
   return (
-    <div style={{ background: "#0a1420", color: "#fff" }} className="min-h-screen">
+    <div style={{ background: "var(--sc-bg)", color: "var(--sc-text)" }} className="min-h-screen">
       <SiteHeader />
       <main className="max-w-3xl mx-auto px-5 py-16">
         <h1 className="text-3xl font-bold mb-2">Política de Privacidade</h1>
-        <p className="text-sm mb-10" style={{ color: "#7fa0bd" }}>Última atualização: {UPDATED}</p>
+        <p className="text-sm mb-10" style={{ color: "var(--sc-muted)" }}>Última atualização: {UPDATED}</p>
 
-        <div className="space-y-10 text-sm leading-relaxed" style={{ color: "#b8d0e8" }}>
+        <div className="space-y-10 text-sm leading-relaxed" style={{ color: "var(--sc-muted)" }}>
 
           <Section title="1. Quem somos">
-            <p>A <strong className="text-white">CKlareza</strong> (nome fantasia, CNPJ em processo de abertura) é uma plataforma de gestão de mentoria white-label. Neste documento, "CKlareza", "nós" ou "plataforma" se referem ao serviço disponível em <strong className="text-white">cklareza.com</strong>.</p>
-            <p className="mt-3">Para dúvidas sobre privacidade ou exercício de direitos, entre em contato com nosso encarregado de dados (DPO) pelo e-mail <strong className="text-white">contactus@cklareza.com</strong>.</p>
+            <p>A <strong className="text-[var(--sc-text)]">CKlareza</strong> (RP Sap IA · CNPJ 59.722.807/0001-80) é uma plataforma de gestão de mentoria white-label. Neste documento, "CKlareza", "nós" ou "plataforma" se referem ao serviço disponível em <strong className="text-[var(--sc-text)]">cklareza.com</strong>.</p>
+            <p className="mt-3">Para dúvidas sobre privacidade ou exercício de direitos, entre em contato com nosso encarregado de dados (DPO) pelo e-mail <strong className="text-[var(--sc-text)]">contactus@cklareza.com</strong>.</p>
           </Section>
 
           <Section title="2. Dados que coletamos">
@@ -35,9 +35,9 @@ export default function PrivacidadePage() {
           <Section title="3. Finalidade e base legal (LGPD)">
             <table className="w-full text-xs mt-3 border-collapse">
               <thead>
-                <tr style={{ borderBottom: "1px solid #1e3450" }}>
-                  <th className="text-left py-2 pr-4 font-semibold text-white">Finalidade</th>
-                  <th className="text-left py-2 font-semibold text-white">Base legal (LGPD art. 7)</th>
+                <tr style={{ borderBottom: "1px solid var(--sc-border)" }}>
+                  <th className="text-left py-2 pr-4 font-semibold text-[var(--sc-text)]">Finalidade</th>
+                  <th className="text-left py-2 font-semibold text-[var(--sc-text)]">Base legal (LGPD art. 7)</th>
                 </tr>
               </thead>
               <tbody className="space-y-2">
@@ -48,7 +48,7 @@ export default function PrivacidadePage() {
                   ["Melhorias e desenvolvimento do produto", "Legítimo interesse — inciso IX"],
                   ["Comunicações sobre o serviço", "Consentimento — inciso I"],
                 ].map(([fin, base]) => (
-                  <tr key={fin} style={{ borderBottom: "1px solid #1a2e45" }}>
+                  <tr key={fin} style={{ borderBottom: "1px solid var(--sc-border)" }}>
                     <td className="py-2 pr-4">{fin}</td>
                     <td className="py-2">{base}</td>
                   </tr>
@@ -58,7 +58,7 @@ export default function PrivacidadePage() {
           </Section>
 
           <Section title="4. Compartilhamento de dados">
-            <p>Seus dados <strong className="text-white">não são vendidos nem compartilhados com terceiros</strong> para fins comerciais. Compartilhamos apenas com:</p>
+            <p>Seus dados <strong className="text-[var(--sc-text)]">não são vendidos nem compartilhados com terceiros</strong> para fins comerciais. Compartilhamos apenas com:</p>
             <ul className="mt-3 space-y-2 list-none">
               <Item label="Seu mentor">O mentor responsável pela sua mentoria tem acesso aos seus dados cadastrais e de progresso.</Item>
               <Item label="Supabase (banco de dados)">Infraestrutura de armazenamento (GDPR-compliant, servidores no Brasil/EUA).</Item>
@@ -70,8 +70,8 @@ export default function PrivacidadePage() {
           <Section title="5. Retenção dos dados">
             <p>Seus dados são mantidos enquanto sua conta estiver ativa. Após o encerramento:</p>
             <ul className="mt-3 space-y-1.5 list-disc pl-5">
-              <li>Dados de mensagens e check-ins são excluídos em até <strong className="text-white">30 dias</strong>.</li>
-              <li>Dados financeiros são mantidos por <strong className="text-white">5 anos</strong> para fins fiscais/contábeis, conforme legislação brasileira.</li>
+              <li>Dados de mensagens e check-ins são excluídos em até <strong className="text-[var(--sc-text)]">30 dias</strong>.</li>
+              <li>Dados financeiros são mantidos por <strong className="text-[var(--sc-text)]">5 anos</strong> para fins fiscais/contábeis, conforme legislação brasileira.</li>
               <li>Após este prazo, todos os dados são anonimizados ou excluídos permanentemente.</li>
             </ul>
           </Section>
@@ -87,13 +87,13 @@ export default function PrivacidadePage() {
                 ["Revogação de consentimento", "Retirar consentimento a qualquer momento, sem prejuízo dos tratamentos anteriores."],
                 ["Informação", "Saber com quais entidades seus dados são compartilhados."],
               ].map(([title, desc]) => (
-                <div key={title} className="rounded-xl p-4" style={{ background: "#0f2030", border: "1px solid #1e3450" }}>
-                  <p className="font-semibold text-white text-xs">{title}</p>
-                  <p className="mt-1 text-xs" style={{ color: "#7fa0bd" }}>{desc}</p>
+                <div key={title} className="rounded-xl p-4" style={{ background: "var(--sc-card)", border: "1px solid var(--sc-border)" }}>
+                  <p className="font-semibold text-[var(--sc-text)] text-xs">{title}</p>
+                  <p className="mt-1 text-xs" style={{ color: "var(--sc-muted)" }}>{desc}</p>
                 </div>
               ))}
             </div>
-            <p className="mt-4">Para exercer qualquer direito, envie um e-mail para <strong className="text-white">contactus@cklareza.com</strong> com o assunto <strong className="text-white">"[LGPD] + seu direito"</strong>. Responderemos em até <strong className="text-white">15 dias úteis</strong>. Você também pode exportar ou solicitar a exclusão dos seus dados diretamente pelo portal ou painel do mentor.</p>
+            <p className="mt-4">Para exercer qualquer direito, envie um e-mail para <strong className="text-[var(--sc-text)]">contactus@cklareza.com</strong> com o assunto <strong className="text-[var(--sc-text)]">"[LGPD] + seu direito"</strong>. Responderemos em até <strong className="text-[var(--sc-text)]">15 dias úteis</strong>. Você também pode exportar ou solicitar a exclusão dos seus dados diretamente pelo portal ou painel do mentor.</p>
           </Section>
 
           <Section title="7. Segurança">
@@ -107,7 +107,7 @@ export default function PrivacidadePage() {
           </Section>
 
           <Section title="8. Cookies e armazenamento local">
-            <p>Utilizamos cookies de sessão (Supabase Auth) e armazenamento local (<code className="px-1 rounded text-xs" style={{ background: "#1e3450" }}>localStorage</code>) para:</p>
+            <p>Utilizamos cookies de sessão (Supabase Auth) e armazenamento local (<code className="px-1 rounded text-xs" style={{ background: "var(--sc-card2)" }}>localStorage</code>) para:</p>
             <ul className="mt-2 space-y-1 list-disc pl-5">
               <li>Manter a sessão autenticada do mentor.</li>
               <li>Registrar preferências locais (idioma, sidebar, mentor selecionado).</li>
@@ -121,14 +121,15 @@ export default function PrivacidadePage() {
           </Section>
 
           <Section title="10. Contato">
-            <p>Encarregado de Proteção de Dados (DPO): <strong className="text-white">contactus@cklareza.com</strong><br />WhatsApp: <strong className="text-white">+55 48 97400-1405</strong></p>
+            <p>Encarregado de Proteção de Dados (DPO): <strong className="text-[var(--sc-text)]">contactus@cklareza.com</strong><br />WhatsApp: <strong className="text-[var(--sc-text)]">+55 48 97400-1405</strong></p>
           </Section>
         </div>
 
         <div className="mt-12 text-center">
-          <Link href="/" className="text-sm" style={{ color: "#7fa0bd" }}>← Voltar ao início</Link>
+          <Link href="/" className="text-sm" style={{ color: "var(--sc-muted)" }}>← Voltar ao início</Link>
         </div>
       </main>
+      <LifetimeValueCTA />
       <SiteFooter />
     </div>
   )
@@ -137,7 +138,7 @@ export default function PrivacidadePage() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section>
-      <h2 className="text-base font-bold text-white mb-3" style={{ borderBottom: "1px solid #1e3450", paddingBottom: "8px" }}>{title}</h2>
+      <h2 className="text-base font-bold text-[var(--sc-text)] mb-3" style={{ borderBottom: "1px solid var(--sc-border)", paddingBottom: "8px" }}>{title}</h2>
       {children}
     </section>
   )
@@ -146,7 +147,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function Item({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <li className="flex gap-2">
-      <span className="font-semibold text-white shrink-0">{label}:</span>
+      <span className="font-semibold text-[var(--sc-text)] shrink-0">{label}:</span>
       <span>{children}</span>
     </li>
   )

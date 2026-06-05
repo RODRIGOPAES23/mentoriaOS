@@ -62,19 +62,54 @@ const JSONLD = {
       "@type": "Organization",
       "@id": `${SITE}/#organization`,
       name: "CKlareza",
+      legalName: "Rodrigo R. S. Paes Ltda",
+      alternateName: ["RP Sap IA", "CKlareza Lifetime Value"],
       url: SITE,
       logo: `${SITE}/logo.jpg`,
       slogan: "Lifetime Value",
       description: DESC,
       email: "contactus@cklareza.com",
-      sameAs: ["https://www.linkedin.com/in/cklareza-lifetime-value"],
-      contactPoint: {
-        "@type": "ContactPoint",
-        contactType: "sales",
-        email: "contactus@cklareza.com",
-        telephone: "+5548974001405",
-        availableLanguage: ["Portuguese", "English", "Spanish"],
+      telephone: "+5548974001405",
+      taxID: "59.722.807/0001-80",
+      vatID: "BR59.722.807/0001-80",
+      foundingDate: "2026",
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: "Rua 72, nº 223, Sala 1507 — Lote 12/15, Quadra C16, Jardim Goiás",
+        addressLocality: "Goiânia",
+        addressRegion: "GO",
+        postalCode: "74805-480",
+        addressCountry: "BR",
       },
+      founder: {
+        "@type": "Person",
+        name: "Rodrigo Paes",
+        jobTitle: "CEO & Fundador",
+        email: "rodrigo.paes.rj@gmail.com",
+      },
+      employee: {
+        "@type": "Person",
+        name: "Rodrigo Paes",
+        jobTitle: "CEO",
+      },
+      sameAs: ["https://www.linkedin.com/in/cklareza-lifetime-value"],
+      contactPoint: [
+        {
+          "@type": "ContactPoint",
+          contactType: "sales",
+          email: "contactus@cklareza.com",
+          telephone: "+5548974001405",
+          availableLanguage: ["Portuguese", "English", "Spanish"],
+        },
+        {
+          "@type": "ContactPoint",
+          contactType: "customer support",
+          email: "rodrigo.paes.rj@gmail.com",
+          telephone: "+5548974001405",
+          areaServed: "BR",
+          availableLanguage: ["Portuguese"],
+        },
+      ],
     },
     {
       "@type": "WebSite",
@@ -118,6 +153,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="pt-BR" suppressHydrationWarning className={inter.variable}>
       <head>
+        {/* Anti-flash de tema: aplica html.dark ANTES da pintura (padrão = dark) */}
+        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('ck_theme');if(t==='light'){document.documentElement.classList.remove('dark');}else{document.documentElement.classList.add('dark');}}catch(e){document.documentElement.classList.add('dark');}})();` }} />
         {/* hreflang — indica ao Google as versões por idioma */}
         <link rel="alternate" hrefLang="pt-BR" href="https://cklareza.com/" />
         <link rel="alternate" hrefLang="en"    href="https://cklareza.com/" />

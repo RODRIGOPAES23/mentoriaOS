@@ -37,14 +37,19 @@ export const COLORS_LIGHT = {
   get danger() { return "#ef4444" },
 }
 
-// Alias para compatibilidade com código existente que usa "SC"
+// "SC" agora aponta para CSS variables (--sc-*) definidas em globals.css.
+// Assim TODOS os usos sólidos (background: SC.bg, color: SC.muted, ...) trocam
+// entre light/dark automaticamente via a classe html.dark — sem JS/re-render,
+// funcionando inclusive em Server Components. Usos com opacidade (${SC.x}NN)
+// foram convertidos para rgb(var(--sc-x-rgb) / .NN) nas páginas.
 export const SC_LIGHT = {
-  bg: COLORS_LIGHT.bg,
-  card: COLORS_LIGHT.card,
-  card2: COLORS_LIGHT.bgAlt,
-  border: COLORS_LIGHT.border,
-  muted: COLORS_LIGHT.textMuted,
-  gold: COLORS_LIGHT.gold,
-  goldL: COLORS_LIGHT.goldLight,
-  teal: COLORS_LIGHT.teal,
+  bg: "var(--sc-bg)",
+  card: "var(--sc-card)",
+  card2: "var(--sc-card2)",
+  border: "var(--sc-border)",
+  muted: "var(--sc-muted)",
+  text: "var(--sc-text)",
+  gold: "var(--sc-gold)",
+  goldL: "var(--sc-goldl)",
+  teal: "var(--sc-teal)",
 }

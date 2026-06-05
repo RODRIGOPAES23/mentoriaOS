@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { Check, ArrowRight, Sparkles } from "lucide-react"
-import { SiteHeader, SiteFooter, SC } from "@/components/site/SiteChrome"
+import { SiteHeader, SiteFooter, LifetimeValueCTA, SC } from "@/components/site/SiteChrome"
 
 export const metadata: Metadata = {
   title: "Preços — Planos de Mentoria White-Label",
@@ -28,7 +28,7 @@ const PLANOS = [
 
 export default function Precos() {
   return (
-    <div style={{ background: SC.bg, color: "#1f2937" }} className="min-h-screen">
+    <div style={{ background: SC.bg, color: SC.text }} className="min-h-screen">
       <SiteHeader />
       <section className="max-w-4xl mx-auto px-5 pt-16 pb-10 text-center">
         <h1 className="text-4xl md:text-5xl font-bold tracking-tight">Planos sob medida</h1>
@@ -39,7 +39,7 @@ export default function Precos() {
 
       <section className="max-w-5xl mx-auto px-5 pb-16 grid md:grid-cols-3 gap-5 items-start">
         {PLANOS.map(p => (
-          <div key={p.nome} className="rounded-2xl p-7 relative" style={{ background: SC.card, border: `1px solid ${p.destaque ? SC.gold : SC.border}`, boxShadow: p.destaque ? `0 20px 60px -20px ${SC.gold}33` : "none" }}>
+          <div key={p.nome} className="rounded-2xl p-7 relative" style={{ background: SC.card, border: `1px solid ${p.destaque ? SC.gold : SC.border}`, boxShadow: p.destaque ? `0 20px 60px -20px rgb(var(--sc-gold-rgb) / 0.2)` : "none" }}>
             {p.destaque && <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full" style={{ background: SC.gold, color: "#1a1407" }}>Mais escolhido</span>}
             <h2 className="text-xl font-bold flex items-center gap-2">{p.destaque && <Sparkles className="w-4 h-4" style={{ color: SC.gold }} />}{p.nome}</h2>
             <p className="text-sm mt-1.5 min-h-[40px]" style={{ color: SC.muted }}>{p.sub}</p>
@@ -48,7 +48,7 @@ export default function Precos() {
               {p.feats.map(f => <li key={f} className="flex items-start gap-2 text-sm"><Check className="w-4 h-4 mt-0.5 shrink-0" style={{ color: SC.teal }} /> {f}</li>)}
             </ul>
             <Link href="/contato" className="mt-6 w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl font-bold transition-all"
-              style={p.destaque ? { background: SC.gold, color: "#1a1407" } : { background: SC.bg, border: `1px solid ${SC.border}`, color: "#1f2937" }}>
+              style={p.destaque ? { background: SC.gold, color: "#1a1407" } : { background: SC.bg, border: `1px solid ${SC.border}`, color: SC.text }}>
               Falar com a gente <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
@@ -59,6 +59,7 @@ export default function Precos() {
         <p className="text-lg" style={{ color: SC.muted }}>Quer ver funcionando antes de decidir?</p>
         <Link href="/contato" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-bold mt-5" style={{ background: SC.gold, color: "#1a1407" }}>Agende uma demonstração <ArrowRight className="w-5 h-5" /></Link>
       </section>
+      <LifetimeValueCTA />
       <SiteFooter />
     </div>
   )

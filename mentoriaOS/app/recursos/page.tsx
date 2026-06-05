@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import Image from "next/image"
 import { LayoutDashboard, DollarSign, KanbanSquare, Brain, Phone, Building2, ArrowRight, Check } from "lucide-react"
-import { SiteHeader, SiteFooter, SC } from "@/components/site/SiteChrome"
+import { SiteHeader, SiteFooter, LifetimeValueCTA, SC } from "@/components/site/SiteChrome"
 
 export const metadata: Metadata = {
   title: "Recursos — Financeiro, Atividades e IA para Mentoria",
@@ -21,7 +21,7 @@ const FEATURES = [
 
 export default function Recursos() {
   return (
-    <div style={{ background: SC.bg, color: "#1f2937" }} className="min-h-screen">
+    <div style={{ background: SC.bg, color: SC.text }} className="min-h-screen">
       <SiteHeader />
       <section className="max-w-4xl mx-auto px-5 pt-16 pb-10 text-center">
         <h1 className="text-4xl md:text-5xl font-bold tracking-tight">Tudo para operar sua mentoria</h1>
@@ -52,7 +52,7 @@ export default function Recursos() {
             ["produto-atividades", "Atividades em Kanban: a fazer, atrasadas e concluídas — de todos os mentorados."],
             ["produto-financeiro", "Financeiro: cobranças, inadimplência e projeção, com cada pagamento editável."],
           ].map(([img, cap]) => (
-            <figure key={img} className="rounded-2xl p-1.5 overflow-hidden" style={{ background: SC.card, border: `1px solid ${SC.border}`, boxShadow: `0 24px 70px -28px ${SC.teal}40` }}>
+            <figure key={img} className="rounded-2xl p-1.5 overflow-hidden" style={{ background: SC.card, border: `1px solid ${SC.border}`, boxShadow: `0 24px 70px -28px rgb(var(--sc-teal-rgb) / 0.25)` }}>
               <Image src={`/${img}.jpg`} alt={cap} width={1440} height={880} sizes="(max-width: 1024px) 100vw, 1024px" className="w-full h-auto rounded-xl block" />
               <figcaption className="text-center text-sm py-3 px-4" style={{ color: SC.muted }}>{cap}</figcaption>
             </figure>
@@ -80,9 +80,10 @@ export default function Recursos() {
         <h2 className="text-3xl md:text-4xl font-bold">Pronto para ver na prática?</h2>
         <div className="flex flex-col sm:flex-row gap-3 justify-center mt-7">
           <Link href="/contato" className="px-6 py-3.5 rounded-xl font-bold inline-flex items-center justify-center gap-2" style={{ background: SC.gold, color: "#1a1407" }}>Agende uma demonstração <ArrowRight className="w-5 h-5" /></Link>
-          <Link href="/login" className="px-6 py-3.5 rounded-xl font-semibold" style={{ background: SC.card, border: `1px solid ${SC.border}`, color: "#1f2937" }}>Acessar o sistema</Link>
+          <Link href="/login" className="px-6 py-3.5 rounded-xl font-semibold" style={{ background: SC.card, border: `1px solid ${SC.border}`, color: SC.text }}>Acessar o sistema</Link>
         </div>
       </section>
+      <LifetimeValueCTA />
       <SiteFooter />
     </div>
   )

@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { ShieldCheck, Lock, Database, Download, FileText, CheckCircle, ArrowRight } from "lucide-react"
-import { SiteHeader, SiteFooter } from "@/components/site/SiteChrome"
+import { SiteHeader, SiteFooter, LifetimeValueCTA } from "@/components/site/SiteChrome"
 import { SC_LIGHT as SC } from "@/lib/colors-light"
 
 export const metadata: Metadata = {
@@ -133,12 +133,12 @@ const ES_CONTENT = {
 
 function SecurityPage({ content, lang }: { content: typeof PT_CONTENT; lang: string }) {
   return (
-    <div style={{ background: SC.bg, color: "#fff" }} className="min-h-screen">
+    <div style={{ background: SC.bg, color: SC.text }} className="min-h-screen">
       <SiteHeader />
 
       {/* HERO */}
       <section className="max-w-3xl mx-auto px-5 pt-20 pb-12 text-center">
-        <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5" style={{ background: `${SC.teal}18`, border: `1px solid ${SC.teal}44` }}>
+        <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5" style={{ background: `rgb(var(--sc-teal-rgb) / 0.09)`, border: `1px solid rgb(var(--sc-teal-rgb) / 0.27)` }}>
           <ShieldCheck className="w-7 h-7" style={{ color: SC.teal }} />
         </div>
         <span className="text-xs font-bold tracking-[0.3em]" style={{ color: SC.teal }}>{content.eyebrow}</span>
@@ -152,7 +152,7 @@ function SecurityPage({ content, lang }: { content: typeof PT_CONTENT; lang: str
       <section className="max-w-5xl mx-auto px-5 pb-16 grid md:grid-cols-2 lg:grid-cols-3 gap-5">
         {PILARES.map(p => (
           <div key={p.titulo} className="rounded-2xl p-6" style={{ background: SC.card, border: `1px solid ${SC.border}` }}>
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4" style={{ background: `${SC.teal}18`, border: `1px solid ${SC.teal}33` }}>
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4" style={{ background: `rgb(var(--sc-teal-rgb) / 0.09)`, border: `1px solid rgb(var(--sc-teal-rgb) / 0.2)` }}>
               <p.icon className="w-6 h-6" style={{ color: SC.teal }} />
             </div>
             <h3 className="font-bold text-lg">{p.titulo}</h3>
@@ -186,7 +186,7 @@ function SecurityPage({ content, lang }: { content: typeof PT_CONTENT; lang: str
         <h2 className="text-2xl font-bold mb-6">{content.trust}</h2>
         <div className="grid gap-3">
           {content.trustItems.map((item, i) => (
-            <div key={i} className="flex items-start gap-3 rounded-xl p-4" style={{ background: `${SC.teal}11`, border: `1px solid ${SC.teal}33` }}>
+            <div key={i} className="flex items-start gap-3 rounded-xl p-4" style={{ background: `rgb(var(--sc-teal-rgb) / 0.07)`, border: `1px solid rgb(var(--sc-teal-rgb) / 0.2)` }}>
               <CheckCircle className="w-5 h-5 shrink-0 mt-0.5" style={{ color: SC.teal }} />
               <span>{item}</span>
             </div>
@@ -200,7 +200,7 @@ function SecurityPage({ content, lang }: { content: typeof PT_CONTENT; lang: str
           <h2 className="text-2xl font-bold">{content.ctaTitle}</h2>
           <p className="mt-3 text-lg" style={{ color: SC.muted }}>{content.ctaText}</p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-6">
-            <Link href="/privacidade" className="flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm" style={{ background: `${SC.teal}18`, color: SC.teal, border: `1px solid ${SC.teal}44` }}>
+            <Link href="/privacidade" className="flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm" style={{ background: `rgb(var(--sc-teal-rgb) / 0.09)`, color: SC.teal, border: `1px solid rgb(var(--sc-teal-rgb) / 0.27)` }}>
               {content.ctaBtn1}
             </Link>
             <Link href="/contato" className="flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm" style={{ background: SC.gold, color: "#1a1407" }}>
@@ -210,6 +210,7 @@ function SecurityPage({ content, lang }: { content: typeof PT_CONTENT; lang: str
         </div>
       </section>
 
+      <LifetimeValueCTA />
       <SiteFooter />
     </div>
   )
