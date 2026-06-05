@@ -4,18 +4,26 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import {
   Sparkles, LayoutDashboard, DollarSign, KanbanSquare, Brain,
-  Building2, ArrowRight, Check, Phone, ShieldCheck, Star, Globe, Heart,
+  Building2, ArrowRight, Check, Phone, ShieldCheck, Star, Globe, Heart, Sun, Moon,
 } from "lucide-react"
 
-const GOLD = "#d4af37"
-const GOLD_LIGHT = "#f0d97d"
-const GOLD_DEEP = "#9a7916"   // ouro legível sobre fundo branco (texto)
-const TEAL = "#0f8a8a"        // teal mais escuro p/ contraste em texto
-const BG = "#ffffff"
-const CARD = "#f8f9fa"
-const BORDER = "#e5e7eb"
-const MUTED = "#5f6368"        // cinza Google (corpo de texto)
-const INK = "#1f2937"          // tinta escura (títulos)
+type Theme = "dark" | "light"
+
+// Paleta reativa ao tema. Light = Google-Clean. Dark = cyberpunk neon (ciano + verde) sobre #060913.
+const PALETTES: Record<Theme, any> = {
+  light: {
+    bg: "#ffffff", card: "#f8f9fa", card2: "#f3f4f6", border: "#e5e7eb",
+    muted: "#5f6368", ink: "#1f2937",
+    gold: "#d4af37", goldLight: "#f0d97d", goldDeep: "#9a7916", teal: "#0f8a8a",
+    onAccent: "#1a1407",
+  },
+  dark: {
+    bg: "#060913", card: "#0c1322", card2: "#111c30", border: "#1e3a5f",
+    muted: "#93a8c9", ink: "#e8f1ff",
+    gold: "#22d3ee", goldLight: "#67e8f9", goldDeep: "#3dd7f0", teal: "#34d399",
+    onAccent: "#04121a",
+  },
+}
 
 type Lang = "pt" | "en" | "es"
 const LANGS: { code: Lang; label: string }[] = [
@@ -52,6 +60,9 @@ const T: Record<Lang, any> = {
     ctaT: "Pronto para elevar sua mentoria?", ctaS: "Entre agora e veja sua operação organizada em minutos.", ctaBtn: "Acessar o sistema",
     foot: "Entrar →",
     faqT: "Perguntas frequentes",
+    segLabel: "CONFIANÇA", segT: "Segurança em primeiro lugar", segS: "Construída para empresas que levam privacidade e proteção de dados a sério.",
+    segItens: ["100 em SEO e Boas Práticas — Google PageSpeed", "Conforme à LGPD (Lei 13.709/2018)", "Dados criptografados (em trânsito e repouso)", "Isolamento de dados por papel e empresa"],
+    segCta: "Saiba mais sobre segurança",
     faq: [
       ["O que é o CKlareza?", "É uma plataforma de mentoria white-label: você organiza o financeiro, as atividades e as calls dos seus mentorados num só lugar, com a sua marca e uma inteligência que mostra quem precisa de atenção agora."],
       ["O CKlareza é white-label?", "Sim. Você usa o seu logo, as suas cores e o seu domínio próprio. Seus clientes veem a sua empresa — o motor é o CKlareza."],
@@ -88,6 +99,9 @@ const T: Record<Lang, any> = {
     ctaT: "Ready to elevate your mentorship?", ctaS: "Sign in now and see your operation organized in minutes.", ctaBtn: "Access the system",
     foot: "Sign in →",
     faqT: "Frequently asked questions",
+    segLabel: "TRUST", segT: "Security first", segS: "Built for companies that take privacy and data protection seriously.",
+    segItens: ["100 in SEO & Best Practices — Google PageSpeed", "LGPD compliant (Law 13.709/2018)", "Encrypted data (in transit and at rest)", "Data isolation by role and company"],
+    segCta: "Learn more about security",
     faq: [
       ["What is CKlareza?", "A white-label mentorship platform: organize your mentees' finances, tasks and calls in one place, under your brand, with intelligence that shows who needs attention now."],
       ["Is CKlareza white-label?", "Yes. Use your own logo, colors and domain. Your clients see your company — the engine is CKlareza."],
@@ -124,6 +138,9 @@ const T: Record<Lang, any> = {
     ctaT: "¿Listo para elevar tu mentoría?", ctaS: "Entra ahora y ve tu operación organizada en minutos.", ctaBtn: "Acceder al sistema",
     foot: "Entrar →",
     faqT: "Preguntas frecuentes",
+    segLabel: "CONFIANZA", segT: "Seguridad primero", segS: "Construida para empresas que se toman en serio la privacidad y la protección de datos.",
+    segItens: ["100 en SEO y Buenas Prácticas — Google PageSpeed", "Conforme a LGPD (Ley 13.709/2018)", "Datos cifrados (en tránsito y reposo)", "Aislamiento de datos por rol y empresa"],
+    segCta: "Conoce más sobre seguridad",
     faq: [
       ["¿Qué es CKlareza?", "Una plataforma de mentoría white-label: organiza las finanzas, tareas y calls de tus mentoreados en un solo lugar, con tu marca e inteligencia que muestra quién necesita atención ahora."],
       ["¿CKlareza es white-label?", "Sí. Usa tu logo, tus colores y tu dominio propio. Tus clientes ven tu empresa — el motor es CKlareza."],
@@ -133,72 +150,94 @@ const T: Record<Lang, any> = {
   },
 }
 
-function Logo({ size = "md" }: { size?: "md" | "sm" }) {
+function Logo({ size = "md", c }: { size?: "md" | "sm"; c: any }) {
   return (
     <div className="flex items-center gap-2">
-      <Sparkles className="shrink-0" style={{ color: GOLD, width: size === "sm" ? 18 : 22, height: size === "sm" ? 18 : 22 }} />
+      <Sparkles className="shrink-0" style={{ color: c.gold, width: size === "sm" ? 18 : 22, height: size === "sm" ? 18 : 22 }} />
       <div className="leading-none">
-        <span className="font-bold tracking-tight" style={{
-          fontSize: size === "sm" ? 18 : 22,
-          color: GOLD_DEEP,
-        }}>CKlareza</span>
-        {size === "md" && <span className="block text-[9px] tracking-[0.25em] mt-0.5" style={{ color: TEAL }}>LIFETIME VALUE</span>}
+        <span className="font-bold tracking-tight" style={{ fontSize: size === "sm" ? 18 : 22, color: c.goldDeep }}>CKlareza</span>
+        {size === "md" && <span className="block text-[9px] tracking-[0.25em] mt-0.5" style={{ color: c.teal }}>LIFETIME VALUE</span>}
       </div>
     </div>
   )
 }
 
 const FEAT_ICONS = [LayoutDashboard, DollarSign, KanbanSquare, Brain, Phone, Building2]
-const FEAT_CORES = [TEAL, "#22c55e", "#4c9aff", "#a855f7", GOLD_DEEP, TEAL]
-
 
 export default function LandingPage() {
   const [lang, setLang] = useState<Lang>("pt")
   const [openLang, setOpenLang] = useState(false)
+  const [theme, setTheme] = useState<Theme>("dark")  // abre em DARK por padrão
 
   useEffect(() => {
     const saved = localStorage.getItem("ck_lang") as Lang | null
-    if (saved && LANGS.some(l => l.code === saved)) { setLang(saved); return }
-    const nav = navigator.language.slice(0, 2)
-    if (nav === "en" || nav === "es") setLang(nav as Lang)
+    if (saved && LANGS.some(l => l.code === saved)) setLang(saved)
+    else {
+      const nav = navigator.language.slice(0, 2)
+      if (nav === "en" || nav === "es") setLang(nav as Lang)
+    }
+    const savedTheme = localStorage.getItem("ck_theme")
+    if (savedTheme === "light" || savedTheme === "dark") setTheme(savedTheme)
   }, [])
 
   const t = T[lang]
+  const c = PALETTES[theme]
+  const featCores = [c.teal, "#22c55e", "#4c9aff", "#a855f7", c.goldDeep, c.teal]
   const escolher = (l: Lang) => { setLang(l); localStorage.setItem("ck_lang", l); setOpenLang(false) }
+  const toggleTheme = () => setTheme(prev => {
+    const next: Theme = prev === "dark" ? "light" : "dark"
+    localStorage.setItem("ck_theme", next)
+    return next
+  })
+
+  // Link de navegação com hover ciente do tema
+  const NavLink = ({ href, children }: { href: string; children: React.ReactNode }) => (
+    <Link href={href} className="transition-colors" style={{ color: c.muted }}
+      onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = c.ink}
+      onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = c.muted}>{children}</Link>
+  )
 
   return (
-    <div style={{ background: BG, color: INK }} className="min-h-screen">
+    <div style={{ background: c.bg, color: c.ink, transition: "background 0.3s, color 0.3s" }} className="min-h-screen">
       {/* NAV */}
-      <header className="sticky top-0 z-40 backdrop-blur-md" style={{ background: `${BG}cc`, borderBottom: `1px solid ${BORDER}` }}>
+      <header className="sticky top-0 z-40 backdrop-blur-md" style={{ background: `${c.bg}cc`, borderBottom: `1px solid ${c.border}` }}>
         <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
-          <Logo />
-          <nav className="hidden md:flex items-center gap-7 text-sm" style={{ color: MUTED }}>
-            <Link href="/recursos" className="hover:text-gray-900 transition-colors">{t.nav[0]}</Link>
-            <Link href="/precos" className="hover:text-gray-900 transition-colors">{t.nav[3]}</Link>
-            <Link href="/sobre" className="hover:text-gray-900 transition-colors">{t.nav[2]}</Link>
-            <Link href="/blog" className="hover:text-gray-900 transition-colors">Blog</Link>
-            <Link href="/contato" className="hover:text-gray-900 transition-colors">Contato</Link>
+          <Logo c={c} />
+          <nav className="hidden md:flex items-center gap-7 text-sm">
+            <NavLink href="/recursos">{t.nav[0]}</NavLink>
+            <NavLink href="/precos">{t.nav[3]}</NavLink>
+            <NavLink href="/sobre">{t.nav[2]}</NavLink>
+            <NavLink href="/blog">Blog</NavLink>
+            <NavLink href="/contato">Contato</NavLink>
           </nav>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
+            {/* Toggle tema sol/lua */}
+            <button onClick={toggleTheme} title={theme === "dark" ? "Tema claro" : "Tema escuro"} aria-label="Alternar tema"
+              className="flex items-center justify-center w-9 h-9 rounded-lg transition-all"
+              style={{ color: c.gold, border: `1px solid ${c.border}`, background: `${c.gold}10` }}>
+              {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
             {/* Seletor de idioma */}
             <div className="relative">
-              <button onClick={() => setOpenLang(o => !o)} className="flex items-center gap-1.5 px-2.5 py-2 rounded-lg text-sm" style={{ color: MUTED, border: `1px solid ${BORDER}` }}>
+              <button onClick={() => setOpenLang(o => !o)} className="flex items-center gap-1.5 px-2.5 py-2 rounded-lg text-sm" style={{ color: c.muted, border: `1px solid ${c.border}` }}>
                 <Globe className="w-4 h-4" /> {lang.toUpperCase()}
               </button>
               {openLang && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setOpenLang(false)} />
-                  <div className="absolute right-0 top-full mt-1 z-50 rounded-lg overflow-hidden" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+                  <div className="absolute right-0 top-full mt-1 z-50 rounded-lg overflow-hidden" style={{ background: c.card, border: `1px solid ${c.border}` }}>
                     {LANGS.map(l => (
                       <button key={l.code} onClick={() => escolher(l.code)}
-                        className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                        style={{ color: l.code === lang ? GOLD : INK }}>{l.label}</button>
+                        className="block w-full text-left px-4 py-2 text-sm transition-colors"
+                        style={{ color: l.code === lang ? c.gold : c.ink }}
+                        onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = c.card2}
+                        onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}>{l.label}</button>
                     ))}
                   </div>
                 </>
               )}
             </div>
-            <Link href="/login" className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all" style={{ background: GOLD, color: "#1a1407" }}>
+            <Link href="/login" className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all" style={{ background: c.gold, color: c.onAccent, boxShadow: `0 6px 20px ${c.gold}40` }}>
               {t.entrar} <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
@@ -207,65 +246,62 @@ export default function LandingPage() {
 
       {/* HERO */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0" style={{ background: `radial-gradient(60% 50% at 50% 0%, ${TEAL}22 0%, transparent 70%)` }} />
-        <div className="relative max-w-4xl mx-auto px-5 pt-20 pb-14 text-center">
-          <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold mb-6" style={{ background: `${GOLD}18`, border: `1px solid ${GOLD}40`, color: GOLD_DEEP }}>
-            <Star className="w-3.5 h-3.5" style={{ color: GOLD_DEEP }} /> {t.badge}
+        <div className="absolute inset-0" style={{ background: `radial-gradient(60% 50% at 50% 0%, ${c.gold}1f 0%, transparent 70%)` }} />
+        <div className="relative max-w-4xl mx-auto px-5 pt-14 pb-8 text-center">
+          <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold mb-6" style={{ background: `${c.gold}18`, border: `1px solid ${c.gold}40`, color: c.goldDeep }}>
+            <Star className="w-3.5 h-3.5" style={{ color: c.goldDeep }} /> {t.badge}
           </span>
-          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.05]" style={{ color: INK }}>
+          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.05]" style={{ color: c.ink }}>
             {t.h1a}<br />
-            <span style={{ color: GOLD_DEEP }}>{t.h1b}</span>
+            <span style={{ color: c.goldDeep }}>{t.h1b}</span>
           </h1>
-          <p className="text-lg md:text-xl mt-6 max-w-2xl mx-auto leading-relaxed" style={{ color: MUTED }}>
-            {t.sub}<span className="font-semibold" style={{ color: INK }}>{t.subStrong}</span>
+          <p className="text-lg md:text-xl mt-6 max-w-2xl mx-auto leading-relaxed" style={{ color: c.muted }}>
+            {t.sub}<span className="font-semibold" style={{ color: c.ink }}>{t.subStrong}</span>
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-9">
-            <Link href="/login" className="flex items-center gap-2 px-6 py-3.5 rounded-xl text-base font-bold transition-all hover:-translate-y-0.5" style={{ background: GOLD, color: "#1a1407" }}>
+            <Link href="/login" className="flex items-center gap-2 px-6 py-3.5 rounded-xl text-base font-bold transition-all hover:-translate-y-0.5" style={{ background: c.gold, color: c.onAccent, boxShadow: `0 10px 30px ${c.gold}40` }}>
               {t.cta1} <ArrowRight className="w-5 h-5" />
             </Link>
-            <a href="#recursos" className="px-6 py-3.5 rounded-xl text-base font-semibold transition-all hover:border-gray-300 hover:bg-gray-50" style={{ background: BG, border: `1px solid ${BORDER}`, color: INK }}>{t.cta2}</a>
-          </div>
-          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mt-8 text-xs" style={{ color: MUTED }}>
-            {t.trust.map((x: string) => <span key={x} className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5" style={{ color: TEAL }} /> {x}</span>)}
+            <a href="#recursos" className="px-6 py-3.5 rounded-xl text-base font-semibold transition-all" style={{ background: c.card, border: `1px solid ${c.border}`, color: c.ink }}
+              onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = c.card2}
+              onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = c.card}>{t.cta2}</a>
           </div>
         </div>
 
-        {/* VÍDEO PRINCIPAL — "Conheça a plataforma" (aparece já na abertura) */}
-        <div className="relative max-w-3xl mx-auto px-5 pb-8">
-          <div className="rounded-2xl overflow-hidden" style={{ background: "#000", border: `2px solid ${GOLD}44`, boxShadow: `0 40px 120px -30px ${GOLD}50` }}>
-            <video
-              src="/video-cklareza.mp4"
-              autoPlay
-              muted
-              loop
-              playsInline
-              controls
-              className="w-full h-auto block"
-            />
+        {/* VÍDEO PRINCIPAL — "Conheça a plataforma" (logo no topo) */}
+        <div className="relative max-w-3xl mx-auto px-5 pb-6">
+          <div className="rounded-2xl overflow-hidden" style={{ background: "#000", border: `2px solid ${c.gold}55`, boxShadow: `0 30px 90px -25px ${c.gold}55` }}>
+            <video src="/video-cklareza.mp4" autoPlay muted loop playsInline controls className="w-full h-auto block" />
           </div>
-          <p className="text-center text-sm mt-3 font-semibold flex items-center justify-center gap-2" style={{ color: MUTED }}>
-            <Sparkles className="w-3.5 h-3.5" style={{ color: GOLD }} /> {t.vid1}
+          <p className="text-center text-sm mt-3 font-semibold flex items-center justify-center gap-2" style={{ color: c.muted }}>
+            <Sparkles className="w-3.5 h-3.5" style={{ color: c.gold }} /> {t.vid1}
           </p>
+        </div>
+
+        {/* TRUST — abaixo do vídeo, em destaque */}
+        <div className="relative max-w-3xl mx-auto px-5 pb-14">
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            {t.trust.map((x: string) => (
+              <span key={x} className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-semibold"
+                style={{ background: `${c.teal}16`, border: `1px solid ${c.teal}55`, color: c.ink, boxShadow: `0 6px 22px ${c.teal}26` }}>
+                <Check className="w-4 h-4 shrink-0" style={{ color: c.teal }} /> {x}
+              </span>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* VÍDEO — Organização & banco de dados */}
       <section id="videos" className="max-w-3xl mx-auto px-5 py-16">
         <div className="text-center mb-8">
-          <h2 className="text-3xl md:text-4xl font-bold" style={{ color: INK }}>{t.vid2}</h2>
-          <p className="mt-3 text-lg" style={{ color: MUTED }}>{t.vidS}</p>
+          <h2 className="text-3xl md:text-4xl font-bold" style={{ color: c.ink }}>{t.vid2}</h2>
+          <p className="mt-3 text-lg" style={{ color: c.muted }}>{t.vidS}</p>
         </div>
-        <div className="rounded-2xl overflow-hidden" style={{ background: CARD, border: `1px solid ${BORDER}`, boxShadow: "0 20px 50px -25px rgba(17,24,39,0.2)" }}>
-          <video
-            src="/video-organizacao.mp4"
-            controls
-            preload="metadata"
-            playsInline
-            className="w-full h-auto block bg-black"
-          />
+        <div className="rounded-2xl overflow-hidden" style={{ background: c.card, border: `1px solid ${c.border}`, boxShadow: `0 20px 50px -25px ${c.gold}33` }}>
+          <video src="/video-organizacao.mp4" controls preload="metadata" playsInline className="w-full h-auto block bg-black" />
           <div className="px-5 py-4 flex items-center gap-2.5">
-            <span className="w-2 h-2 rounded-full" style={{ background: TEAL }} />
-            <span className="text-sm font-semibold" style={{ color: INK }}>{t.vid2}</span>
+            <span className="w-2 h-2 rounded-full" style={{ background: c.teal }} />
+            <span className="text-sm font-semibold" style={{ color: c.ink }}>{t.vid2}</span>
           </div>
         </div>
       </section>
@@ -273,19 +309,19 @@ export default function LandingPage() {
       {/* RECURSOS */}
       <section id="recursos" className="max-w-6xl mx-auto px-5 py-20">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold">{t.recT}</h2>
-          <p className="mt-3 text-lg" style={{ color: MUTED }}>{t.recS}</p>
+          <h2 className="text-3xl md:text-4xl font-bold" style={{ color: c.ink }}>{t.recT}</h2>
+          <p className="mt-3 text-lg" style={{ color: c.muted }}>{t.recS}</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {t.feats.map((f: string[], i: number) => {
-            const Icon = FEAT_ICONS[i]; const cor = FEAT_CORES[i]
+            const Icon = FEAT_ICONS[i]; const cor = featCores[i]
             return (
-              <div key={i} className="rounded-2xl p-6 transition-all hover:-translate-y-1" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
-                <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-4" style={{ background: `${cor}18`, border: `1px solid ${cor}33` }}>
+              <div key={i} className="rounded-2xl p-6 transition-all hover:-translate-y-1" style={{ background: c.card, border: `1px solid ${c.border}` }}>
+                <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-4" style={{ background: `${cor}1f`, border: `1px solid ${cor}44` }}>
                   <Icon className="w-5 h-5" style={{ color: cor }} />
                 </div>
-                <h3 className="font-bold text-lg">{f[0]}</h3>
-                <p className="mt-2 text-sm leading-relaxed" style={{ color: MUTED }}>{f[1]}</p>
+                <h3 className="font-bold text-lg" style={{ color: c.ink }}>{f[0]}</h3>
+                <p className="mt-2 text-sm leading-relaxed" style={{ color: c.muted }}>{f[1]}</p>
               </div>
             )
           })}
@@ -293,46 +329,46 @@ export default function LandingPage() {
       </section>
 
       {/* PROPÓSITO */}
-      <section id="proposito" className="py-16" style={{ background: `linear-gradient(180deg, ${BG}, ${CARD})`, borderTop: `1px solid ${BORDER}` }}>
+      <section id="proposito" className="py-16" style={{ background: `linear-gradient(180deg, ${c.bg}, ${c.card})`, borderTop: `1px solid ${c.border}` }}>
         <div className="max-w-3xl mx-auto px-5 text-center">
-          <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: `${GOLD}18`, border: `1px solid ${GOLD}44` }}>
-            <Heart className="w-6 h-6" style={{ color: GOLD }} />
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: `${c.gold}1f`, border: `1px solid ${c.gold}44` }}>
+            <Heart className="w-6 h-6" style={{ color: c.gold }} />
           </div>
-          <span className="text-xs font-bold tracking-[0.3em]" style={{ color: TEAL }}>{t.propLabel}</span>
-          <h2 className="text-4xl md:text-5xl font-extrabold mt-3" style={{ color: GOLD_DEEP }}>{t.propT}</h2>
-          <p className="mt-5 text-lg leading-relaxed" style={{ color: MUTED }}>{t.propText}</p>
+          <span className="text-xs font-bold tracking-[0.3em]" style={{ color: c.teal }}>{t.propLabel}</span>
+          <h2 className="text-4xl md:text-5xl font-extrabold mt-3" style={{ color: c.goldDeep }}>{t.propT}</h2>
+          <p className="mt-5 text-lg leading-relaxed" style={{ color: c.muted }}>{t.propText}</p>
         </div>
       </section>
 
       {/* WHITE-LABEL */}
-      <section id="whitelabel" className="py-20" style={{ background: CARD, borderTop: `1px solid ${BORDER}`, borderBottom: `1px solid ${BORDER}` }}>
+      <section id="whitelabel" className="py-20" style={{ background: c.card, borderTop: `1px solid ${c.border}`, borderBottom: `1px solid ${c.border}` }}>
         <div className="max-w-5xl mx-auto px-5 grid md:grid-cols-2 gap-10 items-center">
           <div>
-            <span className="text-xs font-bold tracking-widest" style={{ color: TEAL }}>{t.wlLabel}</span>
-            <h2 className="text-3xl md:text-4xl font-bold mt-3">{t.wlT}</h2>
-            <p className="mt-4 text-lg leading-relaxed" style={{ color: MUTED }}>{t.wlText}</p>
+            <span className="text-xs font-bold tracking-widest" style={{ color: c.teal }}>{t.wlLabel}</span>
+            <h2 className="text-3xl md:text-4xl font-bold mt-3" style={{ color: c.ink }}>{t.wlT}</h2>
+            <p className="mt-4 text-lg leading-relaxed" style={{ color: c.muted }}>{t.wlText}</p>
             <ul className="mt-6 space-y-2.5">
-              {t.wlBullets.map((x: string) => <li key={x} className="flex items-center gap-2.5 text-sm"><Check className="w-4 h-4 shrink-0" style={{ color: GOLD }} /> {x}</li>)}
+              {t.wlBullets.map((x: string) => <li key={x} className="flex items-center gap-2.5 text-sm" style={{ color: c.ink }}><Check className="w-4 h-4 shrink-0" style={{ color: c.gold }} /> {x}</li>)}
             </ul>
           </div>
-          <div className="rounded-2xl p-8 text-center" style={{ background: BG, border: `1px solid ${BORDER}` }}>
-            <ShieldCheck className="w-10 h-10 mx-auto mb-3" style={{ color: GOLD }} />
-            <p className="text-lg font-semibold">{t.wlCardT}</p>
-            <p className="mt-2 text-sm" style={{ color: MUTED }}>{t.wlCardD}</p>
+          <div className="rounded-2xl p-8 text-center" style={{ background: c.bg, border: `1px solid ${c.border}` }}>
+            <ShieldCheck className="w-10 h-10 mx-auto mb-3" style={{ color: c.gold }} />
+            <p className="text-lg font-semibold" style={{ color: c.ink }}>{t.wlCardT}</p>
+            <p className="mt-2 text-sm" style={{ color: c.muted }}>{t.wlCardD}</p>
           </div>
         </div>
       </section>
 
-      {/* FAQ (AI Overviews / featured snippets) */}
+      {/* FAQ */}
       <section id="faq" className="max-w-3xl mx-auto px-5 py-16">
-        <h2 className="text-2xl md:text-3xl font-bold text-center mb-8">{t.faqT}</h2>
+        <h2 className="text-2xl md:text-3xl font-bold text-center mb-8" style={{ color: c.ink }}>{t.faqT}</h2>
         <div className="space-y-3">
           {t.faq.map((qa: string[], i: number) => (
-            <details key={i} className="rounded-xl p-5" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
-              <summary className="font-semibold cursor-pointer list-none flex items-center justify-between gap-3">
-                {qa[0]}<span className="text-xl shrink-0" style={{ color: GOLD }}>+</span>
+            <details key={i} className="rounded-xl p-5" style={{ background: c.card, border: `1px solid ${c.border}` }}>
+              <summary className="font-semibold cursor-pointer list-none flex items-center justify-between gap-3" style={{ color: c.ink }}>
+                {qa[0]}<span className="text-xl shrink-0" style={{ color: c.gold }}>+</span>
               </summary>
-              <p className="mt-3 text-sm leading-relaxed" style={{ color: MUTED }}>{qa[1]}</p>
+              <p className="mt-3 text-sm leading-relaxed" style={{ color: c.muted }}>{qa[1]}</p>
             </details>
           ))}
         </div>
@@ -343,35 +379,25 @@ export default function LandingPage() {
       </section>
 
       {/* CONFIANÇA & SEGURANÇA */}
-      <section className="py-20" style={{ background: CARD, borderTop: `1px solid ${BORDER}`, borderBottom: `1px solid ${BORDER}` }}>
+      <section className="py-20" style={{ background: c.card, borderTop: `1px solid ${c.border}`, borderBottom: `1px solid ${c.border}` }}>
         <div className="max-w-4xl mx-auto px-5">
           <div className="text-center mb-12">
-            <ShieldCheck className="w-10 h-10 mx-auto mb-4" style={{ color: TEAL }} />
-            <span className="text-xs font-bold tracking-[0.3em]" style={{ color: TEAL }}>CONFIANÇA</span>
-            <h2 className="text-3xl font-bold mt-3">Segurança em primeiro lugar</h2>
-            <p className="mt-3 text-lg" style={{ color: MUTED }}>Construída para empresas que levam privacidade e proteção de dados a sério.</p>
+            <ShieldCheck className="w-10 h-10 mx-auto mb-4" style={{ color: c.teal }} />
+            <span className="text-xs font-bold tracking-[0.3em]" style={{ color: c.teal }}>{t.segLabel}</span>
+            <h2 className="text-3xl font-bold mt-3" style={{ color: c.ink }}>{t.segT}</h2>
+            <p className="mt-3 text-lg" style={{ color: c.muted }}>{t.segS}</p>
           </div>
           <div className="grid md:grid-cols-2 gap-4 mb-8">
-            <div className="flex items-start gap-3 rounded-xl p-4" style={{ background: `${TEAL}11`, border: `1px solid ${TEAL}33` }}>
-              <Check className="w-5 h-5 shrink-0 mt-1" style={{ color: TEAL }} />
-              <span className="text-sm">100 em SEO e Boas Práticas — Google PageSpeed</span>
-            </div>
-            <div className="flex items-start gap-3 rounded-xl p-4" style={{ background: `${TEAL}11`, border: `1px solid ${TEAL}33` }}>
-              <Check className="w-5 h-5 shrink-0 mt-1" style={{ color: TEAL }} />
-              <span className="text-sm">Conforme à LGPD (Lei 13.709/2018)</span>
-            </div>
-            <div className="flex items-start gap-3 rounded-xl p-4" style={{ background: `${TEAL}11`, border: `1px solid ${TEAL}33` }}>
-              <Check className="w-5 h-5 shrink-0 mt-1" style={{ color: TEAL }} />
-              <span className="text-sm">Dados criptografados (em trânsito e repouso)</span>
-            </div>
-            <div className="flex items-start gap-3 rounded-xl p-4" style={{ background: `${TEAL}11`, border: `1px solid ${TEAL}33` }}>
-              <Check className="w-5 h-5 shrink-0 mt-1" style={{ color: TEAL }} />
-              <span className="text-sm">Isolamento de dados por papel e empresa</span>
-            </div>
+            {t.segItens.map((item: string) => (
+              <div key={item} className="flex items-start gap-3 rounded-xl p-4" style={{ background: `${c.teal}14`, border: `1px solid ${c.teal}33` }}>
+                <Check className="w-5 h-5 shrink-0 mt-1" style={{ color: c.teal }} />
+                <span className="text-sm" style={{ color: c.ink }}>{item}</span>
+              </div>
+            ))}
           </div>
           <div className="text-center">
-            <Link href="/seguranca" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm" style={{ background: `${TEAL}18`, color: TEAL, border: `1px solid ${TEAL}44` }}>
-              Saiba mais sobre segurança <ArrowRight className="w-4 h-4" />
+            <Link href="/seguranca" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm" style={{ background: `${c.teal}18`, color: c.teal, border: `1px solid ${c.teal}44` }}>
+              {t.segCta} <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         </div>
@@ -380,31 +406,31 @@ export default function LandingPage() {
       {/* CTA */}
       <section id="planos" className="max-w-3xl mx-auto px-5 py-24 text-center">
         <Brain className="w-10 h-10 mx-auto mb-4" style={{ color: "#a855f7" }} />
-        <h2 className="text-3xl md:text-5xl font-bold tracking-tight">{t.ctaT}</h2>
-        <p className="mt-5 text-lg" style={{ color: MUTED }}>{t.ctaS}</p>
-        <Link href="/login" className="inline-flex items-center gap-2 px-8 py-4 rounded-xl text-lg font-bold mt-9 transition-all hover:-translate-y-0.5" style={{ background: GOLD, color: "#1a1407" }}>
+        <h2 className="text-3xl md:text-5xl font-bold tracking-tight" style={{ color: c.ink }}>{t.ctaT}</h2>
+        <p className="mt-5 text-lg" style={{ color: c.muted }}>{t.ctaS}</p>
+        <Link href="/login" className="inline-flex items-center gap-2 px-8 py-4 rounded-xl text-lg font-bold mt-9 transition-all hover:-translate-y-0.5" style={{ background: c.gold, color: c.onAccent, boxShadow: `0 12px 36px ${c.gold}44` }}>
           {t.ctaBtn} <ArrowRight className="w-5 h-5" />
         </Link>
       </section>
 
       {/* FOOTER */}
-      <footer style={{ borderTop: `1px solid ${BORDER}` }}>
+      <footer style={{ borderTop: `1px solid ${c.border}` }}>
         <div className="max-w-6xl mx-auto px-5 py-10 flex flex-col md:flex-row items-center justify-between gap-4">
-          <Logo size="sm" />
+          <Logo size="sm" c={c} />
           <div className="flex flex-col items-center gap-1.5">
-            <p className="text-xs" style={{ color: MUTED }}>© {new Date().getFullYear()} CKlareza · Lifetime Value · cklareza.com</p>
-            <div className="flex items-center gap-1.5" style={{ opacity: 0.65 }}>
-              <span className="text-[9px]" style={{ color: MUTED, letterSpacing: "0.08em" }}>POWERED BY</span>
-              <Sparkles className="w-2.5 h-2.5" style={{ color: GOLD }} />
-              <span className="text-[10px] font-bold" style={{ color: GOLD_DEEP }}>CKlareza</span>
-              <span className="text-[9px]" style={{ color: MUTED }}>·</span>
-              <Brain className="w-2.5 h-2.5" style={{ color: TEAL }} />
-              <span className="text-[10px] font-bold" style={{ color: TEAL, letterSpacing: "0.04em" }}>GRATIDÃO</span>
+            <p className="text-xs" style={{ color: c.muted }}>© {new Date().getFullYear()} CKlareza · Lifetime Value · cklareza.com</p>
+            <div className="flex items-center gap-1.5" style={{ opacity: 0.75 }}>
+              <span className="text-[9px]" style={{ color: c.muted, letterSpacing: "0.08em" }}>POWERED BY</span>
+              <Sparkles className="w-2.5 h-2.5" style={{ color: c.gold }} />
+              <span className="text-[10px] font-bold" style={{ color: c.goldDeep }}>CKlareza</span>
+              <span className="text-[9px]" style={{ color: c.muted }}>·</span>
+              <Brain className="w-2.5 h-2.5" style={{ color: c.teal }} />
+              <span className="text-[10px] font-bold" style={{ color: c.teal, letterSpacing: "0.04em" }}>GRATIDÃO</span>
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/privacidade" className="text-xs" style={{ color: MUTED }}>Privacidade</Link>
-            <Link href="/login" className="text-sm font-semibold" style={{ color: GOLD }}>{t.foot}</Link>
+            <Link href="/privacidade" className="text-xs" style={{ color: c.muted }}>Privacidade</Link>
+            <Link href="/login" className="text-sm font-semibold" style={{ color: c.gold }}>{t.foot}</Link>
           </div>
         </div>
       </footer>
