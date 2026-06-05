@@ -44,18 +44,18 @@ export function SiteHeader() {
  */
 export function LifetimeValueCTA() {
   return (
-    <section className="py-16" style={{ background: SC.card, borderTop: `1px solid ${SC.border}` }}>
+    <section className="py-16" style={{ background: "var(--sc-card)", borderTop: "1px solid var(--sc-border)" }}>
       <div className="max-w-3xl mx-auto px-5 text-center">
-        <h2 className="text-2xl md:text-3xl font-bold" style={{ color: SC.text }}>Por que &quot;Lifetime Value&quot;?</h2>
-        <p className="text-lg mt-4 leading-relaxed" style={{ color: SC.muted }}>
+        <h2 className="text-2xl md:text-3xl font-bold" style={{ color: "var(--sc-text)" }}>Por que &quot;Lifetime Value&quot;?</h2>
+        <p className="text-lg mt-4 leading-relaxed" style={{ color: "var(--sc-muted)" }}>
           Porque o sucesso de uma mentoria não está em vender uma vez — está em acompanhar de perto, gerar resultado e
           manter a relação viva ao longo do tempo. É isso que constrói valor de verdade, para o mentorado e para o mentor.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
-          <Link href="/contato" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-bold" style={{ background: SC.gold, color: "#1a1407", boxShadow: `0 10px 30px rgb(var(--sc-gold-rgb) / 0.27)` }}>
+          <Link href="/contato" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-bold" style={{ background: "var(--sc-gold)", color: "#1a1407", boxShadow: `0 10px 30px rgb(var(--sc-gold-rgb) / 0.27)` }}>
             Fale com a gente <ArrowRight className="w-5 h-5" />
           </Link>
-          <Link href="/login" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold transition-colors" style={{ background: SC.bg, border: `1px solid ${SC.border}`, color: SC.text }}>
+          <Link href="/login" className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold transition-colors" style={{ background: "var(--sc-bg)", border: "1px solid var(--sc-border)", color: "var(--sc-text)" }}>
             Acessar o sistema
           </Link>
         </div>
