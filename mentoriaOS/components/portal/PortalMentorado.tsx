@@ -269,7 +269,7 @@ function DadosLgpdMentorado({ mentoradoId }: { mentoradoId: string }) {
 // ABA CHECK-IN
 // ─────────────────────────────────────────────────────────────────────────────
 function AbaCheckin({ mentorado }: { mentorado: Mentorado }) {
-  const [form, setForm] = useState({ vendas_reais: "", leads_gerados: "", investimento_trafego: "", videos_postados: "", dificuldades_texto: "", tarefas_executadas: "" })
+  const [form, setForm] = useState({ vendas_reais: "", leads_gerados: "", investimento_trafego: "", videos_postados: "", dificuldades_texto: "", tarefas_executadas: "", idioma: "pt", tema: "light" })
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState("")
@@ -292,7 +292,7 @@ function AbaCheckin({ mentorado }: { mentorado: Mentorado }) {
       <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl" style={{ background: `${C.green}20` }}>✅</div>
       <h2 className="text-xl font-bold text-white mb-2">Check-in enviado!</h2>
       <p style={{ color: C.muted }}>Seus dados já estão no painel do seu mentor.</p>
-      <button onClick={() => { setSuccess(false); setForm({ vendas_reais: "", leads_gerados: "", investimento_trafego: "", videos_postados: "", dificuldades_texto: "", tarefas_executadas: "" }) }}
+      <button onClick={() => { setSuccess(false); setForm({ vendas_reais: "", leads_gerados: "", investimento_trafego: "", videos_postados: "", dificuldades_texto: "", tarefas_executadas: "", idioma: "pt", tema: "light" }) }}
         className="mt-5 px-4 py-2 rounded-lg text-sm font-semibold" style={{ background: `${C.green}18`, border: `1px solid ${C.green}44`, color: C.green }}>
         Novo check-in
       </button>
@@ -338,6 +338,30 @@ function AbaCheckin({ mentorado }: { mentorado: Mentorado }) {
           <textarea value={form.tarefas_executadas} onChange={e => setForm(p => ({ ...p, tarefas_executadas: e.target.value }))}
             className="w-full px-3 py-2.5 rounded-lg text-sm text-white placeholder-slate-600 focus:outline-none resize-none" rows={3}
             style={inputStyle} placeholder="Liste o que completou..." onFocus={e => e.target.style.borderColor = C.green} onBlur={e => e.target.style.borderColor = C.border} />
+        </div>
+      </div>
+      <div className="rounded-2xl p-6 space-y-5" style={{ background: C.card, border: `1px solid ${C.border}` }}>
+        <h3 className="text-sm font-semibold" style={{ color: C.blue }}>⚙️ Preferências</h3>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs mb-1.5" style={{ color: C.muted }}>🌍 Idioma</label>
+            <select value={(form as any).idioma} onChange={e => setForm(p => ({ ...p, idioma: e.target.value }))}
+              className="w-full px-3 py-2.5 rounded-lg text-sm text-white placeholder-slate-600 focus:outline-none"
+              style={inputStyle} onFocus={e => e.target.style.borderColor = C.green} onBlur={e => e.target.style.borderColor = C.border}>
+              <option value="pt" style={{ background: C.input, color: "white" }}>Português (BR)</option>
+              <option value="en" style={{ background: C.input, color: "white" }}>English</option>
+              <option value="es" style={{ background: C.input, color: "white" }}>Español</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs mb-1.5" style={{ color: C.muted }}>🎨 Tema</label>
+            <select value={(form as any).tema} onChange={e => setForm(p => ({ ...p, tema: e.target.value }))}
+              className="w-full px-3 py-2.5 rounded-lg text-sm text-white placeholder-slate-600 focus:outline-none"
+              style={inputStyle} onFocus={e => e.target.style.borderColor = C.green} onBlur={e => e.target.style.borderColor = C.border}>
+              <option value="light" style={{ background: C.input, color: "white" }}>☀️ Light</option>
+              <option value="dark" style={{ background: C.input, color: "white" }}>🌙 Dark</option>
+            </select>
+          </div>
         </div>
       </div>
       {error && <p className="text-sm rounded-lg px-4 py-3" style={{ background: `${C.red}18`, border: `1px solid ${C.red}44`, color: C.red }}>{error}</p>}
