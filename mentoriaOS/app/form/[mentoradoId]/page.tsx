@@ -7,6 +7,8 @@ export default function FormPage({ params }: { params: { mentoradoId: string } }
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState("")
   const [mentorado, setMentorado] = useState<{ nome: string; nicho: string } | null>(null)
+  const [perguntas, setPerguntas] = useState<{ id: string; label: string; tipo: string; obrigatoria: boolean }[]>([])
+  const [respostas, setRespostas] = useState<Record<string, string>>({})
 
   const [formData, setFormData] = useState({
     vendas_reais: "",
@@ -22,7 +24,7 @@ export default function FormPage({ params }: { params: { mentoradoId: string } }
     fetch(`/api/form/${params.mentoradoId}`)
       .then((r) => r.json())
       .then((j) => {
-        if (j.mentorado) setMentorado(j.mentorado)
+        if (j.mentorado) { setMentorado(j.mentorado); setPerguntas(j.perguntas || []) }
         else setError("Link inválido ou mentorado não encontrado.")
       })
       .catch(() => setError("Não foi possível carregar o formulário."))
@@ -34,10 +36,16 @@ export default function FormPage({ params }: { params: { mentoradoId: string } }
     setError("")
 
     try {
+      // respostas guardadas com o RÓTULO da pergunta (autoexplicativo p/ o mentor)
+      const respostasComLabel: Record<string, string> = {}
+      for (const q of perguntas) {
+        const v = (respostas[q.id] || "").trim()
+        if (v) respostasComLabel[q.label] = v
+      }
       const res = await fetch(`/api/form/${params.mentoradoId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, respostas_customizadas: respostasComLabel }),
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || "Erro ao enviar")
@@ -156,6 +164,28 @@ export default function FormPage({ params }: { params: { mentoradoId: string } }
               />
             </div>
           </div>
+
+          {perguntas.length > 0 && (
+            <div>
+              <h2 className="text-xl font-semibold mb-6" style={{ color: "#9333ea" }}>✨ Perguntas do seu mentor</h2>
+              <div className="space-y-5">
+                {perguntas.map((q) => (
+                  <div key={q.id}>
+                    <label className="block text-sm font-medium text-gray-600 mb-2">{q.label}{q.obrigatoria ? " *" : ""}</label>
+                    {q.tipo === "textarea" ? (
+                      <textarea required={q.obrigatoria} value={respostas[q.id] || ""}
+                        onChange={(e) => setRespostas((r) => ({ ...r, [q.id]: e.target.value }))}
+                        className="w-full px-4 py-3 bg-ck-input border border-ck-border rounded-lg focus:outline-none focus:border-ck-green text-gray-800 min-h-24 resize-none" />
+                    ) : (
+                      <input type={q.tipo === "number" ? "number" : "text"} required={q.obrigatoria} value={respostas[q.id] || ""}
+                        onChange={(e) => setRespostas((r) => ({ ...r, [q.id]: e.target.value }))}
+                        className="w-full px-4 py-3 bg-ck-input border border-ck-border rounded-lg focus:outline-none focus:border-ck-green text-gray-800" />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {error && (
             <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 text-red-300 text-sm">{error}</div>

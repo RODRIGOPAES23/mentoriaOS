@@ -36,6 +36,16 @@ export default function HistoricoModal({ selected, historico, onClose }: Props) 
                     <span style={{ color: C.muted }}>Investimento: <span className="font-bold" style={{ color: C.text }}>R${h.investimento_trafego?.toLocaleString("pt-BR")}</span></span>
                     <span style={{ color: C.muted }}>Vídeos: <span className="font-bold" style={{ color: C.text }}>{h.videos_postados}</span></span>
                   </div>
+                  {(h as any).respostas_customizadas && Object.keys((h as any).respostas_customizadas).length > 0 && (
+                    <div className="mt-3 pt-3 space-y-1.5" style={{ borderTop: `1px solid ${C.border}` }}>
+                      {Object.entries((h as any).respostas_customizadas as Record<string, string>).map(([label, resp]) => (
+                        <div key={label} className="text-xs">
+                          <span className="font-semibold" style={{ color: C.text }}>{label}: </span>
+                          <span style={{ color: C.muted }}>{resp}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

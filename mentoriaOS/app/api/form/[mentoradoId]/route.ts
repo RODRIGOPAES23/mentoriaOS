@@ -18,14 +18,27 @@ export async function GET(
   const supabase = admin()
   const { data, error } = await supabase
     .from("mentorados")
-    .select("id, nome, nicho, foco_macro")
+    .select("id, nome, nicho, foco_macro, mentor_id")
     .eq("id", params.mentoradoId)
     .single()
 
   if (error || !data) {
     return Response.json({ error: "Mentorado não encontrado" }, { status: 404 })
   }
-  return Response.json({ mentorado: data })
+
+  // Perguntas personalizadas do mentor (dinâmicas) — vão para o formulário do mentorado
+  let perguntas: any[] = []
+  if (data.mentor_id) {
+    const { data: qs } = await supabase
+      .from("custom_questions")
+      .select("id, label, tipo, obrigatoria, ordem")
+      .eq("mentor_id", data.mentor_id)
+      .eq("ativo", true)
+      .order("ordem", { ascending: true })
+    perguntas = qs || []
+  }
+
+  return Response.json({ mentorado: data, perguntas })
 }
 
 export async function POST(
@@ -69,6 +82,8 @@ export async function POST(
       videos_postados: parseInt(String(body.videos_postados)) || 0,
       dificuldades_texto: body.dificuldades_texto || "",
       tarefas_executadas: tarefas,
+      respostas_customizadas: (body.respostas_customizadas && typeof body.respostas_customizadas === "object")
+        ? body.respostas_customizadas : {},
     })
     .select()
     .single()

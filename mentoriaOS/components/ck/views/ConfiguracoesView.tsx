@@ -1,9 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { User, Moon, Building2, Check, ShieldCheck, Download, Loader2 } from "lucide-react"
+import { User, Moon, Building2, Check, ShieldCheck, Download, Loader2, HelpCircle } from "lucide-react"
 import { C } from "@/utils/theme"
 import AdminView from "../AdminView"
+import PerguntasCheckin from "../PerguntasCheckin"
 
 interface Props {
   mentorId: string
@@ -19,7 +20,7 @@ interface Props {
   initialTab?: Aba
 }
 
-type Aba = "geral" | "tema" | "empresa" | "lgpd"
+type Aba = "geral" | "checkin" | "tema" | "empresa" | "lgpd"
 
 const inputCls = "w-full px-3.5 py-2.5 rounded-lg text-sm text-gray-800 focus:outline-none transition-all"
 
@@ -32,6 +33,7 @@ export default function ConfiguracoesView({
 
   const abas = [
     { id: "geral" as const, label: "Meu Perfil", icon: User },
+    { id: "checkin" as const, label: "Check-in", icon: HelpCircle },
     { id: "tema" as const, label: "Tema", icon: Moon },
     { id: "empresa" as const, label: "Empresa", icon: Building2 },
     { id: "lgpd" as const, label: "Dados", icon: ShieldCheck },
@@ -100,6 +102,8 @@ export default function ConfiguracoesView({
           </button>
         </div>
       )}
+
+      {aba === "checkin" && <PerguntasCheckin mentorId={mentorId} accent={accent} />}
 
       {aba === "tema" && (
         <div className="max-w-lg rounded-2xl p-6 space-y-4" style={{ background: C.card, border: `1px solid ${C.border}` }}>
