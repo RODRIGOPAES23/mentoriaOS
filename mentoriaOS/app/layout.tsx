@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import { CookieBanner } from "@/components/site/CookieBanner"
+import SiteAnalytics from "@/components/site/SiteAnalytics"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" })
 
@@ -171,6 +172,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="antialiased text-white" style={{ background: "#0a1420" }}>
         {children}
+        <SiteAnalytics />
         <CookieBanner />
       </body>
     </html>

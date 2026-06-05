@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import { createBrowserClient } from "@supabase/ssr"
 import {
   Building2, Users, GraduationCap, ShieldCheck, Plus, X, Loader2,
-  Power, PenLine, ChevronRight, Globe, Brain, AlertTriangle, Sparkles, CheckCircle2, LogIn,
+  Power, PenLine, ChevronRight, Globe, Brain, AlertTriangle, Sparkles, CheckCircle2, LogIn, TrendingUp,
 } from "lucide-react"
 import { C } from "@/utils/theme"
 
@@ -106,9 +106,14 @@ export default function SuperAdminPage() {
       <header className="px-6 py-4 flex items-center justify-between" style={{ background: C.card, borderBottom: `1px solid ${C.border}` }}>
         <div className="flex items-center gap-2.5">
           <ShieldCheck className="w-5 h-5" style={{ color: C.gold }} />
-          <h1 className="text-base font-bold text-white">CKlareza · Super-Admin</h1>
+          <h1 className="text-base font-bold" style={{ color: C.text }}>CKlareza · Super-Admin</h1>
         </div>
         <div className="flex items-center gap-3">
+          <a href="/admin/analytics"
+            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl"
+            style={{ background: `${C.blue}18`, color: C.blue, border: `1px solid ${C.blue}44` }}>
+            <TrendingUp className="w-4 h-4" /> Analytics de uso
+          </a>
           <button onClick={() => setShowNova(true)}
             className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl"
             style={{ background: C.gold, color: "#1a1407" }}>
