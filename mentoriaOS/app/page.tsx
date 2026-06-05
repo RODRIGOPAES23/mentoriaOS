@@ -6,6 +6,7 @@ import {
   Sparkles, LayoutDashboard, DollarSign, KanbanSquare, Brain,
   Building2, ArrowRight, Check, Phone, ShieldCheck, Star, Globe, Heart, Sun, Moon,
 } from "lucide-react"
+import { LifetimeValueCTA } from "@/components/site/SiteChrome"
 
 type Theme = "dark" | "light"
 
@@ -412,6 +413,9 @@ export default function LandingPage() {
           {t.ctaBtn} <ArrowRight className="w-5 h-5" />
         </Link>
       </section>
+
+      {/* LIFETIME VALUE */}
+      <LifetimeValueCTA />
 
       {/* FOOTER */}
       <footer style={{ borderTop: `1px solid ${c.border}` }}>
