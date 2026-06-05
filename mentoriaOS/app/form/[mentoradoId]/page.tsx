@@ -17,6 +17,8 @@ export default function FormPage({ params }: { params: { mentoradoId: string } }
     videos_postados: "",
     dificuldades_texto: "",
     tarefas_executadas: "",
+    idioma: "pt",
+    tema: "light",
   })
 
   // Carrega o nome do mentorado (valida o link)
@@ -162,6 +164,35 @@ export default function FormPage({ params }: { params: { mentoradoId: string } }
                 className="w-full px-4 py-3 bg-ck-input border border-ck-border rounded-lg focus:outline-none focus:border-ck-green text-gray-800 min-h-24 resize-none"
                 placeholder="Liste as tarefas completadas..."
               />
+            </div>
+          </div>
+
+          <div>
+            <h2 className="text-xl font-semibold mb-6" style={{ color: "#4c9aff" }}>⚙️ Preferências</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-2">🌍 Idioma</label>
+                <select
+                  value={formData.idioma}
+                  onChange={(e) => setFormData({ ...formData, idioma: e.target.value })}
+                  className="w-full px-4 py-3 bg-ck-input border border-ck-border rounded-lg focus:outline-none focus:border-ck-green text-gray-800"
+                >
+                  <option value="pt">Português (BR)</option>
+                  <option value="en">English</option>
+                  <option value="es">Español</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-2">🎨 Tema</label>
+                <select
+                  value={formData.tema}
+                  onChange={(e) => setFormData({ ...formData, tema: e.target.value })}
+                  className="w-full px-4 py-3 bg-ck-input border border-ck-border rounded-lg focus:outline-none focus:border-ck-green text-gray-800"
+                >
+                  <option value="light">☀️ Light</option>
+                  <option value="dark">🌙 Dark</option>
+                </select>
+              </div>
             </div>
           </div>
 

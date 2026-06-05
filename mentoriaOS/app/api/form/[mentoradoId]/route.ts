@@ -84,6 +84,8 @@ export async function POST(
       tarefas_executadas: tarefas,
       respostas_customizadas: (body.respostas_customizadas && typeof body.respostas_customizadas === "object")
         ? body.respostas_customizadas : {},
+      idioma: ["pt", "en", "es"].includes(body.idioma) ? body.idioma : "pt",
+      tema: ["light", "dark"].includes(body.tema) ? body.tema : "light",
     })
     .select()
     .single()
