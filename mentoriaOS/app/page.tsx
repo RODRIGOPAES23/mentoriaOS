@@ -151,9 +151,6 @@ function Logo({ size = "md" }: { size?: "md" | "sm" }) {
 const FEAT_ICONS = [LayoutDashboard, DollarSign, KanbanSquare, Brain, Phone, Building2]
 const FEAT_CORES = [TEAL, "#22c55e", "#4c9aff", "#a855f7", GOLD_DEEP, TEAL]
 
-const MOCK_ICONS = [DollarSign, Phone, KanbanSquare, Building2]
-const MOCK_CORES = ["#22c55e", "#4c9aff", GOLD_DEEP, TEAL]
-const MOCK_VALS = ["R$ 4,2k", "12", "3", "28"]
 
 export default function LandingPage() {
   const [lang, setLang] = useState<Lang>("pt")
@@ -233,75 +230,43 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* PREVIEW DO PRODUTO — mockup limpo estilo Google */}
+        {/* VÍDEO PRINCIPAL — "Conheça a plataforma" (aparece já na abertura) */}
         <div className="relative max-w-3xl mx-auto px-5 pb-8">
-          <div className="rounded-2xl overflow-hidden" style={{ background: BG, border: `1px solid ${BORDER}`, boxShadow: "0 30px 80px -28px rgba(17,24,39,0.25)" }}>
-            {/* barra de janela */}
-            <div className="flex items-center gap-2 px-4 h-11" style={{ borderBottom: `1px solid ${BORDER}`, background: CARD }}>
-              <span className="w-3 h-3 rounded-full" style={{ background: "#ff5f57" }} />
-              <span className="w-3 h-3 rounded-full" style={{ background: "#febc2e" }} />
-              <span className="w-3 h-3 rounded-full" style={{ background: "#28c840" }} />
-              <div className="ml-3 flex items-center gap-2">
-                <Sparkles className="w-3.5 h-3.5" style={{ color: GOLD }} />
-                <span className="text-xs font-semibold" style={{ color: INK }}>CKlareza · Dashboard</span>
-              </div>
-            </div>
-            {/* corpo com 4 cards de métrica */}
-            <div className="p-5 md:p-6">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {t.mock.map((label: string, i: number) => {
-                  const Icon = MOCK_ICONS[i]; const cor = MOCK_CORES[i]
-                  return (
-                    <div key={i} className="rounded-xl p-4 text-left" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
-                      <div className="w-8 h-8 rounded-lg flex items-center justify-center mb-3" style={{ background: `${cor}1a` }}>
-                        <Icon className="w-4 h-4" style={{ color: cor }} />
-                      </div>
-                      <div className="text-xl font-bold" style={{ color: INK }}>{MOCK_VALS[i]}</div>
-                      <div className="text-[11px] mt-0.5 leading-tight" style={{ color: MUTED }}>{label}</div>
-                    </div>
-                  )
-                })}
-              </div>
-              {/* linhas de "lista" decorativas */}
-              <div className="mt-4 space-y-2.5">
-                {[0, 1, 2].map(i => (
-                  <div key={i} className="flex items-center gap-3 rounded-lg px-3 py-2.5" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
-                    <span className="w-2 h-2 rounded-full shrink-0" style={{ background: [TEAL, "#22c55e", GOLD][i] }} />
-                    <span className="h-2 rounded-full" style={{ background: BORDER, width: ["55%", "40%", "65%"][i] }} />
-                    <span className="ml-auto h-2 w-10 rounded-full" style={{ background: BORDER }} />
-                  </div>
-                ))}
-              </div>
-            </div>
+          <div className="rounded-2xl overflow-hidden" style={{ background: "#000", border: `2px solid ${GOLD}44`, boxShadow: `0 40px 120px -30px ${GOLD}50` }}>
+            <video
+              src="/video-cklareza.mp4"
+              autoPlay
+              muted
+              loop
+              playsInline
+              controls
+              className="w-full h-auto block"
+            />
           </div>
+          <p className="text-center text-sm mt-3 font-semibold flex items-center justify-center gap-2" style={{ color: MUTED }}>
+            <Sparkles className="w-3.5 h-3.5" style={{ color: GOLD }} /> {t.vid1}
+          </p>
         </div>
       </section>
 
-      {/* VÍDEOS */}
-      <section id="videos" className="max-w-6xl mx-auto px-5 py-16">
-        <div className="text-center mb-10">
-          <h2 className="text-3xl md:text-4xl font-bold" style={{ color: INK }}>{t.vidT}</h2>
+      {/* VÍDEO — Organização & banco de dados */}
+      <section id="videos" className="max-w-3xl mx-auto px-5 py-16">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl md:text-4xl font-bold" style={{ color: INK }}>{t.vid2}</h2>
           <p className="mt-3 text-lg" style={{ color: MUTED }}>{t.vidS}</p>
         </div>
-        <div className="grid md:grid-cols-2 gap-6">
-          {[
-            { src: "/video-cklareza.mp4", cap: t.vid1 },
-            { src: "/video-organizacao.mp4", cap: t.vid2 },
-          ].map((v) => (
-            <div key={v.src} className="rounded-2xl overflow-hidden" style={{ background: CARD, border: `1px solid ${BORDER}`, boxShadow: "0 20px 50px -25px rgba(17,24,39,0.2)" }}>
-              <video
-                src={v.src}
-                controls
-                preload="metadata"
-                playsInline
-                className="w-full h-auto block bg-black"
-              />
-              <div className="px-5 py-4 flex items-center gap-2.5">
-                <span className="w-2 h-2 rounded-full" style={{ background: TEAL }} />
-                <span className="text-sm font-semibold" style={{ color: INK }}>{v.cap}</span>
-              </div>
-            </div>
-          ))}
+        <div className="rounded-2xl overflow-hidden" style={{ background: CARD, border: `1px solid ${BORDER}`, boxShadow: "0 20px 50px -25px rgba(17,24,39,0.2)" }}>
+          <video
+            src="/video-organizacao.mp4"
+            controls
+            preload="metadata"
+            playsInline
+            className="w-full h-auto block bg-black"
+          />
+          <div className="px-5 py-4 flex items-center gap-2.5">
+            <span className="w-2 h-2 rounded-full" style={{ background: TEAL }} />
+            <span className="text-sm font-semibold" style={{ color: INK }}>{t.vid2}</span>
+          </div>
         </div>
       </section>
 
