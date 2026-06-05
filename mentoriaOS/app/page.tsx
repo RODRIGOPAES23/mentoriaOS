@@ -6,7 +6,7 @@ import {
   Sparkles, LayoutDashboard, DollarSign, KanbanSquare, Brain,
   Building2, ArrowRight, Check, Phone, ShieldCheck, Star, Globe, Heart, Sun, Moon,
 } from "lucide-react"
-import { LifetimeValueCTA } from "@/components/site/SiteChrome"
+import { LifetimeValueCTA, SiteFooter } from "@/components/site/SiteChrome"
 
 type Theme = "dark" | "light"
 
@@ -418,26 +418,7 @@ export default function LandingPage() {
       <LifetimeValueCTA />
 
       {/* FOOTER */}
-      <footer style={{ borderTop: `1px solid ${c.border}` }}>
-        <div className="max-w-6xl mx-auto px-5 py-10 flex flex-col md:flex-row items-center justify-between gap-4">
-          <Logo size="sm" c={c} />
-          <div className="flex flex-col items-center gap-1.5">
-            <p className="text-xs" style={{ color: c.muted }}>© {new Date().getFullYear()} CKlareza · Lifetime Value · cklareza.com</p>
-            <div className="flex items-center gap-1.5" style={{ opacity: 0.75 }}>
-              <span className="text-[9px]" style={{ color: c.muted, letterSpacing: "0.08em" }}>POWERED BY</span>
-              <Sparkles className="w-2.5 h-2.5" style={{ color: c.gold }} />
-              <span className="text-[10px] font-bold" style={{ color: c.goldDeep }}>CKlareza</span>
-              <span className="text-[9px]" style={{ color: c.muted }}>·</span>
-              <Brain className="w-2.5 h-2.5" style={{ color: c.teal }} />
-              <span className="text-[10px] font-bold" style={{ color: c.teal, letterSpacing: "0.04em" }}>GRATIDÃO</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link href="/privacidade" className="text-xs" style={{ color: c.muted }}>Privacidade</Link>
-            <Link href="/login" className="text-sm font-semibold" style={{ color: c.gold }}>{t.foot}</Link>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   )
 }
