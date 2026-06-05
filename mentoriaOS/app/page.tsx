@@ -33,6 +33,8 @@ const T: Record<Lang, any> = {
     trust: ["Sem cartão para testar", "Dados protegidos (LGPD)", "Verificado no Google"],
     mock: ["A receber", "Calls na semana", "Tarefas atrasadas", "Mentorados"],
     recT: "Tudo para operar sua mentoria", recS: "Um sistema, não dez planilhas.",
+    vidT: "Veja a CKlareza em ação", vidS: "Em poucos minutos, entenda como tudo funciona.",
+    vid1: "Conheça a plataforma", vid2: "Organização & banco de dados",
     feats: [
       ["Dashboard de operação", "Tudo que importa numa tela: pendências, calls, progresso e renovações — sem rolar."],
       ["Financeiro inteligente", "Cobranças, inadimplência e projeção. Saiba quem paga, quanto e quando."],
@@ -67,6 +69,8 @@ const T: Record<Lang, any> = {
     trust: ["No card to try", "Protected data (LGPD)", "Verified by Google"],
     mock: ["To receive", "Calls this week", "Overdue tasks", "Mentees"],
     recT: "Everything to run your mentorship", recS: "One system, not ten spreadsheets.",
+    vidT: "See CKlareza in action", vidS: "In a few minutes, see how it all works.",
+    vid1: "Meet the platform", vid2: "Organization & database",
     feats: [
       ["Operations dashboard", "Everything that matters on one screen: dues, calls, progress and renewals — no scrolling."],
       ["Smart finance", "Charges, overdue and forecast. Know who pays, how much and when."],
@@ -101,6 +105,8 @@ const T: Record<Lang, any> = {
     trust: ["Sin tarjeta para probar", "Datos protegidos (LGPD)", "Verificado por Google"],
     mock: ["Por cobrar", "Calls esta semana", "Tareas vencidas", "Mentoreados"],
     recT: "Todo para operar tu mentoría", recS: "Un sistema, no diez planillas.",
+    vidT: "Mira CKlareza en acción", vidS: "En pocos minutos, mira cómo funciona todo.",
+    vid1: "Conoce la plataforma", vid2: "Organización y base de datos",
     feats: [
       ["Panel de operación", "Todo lo que importa en una pantalla: pendientes, calls, progreso y renovaciones."],
       ["Finanzas inteligentes", "Cobros, morosidad y proyección. Sabe quién paga, cuánto y cuándo."],
@@ -268,6 +274,34 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* VÍDEOS */}
+      <section id="videos" className="max-w-6xl mx-auto px-5 py-16">
+        <div className="text-center mb-10">
+          <h2 className="text-3xl md:text-4xl font-bold" style={{ color: INK }}>{t.vidT}</h2>
+          <p className="mt-3 text-lg" style={{ color: MUTED }}>{t.vidS}</p>
+        </div>
+        <div className="grid md:grid-cols-2 gap-6">
+          {[
+            { src: "/video-cklareza.mp4", cap: t.vid1 },
+            { src: "/video-organizacao.mp4", cap: t.vid2 },
+          ].map((v) => (
+            <div key={v.src} className="rounded-2xl overflow-hidden" style={{ background: CARD, border: `1px solid ${BORDER}`, boxShadow: "0 20px 50px -25px rgba(17,24,39,0.2)" }}>
+              <video
+                src={v.src}
+                controls
+                preload="metadata"
+                playsInline
+                className="w-full h-auto block bg-black"
+              />
+              <div className="px-5 py-4 flex items-center gap-2.5">
+                <span className="w-2 h-2 rounded-full" style={{ background: TEAL }} />
+                <span className="text-sm font-semibold" style={{ color: INK }}>{v.cap}</span>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
