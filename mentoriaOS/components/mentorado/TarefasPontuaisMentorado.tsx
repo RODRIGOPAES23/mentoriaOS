@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { CheckCircle2, Circle, AlertCircle } from "lucide-react"
 import { C } from "@/utils/theme"
+import { useT, useLang, localeOf } from "@/components/portal/i18n"
 
 interface Subtarefa {
   id: string
@@ -32,6 +33,8 @@ interface TarefasPonitaisProps {
 }
 
 export function TarefasPontuaisMentorado({ mentoradoId }: TarefasPonitaisProps) {
+  const t = useT()
+  const loc = localeOf(useLang())
   const [tarefas, setTarefas] = useState<TarefaPontual[]>([])
   const [loading, setLoading] = useState(true)
   const [expandedId, setExpandedId] = useState<string | null>(null)
@@ -57,21 +60,21 @@ export function TarefasPontuaisMentorado({ mentoradoId }: TarefasPonitaisProps) 
       <div className="flex items-center justify-center py-12">
         <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
           className="w-8 h-8 border-2 rounded-full" style={{ borderColor: C.amber, borderTopColor: "transparent" }} />
-        <span className="ml-3" style={{ color: C.muted }}>Carregando tarefas...</span>
+        <span className="ml-3" style={{ color: C.muted }}>{t("Carregando tarefas...", "Loading tasks...", "Cargando tareas...")}</span>
       </div>
     )
   }
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-      <h3 className="text-lg font-bold text-white flex items-center gap-2">
+      <h3 className="text-lg font-bold flex items-center gap-2" style={{ color: C.text }}>
         <AlertCircle className="w-5 h-5" style={{ color: C.amber }} />
-        Tarefas Pontuais
+        {t("Tarefas Pontuais", "One-off Tasks", "Tareas Puntuales")}
       </h3>
 
       {tarefas.length === 0 ? (
         <div className="text-center py-12 rounded-2xl p-6" style={{ background: C.card, border: `1px solid ${C.border}`, color: C.muted }}>
-          <p>Nenhuma tarefa pontual no momento</p>
+          <p>{t("Nenhuma tarefa pontual no momento", "No one-off tasks right now", "Ninguna tarea puntual por ahora")}</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -83,7 +86,7 @@ export function TarefasPontuaisMentorado({ mentoradoId }: TarefasPonitaisProps) 
                   style={{ background: C.card, border: `1px solid ${C.border}` }}>
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
-                      <h4 className="font-semibold text-white mb-1">{tarefa.titulo}</h4>
+                      <h4 className="font-semibold mb-1" style={{ color: C.text }}>{tarefa.titulo}</h4>
                       {tarefa.descricao && <p className="text-sm" style={{ color: C.muted }}>{tarefa.descricao}</p>}
                     </div>
                   </div>
@@ -96,7 +99,7 @@ export function TarefasPontuaisMentorado({ mentoradoId }: TarefasPonitaisProps) 
                   </div>
 
                   <p className="text-xs mt-2" style={{ color: C.muted }}>
-                    {tarefa.subtarefas_validadas}/{tarefa.subtarefas_total} subtarefas validadas
+                    {tarefa.subtarefas_validadas}/{tarefa.subtarefas_total} {t("subtarefas validadas", "subtasks validated", "subtareas validadas")}
                   </p>
                 </button>
 
@@ -104,7 +107,7 @@ export function TarefasPontuaisMentorado({ mentoradoId }: TarefasPonitaisProps) 
                   {expandedId === tarefa.id && (
                     <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
                       className="rounded-b-2xl p-4 overflow-hidden" style={{ background: C.input, border: `1px solid ${C.border}`, borderTop: "none" }}>
-                      <p className="text-sm font-semibold text-white mb-4">Subtarefas:</p>
+                      <p className="text-sm font-semibold mb-4" style={{ color: C.text }}>{t("Subtarefas:", "Subtasks:", "Subtareas:")}</p>
                       <div className="space-y-2">
                         {tarefa.tarefas_pontuais_subtarefas.map((sub) => (
                           <div key={sub.id} className="flex items-start gap-3 rounded-lg p-3" style={{ background: `${C.card}80` }}>
@@ -112,12 +115,12 @@ export function TarefasPontuaisMentorado({ mentoradoId }: TarefasPonitaisProps) 
                               ? <CheckCircle2 className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: C.green }} />
                               : <Circle className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: C.muted }} />}
                             <div className="flex-1">
-                              <p className="text-sm" style={{ color: sub.status === "validado" ? C.muted : "#fff", textDecoration: sub.status === "validado" ? "line-through" : "none" }}>
+                              <p className="text-sm" style={{ color: sub.status === "validado" ? C.muted : C.text, textDecoration: sub.status === "validado" ? "line-through" : "none" }}>
                                 {sub.descricao}
                               </p>
                               {sub.status === "validado" && (
                                 <p className="text-xs mt-1" style={{ color: C.green }}>
-                                  ✓ Validado em {new Date(sub.data_validacao || "").toLocaleDateString("pt-BR")}
+                                  ✓ {t("Validado em", "Validated on", "Validado el")} {new Date(sub.data_validacao || "").toLocaleDateString(loc)}
                                 </p>
                               )}
                               {sub.observacao_validacao && (

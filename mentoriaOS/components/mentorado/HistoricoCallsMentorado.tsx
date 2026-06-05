@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { ChevronDown, Calendar, FileText } from "lucide-react"
 import { C } from "@/utils/theme"
+import { useT, useLang, localeOf } from "@/components/portal/i18n"
 
 interface CallHistorico {
   id: string
@@ -21,6 +22,8 @@ interface HistoricoCallsProps {
 }
 
 export function HistoricoCallsMentorado({ mentoradoId }: HistoricoCallsProps) {
+  const t = useT()
+  const loc = localeOf(useLang())
   const [resumao, setResumao] = useState<any>(null)
   const [calls, setCalls] = useState<CallHistorico[]>([])
   const [loading, setLoading] = useState(true)
@@ -48,7 +51,7 @@ export function HistoricoCallsMentorado({ mentoradoId }: HistoricoCallsProps) {
       <div className="flex items-center justify-center py-12">
         <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
           className="w-8 h-8 border-2 rounded-full" style={{ borderColor: C.blue, borderTopColor: "transparent" }} />
-        <span className="ml-3" style={{ color: C.muted }}>Carregando histórico...</span>
+        <span className="ml-3" style={{ color: C.muted }}>{t("Carregando histórico...", "Loading history...", "Cargando historial...")}</span>
       </div>
     )
   }
@@ -58,26 +61,26 @@ export function HistoricoCallsMentorado({ mentoradoId }: HistoricoCallsProps) {
       {/* RESUMÃO CONSOLIDADO */}
       {resumao && (
         <div className="rounded-2xl p-6" style={{ background: `linear-gradient(135deg, ${C.card} 0%, ${C.violet}18 100%)`, border: `1px solid ${C.border}` }}>
-          <h3 className="text-lg font-bold text-white mb-4">📊 Resumão das Calls</h3>
+          <h3 className="text-lg font-bold mb-4" style={{ color: C.text }}>{t("📊 Resumão das Calls", "📊 Calls Summary", "📊 Resumen de Llamadas")}</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="rounded-xl p-4" style={{ background: C.input }}>
-              <p className="text-sm mb-2" style={{ color: C.muted }}>Total de Calls</p>
-              <p className="text-3xl font-bold text-white">{resumao.total_calls}</p>
+              <p className="text-sm mb-2" style={{ color: C.muted }}>{t("Total de Calls", "Total Calls", "Total de Llamadas")}</p>
+              <p className="text-3xl font-bold" style={{ color: C.text }}>{resumao.total_calls}</p>
             </div>
             <div className="rounded-xl p-4" style={{ background: `${C.green}10`, border: `1px solid ${C.green}33` }}>
-              <p className="text-sm mb-2" style={{ color: C.green }}>✅ O que foi feito</p>
+              <p className="text-sm mb-2" style={{ color: C.green }}>{t("✅ O que foi feito", "✅ What was done", "✅ Lo que se hizo")}</p>
               <ul className="text-sm space-y-1" style={{ color: "#a7f3d0" }}>
                 {resumao.o_que_foi_feito?.slice(0, 3).map((item: string, i: number) => <li key={i}>• {item}</li>)}
               </ul>
             </div>
             <div className="rounded-xl p-4" style={{ background: `${C.amber}10`, border: `1px solid ${C.amber}33` }}>
-              <p className="text-sm mb-2" style={{ color: C.amber }}>⚠️ O que falta</p>
+              <p className="text-sm mb-2" style={{ color: C.amber }}>{t("⚠️ O que falta", "⚠️ What's missing", "⚠️ Lo que falta")}</p>
               <ul className="text-sm space-y-1" style={{ color: "#fde68a" }}>
                 {resumao.o_que_falta?.slice(0, 3).map((item: string, i: number) => <li key={i}>• {item}</li>)}
               </ul>
             </div>
             <div className="rounded-xl p-4" style={{ background: `${C.blue}10`, border: `1px solid ${C.blue}33` }}>
-              <p className="text-sm mb-2" style={{ color: C.blue }}>🎯 Próxima abordagem</p>
+              <p className="text-sm mb-2" style={{ color: C.blue }}>{t("🎯 Próxima abordagem", "🎯 Next approach", "🎯 Próximo enfoque")}</p>
               <p className="text-sm" style={{ color: "#bfdbfe" }}>
                 {typeof resumao.proxima_abordagem === "string" ? resumao.proxima_abordagem : resumao.proxima_abordagem?.foco}
               </p>
@@ -88,9 +91,9 @@ export function HistoricoCallsMentorado({ mentoradoId }: HistoricoCallsProps) {
 
       {/* CARDS DE CALLS */}
       <div>
-        <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+        <h3 className="text-lg font-bold mb-4 flex items-center gap-2" style={{ color: C.text }}>
           <Calendar className="w-5 h-5" style={{ color: C.blue }} />
-          Últimas Calls ({calls.length})
+          {t("Últimas Calls", "Latest Calls", "Últimas Llamadas")} ({calls.length})
         </h3>
 
         <div className="space-y-3">
@@ -104,11 +107,11 @@ export function HistoricoCallsMentorado({ mentoradoId }: HistoricoCallsProps) {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <span className="text-sm font-bold" style={{ color: C.blue }}>
-                          {new Date(call.data_call).toLocaleDateString("pt-BR")}
+                          {new Date(call.data_call).toLocaleDateString(loc)}
                         </span>
                         <span className="text-sm" style={{ color: C.muted }}>{call.titulo}</span>
                       </div>
-                      <p className="text-sm" style={{ color: "#94b4cc" }}>{call.principal || "Sem resumo"}</p>
+                      <p className="text-sm" style={{ color: "#94b4cc" }}>{call.principal || t("Sem resumo", "No summary", "Sin resumen")}</p>
                     </div>
                     <ChevronDown className={`w-5 h-5 transition-transform ${expandedId === call.id ? "rotate-180" : ""}`} style={{ color: C.muted }} />
                   </div>
@@ -120,7 +123,7 @@ export function HistoricoCallsMentorado({ mentoradoId }: HistoricoCallsProps) {
                       className="rounded-b-2xl p-4 overflow-hidden" style={{ background: C.input, border: `1px solid ${C.border}`, borderTop: "none" }}>
                       {call.resumo_estruturado?.bullets && (
                         <div className="mb-4">
-                          <p className="text-sm font-semibold text-white mb-2">📋 Pontos principais</p>
+                          <p className="text-sm font-semibold mb-2" style={{ color: C.text }}>{t("📋 Pontos principais", "📋 Key points", "📋 Puntos principales")}</p>
                           <ul className="text-sm space-y-1 ml-4" style={{ color: "#94b4cc" }}>
                             {call.resumo_estruturado.bullets.map((b: string, i: number) => <li key={i}>• {b}</li>)}
                           </ul>
@@ -128,7 +131,7 @@ export function HistoricoCallsMentorado({ mentoradoId }: HistoricoCallsProps) {
                       )}
                       {call.status_entrega && (
                         <div className="mb-4">
-                          <p className="text-sm font-semibold mb-2" style={{ color: C.green }}>✅ Entregues</p>
+                          <p className="text-sm font-semibold mb-2" style={{ color: C.green }}>{t("✅ Entregues", "✅ Delivered", "✅ Entregados")}</p>
                           <p className="text-sm" style={{ color: "#94b4cc" }}>
                             {typeof call.status_entrega === "string" ? call.status_entrega : JSON.stringify(call.status_entrega)}
                           </p>
@@ -136,7 +139,7 @@ export function HistoricoCallsMentorado({ mentoradoId }: HistoricoCallsProps) {
                       )}
                       {call.alinhamento_pendencias && (
                         <div>
-                          <p className="text-sm font-semibold mb-2" style={{ color: C.amber }}>⏳ Pendências</p>
+                          <p className="text-sm font-semibold mb-2" style={{ color: C.amber }}>{t("⏳ Pendências", "⏳ Pending", "⏳ Pendientes")}</p>
                           <p className="text-sm" style={{ color: "#94b4cc" }}>
                             {typeof call.alinhamento_pendencias === "string" ? call.alinhamento_pendencias : JSON.stringify(call.alinhamento_pendencias)}
                           </p>
@@ -153,7 +156,7 @@ export function HistoricoCallsMentorado({ mentoradoId }: HistoricoCallsProps) {
         {calls.length === 0 && (
           <div className="text-center py-12" style={{ color: C.muted }}>
             <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p>Nenhuma call registrada ainda</p>
+            <p>{t("Nenhuma call registrada ainda", "No calls recorded yet", "Ninguna llamada registrada aún")}</p>
           </div>
         )}
       </div>

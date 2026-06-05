@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { motion } from "framer-motion"
 import { Save, AlertCircle } from "lucide-react"
+import { useT } from "@/components/portal/i18n"
 
 interface FormMentoradoData {
   nome: string
@@ -63,6 +64,7 @@ export function FormCadastroMentorado({
     cidade: initialData?.cidade || "",
   })
 
+  const t = useT()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -114,7 +116,7 @@ export function FormCadastroMentorado({
       onSubmit={handleSubmit}
       className="space-y-6 bg-ck-card rounded-2xl p-8 border border-ck-border"
     >
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Cadastro do Mentorado</h2>
+      <h2 className="text-2xl font-bold text-gray-900 mb-6">{t("Cadastro do Mentorado", "Mentee Profile", "Perfil del Mentorizado")}</h2>
 
       {error && (
         <div className="flex items-center gap-3 bg-red-900/20 border border-red-700/50 rounded-lg p-4">
@@ -125,18 +127,18 @@ export function FormCadastroMentorado({
 
       {success && (
         <div className="bg-green-900/20 border border-green-700/50 rounded-lg p-4">
-          <p className="text-green-300">✓ Dados salvos com sucesso!</p>
+          <p className="text-green-300">{t("✓ Dados salvos com sucesso!", "✓ Data saved successfully!", "¡✓ Datos guardados con éxito!")}</p>
         </div>
       )}
 
       {/* SEÇÃO 1: CONTATO */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">📋 Contato</h3>
+        <h3 className="text-lg font-semibold text-gray-800 mb-4">{t("📋 Contato", "📋 Contact", "📋 Contacto")}</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input
             type="text"
             name="nome"
-            placeholder="Nome completo"
+            placeholder={t("Nome completo", "Full name", "Nombre completo")}
             value={formData.nome}
             onChange={handleChange}
             required
@@ -153,7 +155,7 @@ export function FormCadastroMentorado({
           <input
             type="tel"
             name="cel"
-            placeholder="Celular"
+            placeholder={t("Celular", "Mobile phone", "Celular")}
             value={formData.cel}
             onChange={handleChange}
             className="bg-ck-input border border-ck-border rounded px-4 py-2 text-gray-800 placeholder-ck-muted focus:outline-none focus:border-ck-green"
@@ -161,7 +163,7 @@ export function FormCadastroMentorado({
           <input
             type="tel"
             name="contato_emergencia"
-            placeholder="Contato de emergência"
+            placeholder={t("Contato de emergência", "Emergency contact", "Contacto de emergencia")}
             value={formData.contato_emergencia}
             onChange={handleChange}
             className="bg-ck-input border border-ck-border rounded px-4 py-2 text-gray-800 placeholder-ck-muted focus:outline-none focus:border-ck-green"
@@ -169,7 +171,7 @@ export function FormCadastroMentorado({
           <input
             type="text"
             name="instagram_handle"
-            placeholder="Instagram (@user)"
+            placeholder={t("Instagram (@user)", "Instagram (@user)", "Instagram (@user)")}
             value={formData.instagram_handle}
             onChange={handleChange}
             className="bg-ck-input border border-ck-border rounded px-4 py-2 text-gray-800 placeholder-ck-muted focus:outline-none focus:border-ck-green md:col-span-2"
@@ -179,12 +181,12 @@ export function FormCadastroMentorado({
 
       {/* SEÇÃO 2: EXPERIÊNCIA */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">💼 Experiência</h3>
+        <h3 className="text-lg font-semibold text-gray-800 mb-4">{t("💼 Experiência", "💼 Experience", "💼 Experiencia")}</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <input
             type="number"
             name="tempo_mercado"
-            placeholder="Tempo de mercado (anos)"
+            placeholder={t("Tempo de mercado (anos)", "Years in the market", "Tiempo en el mercado (años)")}
             value={formData.tempo_mercado}
             onChange={handleChange}
             className="bg-ck-input border border-ck-border rounded px-4 py-2 text-gray-800 placeholder-ck-muted focus:outline-none focus:border-ck-green"
@@ -192,7 +194,7 @@ export function FormCadastroMentorado({
           <input
             type="text"
             name="formacao"
-            placeholder="Formação acadêmica"
+            placeholder={t("Formação acadêmica", "Academic background", "Formación académica")}
             value={formData.formacao}
             onChange={handleChange}
             className="bg-ck-input border border-ck-border rounded px-4 py-2 text-gray-800 placeholder-ck-muted focus:outline-none focus:border-ck-green"
@@ -208,7 +210,7 @@ export function FormCadastroMentorado({
               onChange={handleChange}
               className="w-4 h-4 rounded"
             />
-            <span className="text-sm text-gray-600">Tem clínica?</span>
+            <span className="text-sm text-gray-600">{t("Tem clínica?", "Has a clinic?", "¿Tiene clínica?")}</span>
           </label>
           <label className="flex items-center gap-2 cursor-pointer">
             <input
@@ -218,7 +220,7 @@ export function FormCadastroMentorado({
               onChange={handleChange}
               className="w-4 h-4 rounded"
             />
-            <span className="text-sm text-gray-600">Mentoria</span>
+            <span className="text-sm text-gray-600">{t("Mentoria", "Mentorship", "Mentoría")}</span>
           </label>
           <label className="flex items-center gap-2 cursor-pointer">
             <input
@@ -228,7 +230,7 @@ export function FormCadastroMentorado({
               onChange={handleChange}
               className="w-4 h-4 rounded"
             />
-            <span className="text-sm text-gray-600">Tráfego</span>
+            <span className="text-sm text-gray-600">{t("Tráfego", "Paid traffic", "Tráfico")}</span>
           </label>
           <label className="flex items-center gap-2 cursor-pointer">
             <input
@@ -238,18 +240,18 @@ export function FormCadastroMentorado({
               onChange={handleChange}
               className="w-4 h-4 rounded"
             />
-            <span className="text-sm text-gray-600">Agência Mkt</span>
+            <span className="text-sm text-gray-600">{t("Agência Mkt", "Mkt agency", "Agencia Mkt")}</span>
           </label>
         </div>
       </div>
 
       {/* SEÇÃO 3: EXPECTATIVAS */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">🎯 Expectativas</h3>
+        <h3 className="text-lg font-semibold text-gray-800 mb-4">{t("🎯 Expectativas", "🎯 Expectations", "🎯 Expectativas")}</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <textarea
             name="expectativa_30_dias"
-            placeholder="O que espera em 30 dias?"
+            placeholder={t("O que espera em 30 dias?", "What do you expect in 30 days?", "¿Qué esperas en 30 días?")}
             value={formData.expectativa_30_dias}
             onChange={handleChange}
             rows={3}
@@ -257,7 +259,7 @@ export function FormCadastroMentorado({
           />
           <textarea
             name="expectativa_90_dias"
-            placeholder="O que espera em 90 dias?"
+            placeholder={t("O que espera em 90 dias?", "What do you expect in 90 days?", "¿Qué esperas en 90 días?")}
             value={formData.expectativa_90_dias}
             onChange={handleChange}
             rows={3}
@@ -265,7 +267,7 @@ export function FormCadastroMentorado({
           />
           <textarea
             name="expectativa_6_meses"
-            placeholder="O que espera em 6 meses?"
+            placeholder={t("O que espera em 6 meses?", "What do you expect in 6 months?", "¿Qué esperas en 6 meses?")}
             value={formData.expectativa_6_meses}
             onChange={handleChange}
             rows={3}
@@ -273,7 +275,7 @@ export function FormCadastroMentorado({
           />
           <textarea
             name="expectativa_12_meses"
-            placeholder="O que espera em 12 meses?"
+            placeholder={t("O que espera em 12 meses?", "What do you expect in 12 months?", "¿Qué esperas en 12 meses?")}
             value={formData.expectativa_12_meses}
             onChange={handleChange}
             rows={3}
@@ -284,12 +286,12 @@ export function FormCadastroMentorado({
 
       {/* SEÇÃO 4: FINANCEIRO */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">💰 Financeiro</h3>
+        <h3 className="text-lg font-semibold text-gray-800 mb-4">{t("💰 Financeiro", "💰 Financial", "💰 Financiero")}</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <input
             type="number"
             name="faturamento_medio_3m"
-            placeholder="Faturamento médio últimos 3 meses"
+            placeholder={t("Faturamento médio últimos 3 meses", "Avg. revenue last 3 months", "Facturación media últimos 3 meses")}
             value={formData.faturamento_medio_3m}
             onChange={handleChange}
             step="0.01"
@@ -298,7 +300,7 @@ export function FormCadastroMentorado({
           <input
             type="text"
             name="nicho"
-            placeholder="Nicho"
+            placeholder={t("Nicho", "Niche", "Nicho")}
             value={formData.nicho}
             onChange={handleChange}
             className="bg-ck-input border border-ck-border rounded px-4 py-2 text-gray-800 placeholder-ck-muted focus:outline-none focus:border-ck-green"
@@ -314,14 +316,14 @@ export function FormCadastroMentorado({
               onChange={handleChange}
               className="w-4 h-4 rounded"
             />
-            <span className="text-gray-600">Já atua rodando tráfego?</span>
+            <span className="text-gray-600">{t("Já atua rodando tráfego?", "Already running paid traffic?", "¿Ya gestiona tráfico pago?")}</span>
           </label>
 
           {formData.atua_trafego && (
             <input
               type="number"
               name="investimento_trafego_mensal"
-              placeholder="Investimento médio mensal em tráfego"
+              placeholder={t("Investimento médio mensal em tráfego", "Avg. monthly ad spend", "Inversión media mensual en tráfico")}
               value={formData.investimento_trafego_mensal || ""}
               onChange={handleChange}
               step="0.01"
@@ -338,7 +340,7 @@ export function FormCadastroMentorado({
               className="w-4 h-4 rounded"
             />
             <span className="text-gray-600">
-              Possui vendedora dedicada no time?
+              {t("Possui vendedora dedicada no time?", "Has a dedicated salesperson on the team?", "¿Tiene vendedora dedicada en el equipo?")}
             </span>
           </label>
         </div>
@@ -346,11 +348,11 @@ export function FormCadastroMentorado({
 
       {/* SEÇÃO 5: LOCALIZAÇÃO */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">📍 Localização</h3>
+        <h3 className="text-lg font-semibold text-gray-800 mb-4">{t("📍 Localização", "📍 Location", "📍 Ubicación")}</h3>
         <input
           type="text"
           name="cidade"
-          placeholder="Cidade"
+          placeholder={t("Cidade", "City", "Ciudad")}
           value={formData.cidade}
           onChange={handleChange}
           className="w-full bg-ck-input border border-ck-border rounded px-4 py-2 text-gray-800 placeholder-ck-muted focus:outline-none focus:border-ck-green"
@@ -367,7 +369,7 @@ export function FormCadastroMentorado({
         style={{ background: "#00d68f", color: "#0a1628" }}
       >
         <Save className="w-5 h-5" />
-        {loading ? "Salvando..." : "Salvar Cadastro"}
+        {loading ? t("Salvando...", "Saving...", "Guardando...") : t("Salvar Cadastro", "Save Profile", "Guardar Perfil")}
       </motion.button>
     </motion.form>
   )
