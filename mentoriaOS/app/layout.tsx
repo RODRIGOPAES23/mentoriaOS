@@ -3,6 +3,7 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import { CookieBanner } from "@/components/site/CookieBanner"
 import SiteAnalytics from "@/components/site/SiteAnalytics"
+import { BreadcrumbSchema } from "@/components/site/BreadcrumbSchema"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" })
 
@@ -171,6 +172,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(JSONLD) }} />
       </head>
       <body className="antialiased text-white" style={{ background: "#0a1420" }}>
+        <BreadcrumbSchema />
         {children}
         <SiteAnalytics />
         <CookieBanner />
