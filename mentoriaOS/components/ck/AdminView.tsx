@@ -68,13 +68,13 @@ function AdminViewBase({ mentorId, accent, onAbrirMentorado }: Props) {
   if (negado) return (
     <div className="rounded-2xl p-10 text-center" style={{ background: C.card, border: `1px solid ${C.border}` }}>
       <Crown className="w-10 h-10 mx-auto mb-3" style={{ color: C.border }} />
-      <p className="text-white font-semibold mb-1">Área do Administrador</p>
+      <p className="font-semibold mb-1" style={{ color: C.text }}>Área do Administrador</p>
       <p className="text-sm" style={{ color: C.muted }}>Apenas o admin da empresa tem acesso a esta visão.</p>
     </div>
   )
 
   const { empresa, mentores, mentorados, stats } = data
-  const inputStyle = { background: C.input, border: `1px solid ${C.border}` }
+  const inputStyle = { background: C.input, border: `1px solid ${C.border}`, color: C.text }
 
   return (
     <div className="space-y-5">
@@ -89,7 +89,7 @@ function AdminViewBase({ mentorId, accent, onAbrirMentorado }: Props) {
           </label>
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold text-white">{empresa.nome}</h1>
+              <h1 className="text-2xl font-bold" style={{ color: C.text }}>{empresa.nome}</h1>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: `${accent}20`, color: accent, border: `1px solid ${accent}44` }}>EMPRESA</span>
             </div>
             <p className="text-sm mt-0.5" style={{ color: C.muted }}>{empresa.nicho_foco || "Mentoria"}</p>
@@ -108,7 +108,7 @@ function AdminViewBase({ mentorId, accent, onAbrirMentorado }: Props) {
             <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3" style={{ background: `${s.cor}18`, border: `1px solid ${s.cor}30` }}>
               <s.icon className="w-4 h-4" style={{ color: s.cor }} />
             </div>
-            <p className="text-2xl font-bold text-white">{s.valor}</p>
+            <p className="text-2xl font-bold" style={{ color: C.text }}>{s.valor}</p>
             <p className="text-xs mt-0.5" style={{ color: C.muted }}>{s.label}</p>
           </div>
         ))}
@@ -121,7 +121,7 @@ function AdminViewBase({ mentorId, accent, onAbrirMentorado }: Props) {
             <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${C.violet}18`, border: `1px solid ${C.violet}30` }}>
               <Sparkles className="w-4 h-4" style={{ color: C.violet }} />
             </div>
-            <h3 className="text-sm font-semibold text-white">DNA da Empresa</h3>
+            <h3 className="text-sm font-semibold" style={{ color: C.text }}>DNA da Empresa</h3>
           </div>
           {!editandoDna ? (
             <button onClick={() => setEditandoDna(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold" style={{ background: `${accent}18`, border: `1px solid ${accent}33`, color: accent }}>
@@ -170,17 +170,17 @@ function AdminViewBase({ mentorId, accent, onAbrirMentorado }: Props) {
       {/* Mentores da empresa */}
       <div className="rounded-2xl overflow-hidden" style={{ background: C.card, border: `1px solid ${C.border}` }}>
         <div className="px-6 py-4" style={{ borderBottom: `1px solid ${C.border}` }}>
-          <h3 className="text-sm font-semibold text-white">Equipe de Mentores</h3>
+          <h3 className="text-sm font-semibold" style={{ color: C.text }}>Equipe de Mentores</h3>
         </div>
         <div>
           {mentores.map((m: any) => (
             <div key={m.id} className="px-6 py-3.5 flex items-center gap-3" style={{ borderBottom: `1px solid ${C.border}40` }}>
               <div className="w-9 h-9 rounded-full overflow-hidden shrink-0" style={{ border: `1px solid ${C.border}` }}>
-                {m.foto_url ? <img src={m.foto_url} alt={m.nome} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-xs font-bold text-white" style={{ background: C.input }}>{iniciais(m.nome)}</div>}
+                {m.foto_url ? <img src={m.foto_url} alt={m.nome} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-xs font-bold" style={{ background: C.input, color: C.muted }}>{iniciais(m.nome)}</div>}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <p className="text-sm font-semibold text-white truncate">{m.nome}</p>
+                  <p className="text-sm font-semibold truncate" style={{ color: C.text }}>{m.nome}</p>
                   {m.role === "admin" && <Crown className="w-3.5 h-3.5 shrink-0" style={{ color: accent }} />}
                 </div>
                 <p className="text-[10px] truncate" style={{ color: C.muted }}>{m.nicho_foco || "—"}</p>
@@ -205,7 +205,7 @@ function AdminViewBase({ mentorId, accent, onAbrirMentorado }: Props) {
       {/* Todos os mentorados da empresa */}
       <div className="rounded-2xl overflow-hidden" style={{ background: C.card, border: `1px solid ${C.border}` }}>
         <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom: `1px solid ${C.border}` }}>
-          <h3 className="text-sm font-semibold text-white">Todos os Mentorados</h3>
+          <h3 className="text-sm font-semibold" style={{ color: C.text }}>Todos os Mentorados</h3>
           <span className="text-xs" style={{ color: C.muted }}>{mentorados.length} ativos</span>
         </div>
         {mentorados.length === 0 ? (
@@ -223,7 +223,7 @@ function AdminViewBase({ mentorId, accent, onAbrirMentorado }: Props) {
                   {mo.foto_url ? <img src={mo.foto_url} alt={mo.nome} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-xs font-bold" style={{ background: C.input, color: accent }}>{iniciais(mo.nome)}</div>}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-white truncate">{mo.nome}</p>
+                  <p className="text-sm font-semibold truncate" style={{ color: C.text }}>{mo.nome}</p>
                   <p className="text-[10px] truncate" style={{ color: C.muted }}>{mo.nicho} · mentor: {mo.mentor_nome}</p>
                 </div>
                 <div className="hidden sm:flex items-center gap-2 w-24">

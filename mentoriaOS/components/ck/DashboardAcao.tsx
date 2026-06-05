@@ -78,7 +78,7 @@ function DashboardAcaoBase({ mentorId, accent, onAbrirMentorado, onAgendar, onIr
               </div>
               <ChevronRight className="w-4 h-4" style={{ color: C.muted }} />
             </div>
-            <p className="text-2xl font-bold text-white">{u.valor}</p>
+            <p className="text-2xl font-bold" style={{ color: C.text }}>{u.valor}</p>
             <p className="text-xs mt-0.5" style={{ color: C.muted }}>{u.label}</p>
             <p className="text-[10px] mt-1" style={{ color: u.cor }}>{u.sub}</p>
           </button>
@@ -93,7 +93,7 @@ function DashboardAcaoBase({ mentorId, accent, onAbrirMentorado, onAgendar, onIr
               <AlertTriangle className="w-4 h-4" style={{ color: C.red }} />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-white">Precisa de Atenção</h3>
+              <h3 className="text-sm font-semibold" style={{ color: C.text }}>Precisa de Atenção</h3>
               <p className="text-[11px]" style={{ color: C.muted }}>Priorizado por urgência · clique para abrir o aluno</p>
             </div>
           </div>
@@ -124,7 +124,7 @@ function DashboardAcaoBase({ mentorId, accent, onAbrirMentorado, onAgendar, onIr
                 {/* nome + motivos */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-semibold text-white truncate">{a.nome}</p>
+                    <p className="text-sm font-semibold truncate" style={{ color: C.text }}>{a.nome}</p>
                     <span className="text-[10px]" style={{ color: C.muted }}>· {a.mentor_nome}</span>
                   </div>
                   <div className="flex flex-wrap items-center gap-1.5 mt-1">
@@ -155,7 +155,7 @@ function DashboardAcaoBase({ mentorId, accent, onAbrirMentorado, onAgendar, onIr
             <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${accent}18`, border: `1px solid ${accent}30` }}>
               <Calendar className="w-4 h-4" style={{ color: accent }} />
             </div>
-            <h3 className="text-sm font-semibold text-white">Próximas Calls</h3>
+            <h3 className="text-sm font-semibold" style={{ color: C.text }}>Próximas Calls</h3>
           </div>
           <button onClick={onAgendar}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
@@ -176,7 +176,7 @@ function DashboardAcaoBase({ mentorId, accent, onAbrirMentorado, onAgendar, onIr
                   </span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-white">{s.mentorado_nome}</p>
+                  <p className="text-sm font-semibold" style={{ color: C.text }}>{s.mentorado_nome}</p>
                   <p className="text-xs" style={{ color: C.muted }}>
                     {s.hoje && <span style={{ color: accent }}>Hoje · </span>}
                     {new Date(s.data_hora).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
@@ -207,7 +207,7 @@ function DashboardAcaoBase({ mentorId, accent, onAbrirMentorado, onAgendar, onIr
             <div className="w-8 h-8 rounded-lg flex items-center justify-center mb-2" style={{ background: `${s.cor}18`, border: `1px solid ${s.cor}30` }}>
               <s.icon className="w-4 h-4" style={{ color: s.cor }} />
             </div>
-            <p className="text-xl font-bold text-white">{s.valor}</p>
+            <p className="text-xl font-bold" style={{ color: C.text }}>{s.valor}</p>
             <p className="text-[11px] mt-0.5" style={{ color: C.muted }}>{s.label}</p>
           </div>
         ))}

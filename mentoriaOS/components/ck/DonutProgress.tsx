@@ -17,7 +17,7 @@ export default function DonutProgress({ value, size = 140, stroke = 12, label = 
           style={{ transition: "stroke-dashoffset 0.8s cubic-bezier(0.4,0,0.2,1), stroke 0.3s" }} />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-3xl font-bold text-white">{value}%</span>
+        <span className="text-3xl font-bold" style={{ color: "#1f2937" }}>{value}%</span>
         <span className="text-xs mt-0.5" style={{ color: "#4d7fa8" }}>{label}</span>
       </div>
     </div>

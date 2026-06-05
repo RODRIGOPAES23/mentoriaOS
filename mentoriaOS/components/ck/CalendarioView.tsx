@@ -30,7 +30,7 @@ export default function CalendarioView({ mentorId, onAgendar }: {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-white">Calendário de Sessões</h2>
+        <h2 className="text-xl font-bold" style={{ color: C.text }}>Calendário de Sessões</h2>
         <button onClick={onAgendar}
           className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl transition-all"
           style={{ background: `${C.green}18`, border: `1px solid ${C.green}44`, color: C.green }}>
@@ -40,7 +40,7 @@ export default function CalendarioView({ mentorId, onAgendar }: {
 
       <div className="rounded-2xl overflow-hidden" style={{ background: C.card, border: `1px solid ${C.border}` }}>
         <div className="px-6 py-4" style={{ borderBottom: `1px solid ${C.border}` }}>
-          <h3 className="text-sm font-semibold text-white">Próximas sessões agendadas</h3>
+          <h3 className="text-sm font-semibold" style={{ color: C.text }}>Próximas sessões agendadas</h3>
         </div>
         {loading ? (
           <div className="p-8 text-center text-sm" style={{ color: C.muted }}>Carregando...</div>
@@ -60,7 +60,7 @@ export default function CalendarioView({ mentorId, onAgendar }: {
                   <Calendar className="w-5 h-5" style={{ color: C.green }} />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-semibold text-white">{s.mentorado_nome}</p>
+                  <p className="text-sm font-semibold" style={{ color: C.text }}>{s.mentorado_nome}</p>
                   <p className="text-xs mt-0.5 capitalize" style={{ color: C.muted }}>{fmtDH(s.data_hora)}</p>
                 </div>
                 {s.titulo && s.titulo !== "Sessão de Mentoria" && (

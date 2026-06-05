@@ -100,7 +100,7 @@ export default function VisaoGeral({ data, loading, onAbrirMentorado, onAgendar 
             <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${C.blue}20`, border: `1px solid ${C.blue}30` }}>
               <TrendingUp className="w-4 h-4" style={{ color: C.blue }} />
             </div>
-            <h3 className="text-sm font-semibold text-white">Progresso da Jornada</h3>
+            <h3 className="text-sm font-semibold" style={{ color: C.text }}>Progresso da Jornada</h3>
           </div>
           {foco ? (
             <>
@@ -131,16 +131,16 @@ export default function VisaoGeral({ data, loading, onAbrirMentorado, onAgendar 
             <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${C.amber}20`, border: `1px solid ${C.amber}30` }}>
               <Target className="w-4 h-4" style={{ color: C.amber }} />
             </div>
-            <h3 className="text-sm font-semibold text-white">Próxima Meta</h3>
+            <h3 className="text-sm font-semibold" style={{ color: C.text }}>Próxima Meta</h3>
           </div>
           <div className="flex-1 flex items-center">
             {foco?.meta
-              ? <p className="text-lg font-semibold text-white leading-snug">{foco.meta}</p>
+              ? <p className="text-lg font-semibold leading-snug" style={{ color: C.text }}>{foco.meta}</p>
               : <p className="text-sm" style={{ color: C.muted }}>Defina a meta/ação urgente da semana no perfil do mentorado.</p>}
           </div>
           {foco && (
             <div className="mt-4 pt-4" style={{ borderTop: `1px solid ${C.border}` }}>
-              <p className="text-xs" style={{ color: C.muted }}>Foco atual de <span className="font-semibold text-white">{foco.nome}</span></p>
+              <p className="text-xs" style={{ color: C.muted }}>Foco atual de <span className="font-semibold" style={{ color: C.text }}>{foco.nome}</span></p>
             </div>
           )}
         </div>
@@ -151,7 +151,7 @@ export default function VisaoGeral({ data, loading, onAbrirMentorado, onAgendar 
             <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "#a78bfa18", border: "1px solid #a78bfa30" }}>
               <Sparkles className="w-4 h-4" style={{ color: "#a78bfa" }} />
             </div>
-            <h3 className="text-sm font-semibold text-white">Insights da IA</h3>
+            <h3 className="text-sm font-semibold" style={{ color: C.text }}>Insights da IA</h3>
           </div>
           {foco && foco.insights.length > 0 ? (
             <ul className="space-y-3">
@@ -175,7 +175,7 @@ export default function VisaoGeral({ data, loading, onAbrirMentorado, onAgendar 
       <div className="rounded-2xl overflow-hidden animate-fade-in-up" style={{ background: C.card, border: `1px solid ${C.border}`, animationDelay: "180ms" }}>
         {/* Header */}
         <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom: `1px solid ${C.border}` }}>
-          <h3 className="text-sm font-semibold text-white">Mentorados</h3>
+          <h3 className="text-sm font-semibold" style={{ color: C.text }}>Mentorados</h3>
           <span className="text-xs" style={{ color: C.muted }}>{mentorados.length} ativos</span>
         </div>
 
@@ -215,7 +215,7 @@ export default function VisaoGeral({ data, loading, onAbrirMentorado, onAgendar 
                       : <div className="w-full h-full flex items-center justify-center text-xs font-bold" style={{ background: "#0a1628", color: C.green }}>{iniciais(m.nome)}</div>}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-white truncate">{m.nome}</p>
+                    <p className="text-sm font-semibold truncate" style={{ color: C.text }}>{m.nome}</p>
                     <p className="text-[10px] truncate" style={{ color: C.muted }}>{m.nicho}</p>
                   </div>
                 </div>

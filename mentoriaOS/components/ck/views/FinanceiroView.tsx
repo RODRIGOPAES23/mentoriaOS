@@ -77,7 +77,7 @@ export default function FinanceiroView({ mentorId, accent, mentorados, onAbrirMe
             <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3" style={{ background: `${c.cor}18`, border: `1px solid ${c.cor}30` }}>
               <c.icon className="w-4 h-4" style={{ color: c.cor }} />
             </div>
-            <p className="text-2xl font-bold text-white">{brl(c.valor)}</p>
+            <p className="text-2xl font-bold" style={{ color: C.text }}>{brl(c.valor)}</p>
             <p className="text-xs mt-0.5" style={{ color: C.muted }}>{c.label}</p>
             {c.sub && <p className="text-[10px] mt-1 font-semibold" style={{ color: c.cor }}>{c.sub}</p>}
           </div>
@@ -88,7 +88,7 @@ export default function FinanceiroView({ mentorId, accent, mentorados, onAbrirMe
       <div className="rounded-2xl overflow-hidden" style={{ background: C.card, border: `1px solid ${C.border}` }}>
         <div className="px-6 py-4 flex items-center gap-2.5" style={{ borderBottom: `1px solid ${C.border}` }}>
           <DollarSign className="w-4 h-4" style={{ color: accent }} />
-          <h3 className="text-sm font-semibold text-white">Fila de cobrança</h3>
+          <h3 className="text-sm font-semibold" style={{ color: C.text }}>Fila de cobrança</h3>
           <span className="text-xs" style={{ color: C.muted }}>· pendentes ordenados por vencimento</span>
         </div>
 
@@ -114,11 +114,11 @@ export default function FinanceiroView({ mentorId, accent, mentorados, onAbrirMe
                   onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}>
                   <div className="w-2 h-2 rounded-full shrink-0" style={{ background: cor }} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-white truncate">{nomeDe(p.mentorado_id)}</p>
+                    <p className="text-sm font-semibold truncate" style={{ color: C.text }}>{nomeDe(p.mentorado_id)}</p>
                     {p.descricao && <p className="text-[11px] truncate" style={{ color: C.muted }}>{p.descricao}</p>}
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-sm font-bold text-white">{brl(Number(p.valor || 0))}</p>
+                    <p className="text-sm font-bold" style={{ color: C.text }}>{brl(Number(p.valor || 0))}</p>
                     <p className="text-[11px] font-semibold" style={{ color: cor }}>{prazo}</p>
                   </div>
                   <ChevronRight className="w-4 h-4 shrink-0" style={{ color: C.muted }} />

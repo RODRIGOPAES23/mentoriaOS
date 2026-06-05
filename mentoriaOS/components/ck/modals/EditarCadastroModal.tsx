@@ -56,15 +56,15 @@ export default function EditarCadastroModal({ mentoradoId, nome, onClose, onSalv
     onSalvo()
   }
 
-  const inputStyle = { background: C.input, border: `1px solid ${C.border}` }
-  const inputCls = "w-full px-3.5 py-2.5 rounded-lg text-sm text-white focus:outline-none transition-all"
+  const inputStyle = { background: C.input, border: `1px solid ${C.border}`, color: C.text }
+  const inputCls = "w-full px-3.5 py-2.5 rounded-lg text-sm text-gray-800 focus:outline-none transition-all"
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center backdrop-blur-sm p-4 overflow-y-auto"
       style={{ background: "#00000070" }} onClick={onClose}>
       <div className="w-full max-w-3xl my-8 space-y-4" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between px-1">
-          <h2 className="text-lg font-bold text-white">Editar cadastro — {nome}</h2>
+          <h2 className="text-lg font-bold" style={{ color: C.text }}>Editar cadastro — {nome}</h2>
           <button onClick={onClose} className="p-2 rounded-lg transition-colors" style={{ color: C.muted }}>
             <X className="w-5 h-5" />
           </button>
@@ -82,7 +82,7 @@ export default function EditarCadastroModal({ mentoradoId, nome, onClose, onSalv
             <div className="rounded-2xl p-6 space-y-4" style={{ background: C.card, border: `1px solid ${C.border}` }}>
               <div className="flex items-center gap-2">
                 <Briefcase className="w-4 h-4" style={{ color: C.blue }} />
-                <h3 className="text-sm font-bold text-white">Operação da Mentoria</h3>
+                <h3 className="text-sm font-bold" style={{ color: C.text }}>Operação da Mentoria</h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">

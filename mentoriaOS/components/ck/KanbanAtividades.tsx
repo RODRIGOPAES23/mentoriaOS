@@ -57,7 +57,7 @@ function CardTarefa({ t, onAbrir }: { t: Tarefa; onAbrir: () => void }) {
       }}
       className="rounded-xl p-3 space-y-2">
       <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing">
-        <p className="text-sm text-white leading-snug" style={{ textDecoration: col === "concluidas" ? "line-through" : "none", opacity: col === "concluidas" ? 0.7 : 1 }}>{t.texto}</p>
+        <p className="text-sm leading-snug" style={{ color: C.text, textDecoration: col === "concluidas" ? "line-through" : "none", opacity: col === "concluidas" ? 0.7 : 1 }}>{t.texto}</p>
       </div>
       <div className="flex items-center gap-2">
         <button onClick={onAbrir}
@@ -81,7 +81,7 @@ function Coluna({ col, tarefas, onAbrir }: { col: typeof COLUNAS[number]; tarefa
       style={{ background: C.card, border: `1px solid ${isOver ? col.cor : C.border}`, transition: "border-color .15s" }}>
       <div className="flex items-center gap-2 mb-1 px-1">
         <col.icon className="w-4 h-4" style={{ color: col.cor }} />
-        <h3 className="text-sm font-bold text-white">{col.label}</h3>
+        <h3 className="text-sm font-bold" style={{ color: C.text }}>{col.label}</h3>
         <span className="ml-auto text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: `${col.cor}18`, color: col.cor }}>{tarefas.length}</span>
       </div>
       <p className="text-[10px] mb-3 px-1" style={{ color: C.muted }}>{col.hint}</p>

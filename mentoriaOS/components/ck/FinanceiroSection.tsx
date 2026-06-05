@@ -130,12 +130,12 @@ export default function FinanceiroSection({ mentoradoId, mentorId }: FinanceiroS
   if (!mentoradoId) return null
 
   return (
-    <div className="mb-6 rounded-lg bg-gradient-to-br from-slate-700/40 to-slate-800/40 border border-slate-600/30 backdrop-blur-md p-5">
+    <div className="mb-6 rounded-lg p-5" style={{ background: C.card, border: `1px solid ${C.border}` }}>
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <div className="w-1 h-6 bg-gradient-to-b from-emerald-400 to-green-600 rounded-full" />
-          <h3 className="text-lg font-semibold text-white">Financeiro</h3>
+          <h3 className="text-lg font-semibold" style={{ color: C.text }}>Financeiro</h3>
         </div>
         <button
           onClick={() => { if (showForm) { resetForm() } else { setForm({ valor: "", data_vencimento: "", descricao: "", parcela: "1", status: "pendente" }); setEditId(null); setShowForm(true) } }}
@@ -161,48 +161,48 @@ export default function FinanceiroSection({ mentoradoId, mentorId }: FinanceiroS
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm p-4"
           style={{ background: "#00000070" }} onClick={resetForm}>
-          <div className="w-full max-w-md rounded-2xl bg-slate-800 border border-slate-700 shadow-2xl"
+          <div className="w-full max-w-md rounded-2xl shadow-2xl" style={{ background: C.bg, border: `1px solid ${C.border}` }}
             onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700">
-              <h3 className="text-sm font-bold text-white">{editId ? "Editar pagamento" : "Novo pagamento"}</h3>
-              <button onClick={resetForm} className="p-1.5 rounded-lg text-slate-400 hover:text-white transition-colors">
+            <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: `1px solid ${C.border}` }}>
+              <h3 className="text-sm font-bold" style={{ color: C.text }}>{editId ? "Editar pagamento" : "Novo pagamento"}</h3>
+              <button onClick={resetForm} className="p-1.5 rounded-lg transition-colors" style={{ color: C.muted }}>
                 <X className="w-5 h-5" />
               </button>
             </div>
             <form onSubmit={salvar} className="p-5 space-y-3">
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="text-[10px] text-slate-400 uppercase tracking-widest">Valor (R$)</label>
+                  <label className="text-[10px] uppercase tracking-widest" style={{ color: C.muted }}>Valor (R$)</label>
                   <input type="number" step="0.01" placeholder="0,00" value={form.valor}
                     onChange={e => setForm(f => ({ ...f, valor: e.target.value }))}
-                    className="w-full mt-1 px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:border-emerald-500" />
+                    className="w-full mt-1 px-3 py-2 rounded-lg text-sm focus:outline-none" style={{ background: C.input, border: `1px solid ${C.border}`, color: C.text }} />
                 </div>
                 <div>
-                  <label className="text-[10px] text-slate-400 uppercase tracking-widest">Vencimento</label>
+                  <label className="text-[10px] uppercase tracking-widest" style={{ color: C.muted }}>Vencimento</label>
                   <input type="date" required value={form.data_vencimento}
                     onChange={e => setForm(f => ({ ...f, data_vencimento: e.target.value }))}
-                    className="w-full mt-1 px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:border-emerald-500" />
+                    className="w-full mt-1 px-3 py-2 rounded-lg text-sm focus:outline-none" style={{ background: C.input, border: `1px solid ${C.border}`, color: C.text }} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="text-[10px] text-slate-400 uppercase tracking-widest">Descrição</label>
+                  <label className="text-[10px] uppercase tracking-widest" style={{ color: C.muted }}>Descrição</label>
                   <input type="text" placeholder="Ex: Parcela 1/12" value={form.descricao}
                     onChange={e => setForm(f => ({ ...f, descricao: e.target.value }))}
-                    className="w-full mt-1 px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:border-emerald-500" />
+                    className="w-full mt-1 px-3 py-2 rounded-lg text-sm focus:outline-none" style={{ background: C.input, border: `1px solid ${C.border}`, color: C.text }} />
                 </div>
                 <div>
-                  <label className="text-[10px] text-slate-400 uppercase tracking-widest">Parcela #</label>
+                  <label className="text-[10px] uppercase tracking-widest" style={{ color: C.muted }}>Parcela #</label>
                   <input type="number" min="1" value={form.parcela}
                     onChange={e => setForm(f => ({ ...f, parcela: e.target.value }))}
-                    className="w-full mt-1 px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:border-emerald-500" />
+                    className="w-full mt-1 px-3 py-2 rounded-lg text-sm focus:outline-none" style={{ background: C.input, border: `1px solid ${C.border}`, color: C.text }} />
                 </div>
               </div>
               {editId && (
                 <div>
-                  <label className="text-[10px] text-slate-400 uppercase tracking-widest">Status</label>
+                  <label className="text-[10px] uppercase tracking-widest" style={{ color: C.muted }}>Status</label>
                   <select value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))}
-                    className="w-full mt-1 px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:border-emerald-500">
+                    className="w-full mt-1 px-3 py-2 rounded-lg text-sm focus:outline-none" style={{ background: C.input, border: `1px solid ${C.border}`, color: C.text }}>
                     <option value="pendente">Pendente</option>
                     <option value="pago">Pago</option>
                   </select>
@@ -210,7 +210,7 @@ export default function FinanceiroSection({ mentoradoId, mentorId }: FinanceiroS
               )}
               <div className="flex gap-2 pt-1">
                 <button type="button" onClick={resetForm}
-                  className="flex-1 py-2 rounded-lg bg-slate-700/50 text-slate-400 text-sm hover:bg-slate-700 transition-colors">
+                  className="flex-1 py-2 rounded-lg text-sm transition-colors" style={{ background: C.card2, color: C.muted, border: `1px solid ${C.border}` }}>
                   Cancelar
                 </button>
                 <button type="submit"
@@ -238,8 +238,8 @@ export default function FinanceiroSection({ mentoradoId, mentorId }: FinanceiroS
                 statusCalc === "pago" ? "bg-emerald-500/10 border border-emerald-500/20" :
                 statusCalc === "atrasado" ? "bg-red-500/10 border border-red-500/20" :
                 statusCalc === "hoje" || statusCalc === "proximo" ? "bg-amber-500/10 border border-amber-500/20" :
-                "bg-slate-600/20"
-              }`}>
+                ""
+              }`} style={!["pago", "atrasado", "hoje", "proximo"].includes(statusCalc) ? { background: C.card2 } : undefined}>
                 {/* Ícone */}
                 <div className="flex-shrink-0">
                   {statusCalc === "pago" ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> :
@@ -251,7 +251,7 @@ export default function FinanceiroSection({ mentoradoId, mentorId }: FinanceiroS
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-sm font-bold text-white">
+                    <span className="text-sm font-bold" style={{ color: C.text }}>
                       R$ {Number(p.valor).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                     </span>
                     {p.descricao && <span className="text-xs text-slate-400 truncate">{p.descricao}</span>}

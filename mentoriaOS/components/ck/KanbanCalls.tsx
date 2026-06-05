@@ -56,7 +56,7 @@ function CardSessao({ s, onAvancar }: { s: Sessao; onAvancar: (s: Sessao) => voi
       }}
       className="rounded-xl p-3 space-y-2">
       <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing">
-        <p className="text-sm font-semibold text-white truncate">{s.mentorado_nome || "—"}</p>
+        <p className="text-sm font-semibold truncate" style={{ color: C.text }}>{s.mentorado_nome || "—"}</p>
         <p className="text-[11px] mt-0.5" style={{ color: C.muted }}>{fmtDH(s.data_hora)}</p>
         {s.titulo && s.titulo !== "Sessão de Mentoria" && (
           <p className="text-[11px] truncate" style={{ color: C.muted }}>{s.titulo}</p>
@@ -96,7 +96,7 @@ function Coluna({ col, sessoes, onAvancar }: { col: typeof COLUNAS[number]; sess
       style={{ background: C.card, border: `1px solid ${isOver ? col.cor : C.border}`, transition: "border-color .15s" }}>
       <div className="flex items-center gap-2 mb-1 px-1">
         <col.icon className="w-4 h-4" style={{ color: col.cor }} />
-        <h3 className="text-sm font-bold text-white">{col.label}</h3>
+        <h3 className="text-sm font-bold" style={{ color: C.text }}>{col.label}</h3>
         <span className="ml-auto text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: `${col.cor}18`, color: col.cor }}>{sessoes.length}</span>
       </div>
       <p className="text-[10px] mb-3 px-1" style={{ color: C.muted }}>{col.hint}</p>

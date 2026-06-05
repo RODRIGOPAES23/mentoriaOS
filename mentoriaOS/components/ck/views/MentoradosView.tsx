@@ -85,10 +85,10 @@ export default function MentoradosView({
                 <div className="w-7 h-7 rounded-lg overflow-hidden shrink-0" style={{ border: `1px solid ${C.border}` }}>
                   {selected.foto_url
                     ? <img src={selected.foto_url} alt={selected.nome} className="w-full h-full object-cover" />
-                    : <div className="w-full h-full flex items-center justify-center text-[10px] font-bold text-white" style={{ background: C.card2 }}>{iniciais(selected.nome)}</div>}
+                    : <div className="w-full h-full flex items-center justify-center text-[10px] font-bold" style={{ color: C.muted, background: C.card2 }}>{iniciais(selected.nome)}</div>}
                 </div>
                 <div className="flex-1 min-w-0 text-left">
-                  <p className="text-sm font-semibold text-white truncate">{selected.nome}</p>
+                  <p className="text-sm font-semibold truncate" style={{ color: C.text }}>{selected.nome}</p>
                   <p className="text-[10px] truncate" style={{ color: C.muted }}>{selected.nicho}</p>
                 </div>
               </>
@@ -107,8 +107,8 @@ export default function MentoradosView({
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: C.muted }} />
                     <input autoFocus value={filtroSidebar} onChange={e => setFiltroSidebar(e.target.value)}
                       placeholder="Buscar mentorado..."
-                      className="w-full pl-9 pr-3 py-2 rounded-lg text-sm text-white placeholder-slate-600 focus:outline-none"
-                      style={{ background: C.input, border: `1px solid ${C.border}` }}
+                      className="w-full pl-9 pr-3 py-2 rounded-lg text-sm placeholder-gray-400 focus:outline-none"
+                      style={{ background: C.input, border: `1px solid ${C.border}`, color: C.text }}
                       onFocus={e => e.target.style.borderColor = accent} onBlur={e => e.target.style.borderColor = C.border} />
                   </div>
                 </div>
@@ -126,7 +126,7 @@ export default function MentoradosView({
                         <div className="w-7 h-7 rounded-lg overflow-hidden shrink-0" style={{ border: `1px solid ${C.border}` }}>
                           {m.foto_url
                             ? <img src={m.foto_url} alt={m.nome} className="w-full h-full object-cover" />
-                            : <div className="w-full h-full flex items-center justify-center text-[10px] font-bold text-white" style={{ background: C.input }}>{iniciais(m.nome)}</div>}
+                            : <div className="w-full h-full flex items-center justify-center text-[10px] font-bold" style={{ color: C.muted, background: C.input }}>{iniciais(m.nome)}</div>}
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-semibold truncate" style={{ color: sel ? C.input : "#fff" }}>{m.nome}</p>
@@ -181,7 +181,7 @@ export default function MentoradosView({
                 <div className="flex-1">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <h1 className="text-xl font-bold text-white">{selected.nome}</h1>
+                      <h1 className="text-xl font-bold" style={{ color: C.text }}>{selected.nome}</h1>
                       <p className="text-sm mt-0.5" style={{ color: C.muted }}>{selected.nicho}</p>
                     </div>
                     <span className="px-3 py-1 text-xs font-bold rounded-full shrink-0" style={{ background: `${C.green}18`, border: `1px solid ${C.green}44`, color: C.green }}>
@@ -195,15 +195,15 @@ export default function MentoradosView({
                         @{selected.instagram_handle.replace("@", "")}
                       </a>
                     )}
-                    <span>📅 Início: <span className="text-white font-medium">{selected.data_inicio}</span></span>
+                    <span>📅 Início: <span className="font-medium" style={{ color: C.text }}>{selected.data_inicio}</span></span>
                     {selected.data_fim && (
-                      <span>🏁 Término: <span className="text-white font-medium">{selected.data_fim}</span> · <CountdownDias dataFim={selected.data_fim} /></span>
+                      <span>🏁 Término: <span className="font-medium" style={{ color: C.text }}>{selected.data_fim}</span> · <CountdownDias dataFim={selected.data_fim} /></span>
                     )}
-                    {selected.cidade && <span>📍 <span className="text-white font-medium">{selected.cidade}</span></span>}
-                    <span>🎯 <span className="text-white font-medium">{selected.foco_macro}</span></span>
+                    {selected.cidade && <span>📍 <span className="font-medium" style={{ color: C.text }}>{selected.cidade}</span></span>}
+                    <span>🎯 <span className="font-medium" style={{ color: C.text }}>{selected.foco_macro}</span></span>
                   </div>
                   <div className="flex flex-wrap gap-x-5 gap-y-1 mt-1 text-xs" style={{ color: C.muted }}>
-                    <span>📞 Última call: <span className="text-white font-medium">{selected.data_ultima_call ? new Date(selected.data_ultima_call).toLocaleDateString("pt-BR") : "—"}</span></span>
+                    <span>📞 Última call: <span className="font-medium" style={{ color: C.text }}>{selected.data_ultima_call ? new Date(selected.data_ultima_call).toLocaleDateString("pt-BR") : "—"}</span></span>
                     <span>⏭️ Próxima call: <span className="font-medium" style={{ color: selected.data_proxima_call ? C.green : C.muted }}>{selected.data_proxima_call ? new Date(selected.data_proxima_call).toLocaleDateString("pt-BR") + " " + new Date(selected.data_proxima_call).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : "não agendada"}</span></span>
                   </div>
                   {(selected.expectativa_30_dias || selected.expectativa_90_dias) && (
@@ -211,13 +211,13 @@ export default function MentoradosView({
                       {selected.expectativa_30_dias && (
                         <div className="flex-1 min-w-[180px] rounded-lg px-3 py-2" style={{ background: C.input, border: `1px solid ${C.border}` }}>
                           <p className="text-[9px] font-bold uppercase tracking-widest" style={{ color: C.amber }}>Meta 30 dias</p>
-                          <p className="text-xs text-white mt-0.5">{selected.expectativa_30_dias}</p>
+                          <p className="text-xs mt-0.5" style={{ color: C.text }}>{selected.expectativa_30_dias}</p>
                         </div>
                       )}
                       {selected.expectativa_90_dias && (
                         <div className="flex-1 min-w-[180px] rounded-lg px-3 py-2" style={{ background: C.input, border: `1px solid ${C.border}` }}>
                           <p className="text-[9px] font-bold uppercase tracking-widest" style={{ color: C.green }}>Meta 90 dias</p>
-                          <p className="text-xs text-white mt-0.5">{selected.expectativa_90_dias}</p>
+                          <p className="text-xs mt-0.5" style={{ color: C.text }}>{selected.expectativa_90_dias}</p>
                         </div>
                       )}
                     </div>
@@ -282,7 +282,7 @@ export default function MentoradosView({
                         </div>
                         <History className="w-3.5 h-3.5" style={{ color: C.muted }} />
                       </div>
-                      <p className="text-2xl font-bold text-white">{card.prefixo}{card.valor?.toLocaleString("pt-BR")}</p>
+                      <p className="text-2xl font-bold" style={{ color: C.text }}>{card.prefixo}{card.valor?.toLocaleString("pt-BR")}</p>
                       <p className="text-xs mt-0.5 mb-2" style={{ color: C.muted }}>{card.label}</p>
                       <BadgeVariacao pct={pct} />
                     </button>
@@ -331,7 +331,7 @@ export default function MentoradosView({
                       <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${C.violet}18`, border: `1px solid ${C.violet}30` }}>
                         <Sparkles className="w-4 h-4" style={{ color: C.violet }} />
                       </div>
-                      <h3 className="text-sm font-semibold text-white">Análise de Call com IA</h3>
+                      <h3 className="text-sm font-semibold" style={{ color: C.text }}>Análise de Call com IA</h3>
                     </div>
                     <button onClick={onAnalisarCall}
                       className="flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl transition-all"
@@ -352,7 +352,7 @@ export default function MentoradosView({
                     <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${C.violet}18`, border: `1px solid ${C.violet}30` }}>
                       <Sparkles className="w-4 h-4" style={{ color: C.violet }} />
                     </div>
-                    <h3 className="text-sm font-semibold text-white">Briefing da IA</h3>
+                    <h3 className="text-sm font-semibold" style={{ color: C.text }}>Briefing da IA</h3>
                   </div>
                   <button onClick={onGerarBriefing} disabled={briefingLoading}
                     className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg disabled:opacity-50 transition-all"

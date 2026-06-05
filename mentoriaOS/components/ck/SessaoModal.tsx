@@ -52,7 +52,7 @@ export default function SessaoModal({ mentorId, mentorados, mentoradoIdInicial, 
     else { const j = await res.json(); setErro(j.error || "Erro ao agendar") }
   }
 
-  const inputStyle = { background: C.input, border: `1px solid ${C.border}` }
+  const inputStyle = { background: C.input, border: `1px solid ${C.border}`, color: C.text }
   const onFocus = (e: any) => e.target.style.borderColor = C.green
   const onBlur = (e: any) => e.target.style.borderColor = C.border
 
@@ -64,7 +64,7 @@ export default function SessaoModal({ mentorId, mentorados, mentoradoIdInicial, 
             <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: `${C.green}18`, border: `1px solid ${C.green}33` }}>
               <Calendar className="w-5 h-5" style={{ color: C.green }} />
             </div>
-            <h2 className="text-base font-semibold text-white">Agendar Sessão</h2>
+            <h2 className="text-base font-semibold" style={{ color: C.text }}>Agendar Sessão</h2>
           </div>
           <button onClick={onClose} className="p-2 rounded-lg transition-colors" style={{ color: C.muted }}>
             <X className="w-5 h-5" />

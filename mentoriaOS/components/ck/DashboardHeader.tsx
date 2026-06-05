@@ -1,7 +1,7 @@
 "use client"
 
 import { RefObject } from "react"
-import { AlertCircle, ChevronDown, Settings, LogOut, Sparkles, DollarSign } from "lucide-react"
+import { AlertCircle, ChevronDown, Settings, LogOut, Sparkles, DollarSign, Menu } from "lucide-react"
 import { C } from "@/utils/theme"
 
 interface Props {
@@ -18,13 +18,14 @@ interface Props {
   onCobrancasVencidas: () => void
   onConfiguracoes: () => void
   onSair: () => void
+  onOpenMobileMenu?: () => void
 }
 
 /** Barra superior do dashboard do mentor (presenter puro). */
 export default function DashboardHeader({
   moduleLabel, realtimeConnected, mentorNome, mentorFotoUrl, tarefasVencidas, cobrancasVencidas,
   showMenu, setShowMenu, menuRef, onVencidas, onCobrancasVencidas,
-  onConfiguracoes, onSair,
+  onConfiguracoes, onSair, onOpenMobileMenu,
 }: Props) {
   const itensMenu = [
     { label: "Configurações", icon: Settings, onClick: onConfiguracoes },
@@ -33,7 +34,10 @@ export default function DashboardHeader({
   return (
     <header className="relative px-6 py-3.5 flex items-center justify-between shrink-0" style={{ background: C.card, borderBottom: `1px solid ${C.border}` }}>
       <div className="flex items-center gap-3">
-        <h2 className="text-base font-semibold text-white">{moduleLabel}</h2>
+        <button onClick={onOpenMobileMenu} className="md:hidden p-1.5 -ml-1 rounded-lg" style={{ color: C.text }} title="Abrir menu" aria-label="Abrir menu">
+          <Menu className="w-5 h-5" />
+        </button>
+        <h2 className="text-base font-semibold" style={{ color: C.text }}>{moduleLabel}</h2>
         {realtimeConnected && (
           <span className="flex items-center gap-1 text-[10px] font-medium" style={{ color: C.green }}>
             <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: C.green }} /> Ao vivo
@@ -42,7 +46,7 @@ export default function DashboardHeader({
       </div>
 
       {/* Assinatura CKlareza centralizada */}
-      <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1.5 pointer-events-none">
+      <div className="absolute left-1/2 -translate-x-1/2 hidden md:flex items-center gap-1.5 pointer-events-none">
         <Sparkles className="w-4 h-4" style={{ color: C.gold }} />
         <span className="text-lg font-bold tracking-tight" style={{
           background: "linear-gradient(180deg, #f0d97d 0%, #d4af37 55%, #9c7d2e 100%)",
@@ -84,9 +88,9 @@ export default function DashboardHeader({
             <div className="w-8 h-8 rounded-full overflow-hidden">
               {mentorFotoUrl
                 ? <img src={mentorFotoUrl} alt={mentorNome} className="w-full h-full object-cover" />
-                : <div className="w-full h-full flex items-center justify-center text-xs font-bold text-white" style={{ background: C.input }}>{mentorNome.slice(0, 2).toUpperCase()}</div>}
+                : <div className="w-full h-full flex items-center justify-center text-xs font-bold" style={{ background: C.input, color: C.muted }}>{mentorNome.slice(0, 2).toUpperCase()}</div>}
             </div>
-            <span className="text-sm font-semibold text-white hidden sm:block">{mentorNome}</span>
+            <span className="text-sm font-semibold hidden sm:block" style={{ color: C.text }}>{mentorNome}</span>
             <ChevronDown className="w-3.5 h-3.5" style={{ color: C.muted }} />
           </button>
 
@@ -94,7 +98,7 @@ export default function DashboardHeader({
             <div className="absolute right-0 top-full mt-2 w-52 rounded-xl shadow-xl py-1.5 z-50" style={{ background: C.card2, border: `1px solid ${C.border}` }}>
               {itensMenu.map(item => (
                 <button key={item.label} onClick={item.onClick}
-                  className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-white transition-colors"
+                  className="w-full flex items-center gap-2.5 px-4 py-2 text-sm transition-colors" style={{ color: C.text }}
                   onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = C.border}
                   onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}>
                   <item.icon className="w-4 h-4" style={{ color: C.muted }} /> {item.label}

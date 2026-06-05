@@ -78,6 +78,7 @@ export default function DashboardPage() {
   // UI / navegação
   const [ckView, setCkView] = useState<CkView>("visao-geral")
   const [sidebarCollapsed, setSidebarCollapsed] = useLocalStorage("ck:sidebar-collapsed", false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<"pendencias" | "financeiro" | "calls" | "chat" | "materiais">("pendencias")
   const [filtroSidebar, setFiltroSidebar] = useState("")
   const [realtimeStatus, setRealtimeStatus] = useState<"connecting" | "connected" | "error">("connecting")
@@ -349,6 +350,8 @@ export default function DashboardPage() {
         isAdmin={isAdmin}
         onLogout={logout}
         logoutLabel={mentorLocked ? "Sair" : "Trocar mentor"}
+        mobileOpen={mobileMenuOpen}
+        onMobileClose={() => setMobileMenuOpen(false)}
       />
 
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -366,6 +369,7 @@ export default function DashboardPage() {
           onCobrancasVencidas={() => setCkView("financeiro")}
           onConfiguracoes={() => { setConfigTab("geral"); setCkView("configuracoes"); setShowMenuPerfil(false) }}
           onSair={sair}
+          onOpenMobileMenu={() => setMobileMenuOpen(true)}
         />
 
         <main className="flex-1 overflow-y-auto">

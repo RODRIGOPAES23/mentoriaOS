@@ -52,7 +52,7 @@ export default function ChatMentor({ mentoradoId, mentorId, nomeMentorado }: {
           <MessageCircle className="w-4 h-4" style={{ color: C.green }} />
         </div>
         <div>
-          <h3 className="text-sm font-semibold text-white">Chat com {nomeMentorado.split(" ")[0]}</h3>
+          <h3 className="text-sm font-semibold" style={{ color: C.text }}>Chat com {nomeMentorado.split(" ")[0]}</h3>
           <p className="text-[10px]" style={{ color: C.muted }}>Mensagens em tempo real</p>
         </div>
       </div>
@@ -87,8 +87,8 @@ export default function ChatMentor({ mentoradoId, mentorId, nomeMentorado }: {
 
       <form onSubmit={enviar} className="flex gap-2 p-4 shrink-0" style={{ borderTop: `1px solid ${C.border}` }}>
         <input value={texto} onChange={e => setTexto(e.target.value)} placeholder="Responder..."
-          className="flex-1 px-4 py-2.5 rounded-xl text-sm text-white placeholder-slate-600 focus:outline-none"
-          style={{ background: C.input, border: `1px solid ${C.border}` }}
+          className="flex-1 px-4 py-2.5 rounded-xl text-sm placeholder-gray-400 focus:outline-none"
+          style={{ background: C.input, border: `1px solid ${C.border}`, color: C.text }}
           onFocus={e => e.target.style.borderColor = C.green} onBlur={e => e.target.style.borderColor = C.border} />
         <button type="submit" disabled={enviando || !texto.trim()}
           className="w-11 h-11 rounded-xl flex items-center justify-center disabled:opacity-40 shrink-0"

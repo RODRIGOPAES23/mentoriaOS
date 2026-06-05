@@ -21,7 +21,7 @@ interface Props {
 
 type Aba = "geral" | "tema" | "empresa" | "lgpd"
 
-const inputCls = "w-full px-3.5 py-2.5 rounded-lg text-sm text-white focus:outline-none transition-all"
+const inputCls = "w-full px-3.5 py-2.5 rounded-lg text-sm text-gray-800 focus:outline-none transition-all"
 
 /** Central única de configurações. Geral = perfil do mentor (ex-"Meu Perfil"). Empresa (AdminView) vive aqui. */
 export default function ConfiguracoesView({
@@ -60,7 +60,7 @@ export default function ConfiguracoesView({
               <div className="w-16 h-16 rounded-2xl overflow-hidden ring-2 transition-all" style={{ borderColor: C.border }}>
                 {mentorDados?.foto_url
                   ? <img src={mentorDados.foto_url} alt={mentorNome} className="w-full h-full object-cover" />
-                  : <div className="w-full h-full flex items-center justify-center text-xl font-bold text-white" style={{ background: C.input }}>{mentorNome.slice(0, 2).toUpperCase()}</div>}
+                  : <div className="w-full h-full flex items-center justify-center text-xl font-bold" style={{ background: C.input, color: C.muted }}>{mentorNome.slice(0, 2).toUpperCase()}</div>}
               </div>
               <input type="file" accept="image/*" className="hidden" onChange={e => {
                 const file = e.target.files?.[0]
@@ -68,7 +68,7 @@ export default function ConfiguracoesView({
               }} />
             </label>
             <div>
-              <h3 className="font-semibold text-white">Perfil do Mentor</h3>
+              <h3 className="font-semibold" style={{ color: C.text }}>Perfil do Mentor</h3>
               <p className="text-xs" style={{ color: C.muted }}>Clique na foto para trocar</p>
             </div>
           </div>
@@ -103,13 +103,13 @@ export default function ConfiguracoesView({
 
       {aba === "tema" && (
         <div className="max-w-lg rounded-2xl p-6 space-y-4" style={{ background: C.card, border: `1px solid ${C.border}` }}>
-          <h3 className="font-semibold text-white">Aparência</h3>
+          <h3 className="font-semibold" style={{ color: C.text }}>Aparência</h3>
           <div className="flex items-center gap-3 rounded-xl p-4" style={{ background: C.input, border: `1px solid ${C.border}` }}>
             <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: `${accent}18`, border: `1px solid ${accent}44` }}>
               <Moon className="w-4 h-4" style={{ color: accent }} />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-semibold text-white">Modo escuro</p>
+              <p className="text-sm font-semibold" style={{ color: C.text }}>Modo escuro</p>
               <p className="text-[11px]" style={{ color: C.muted }}>Tema único da plataforma (Plecto Navy). Cor de destaque definida pela empresa.</p>
             </div>
             <Check className="w-4 h-4" style={{ color: C.green }} />
@@ -163,14 +163,14 @@ function LgpdView({ mentorId, accent }: { mentorId: string; accent: string }) {
             <ShieldCheck className="w-5 h-5" style={{ color: C2.green }} />
           </div>
           <div>
-            <h3 className="font-semibold text-white text-sm">Proteção de dados (LGPD)</h3>
+            <h3 className="font-semibold text-sm" style={{ color: C.text }}>Proteção de dados (LGPD)</h3>
             <p className="text-xs mt-0.5" style={{ color: C2.muted }}>Lei 13.709/2018 · Seus direitos como titular</p>
           </div>
         </div>
 
         <div className="text-xs space-y-2 leading-relaxed" style={{ color: C2.muted }}>
           <p>Os dados da sua conta (nome, e-mail, metodologia) e o registro dos seus mentorados são tratados pela CKlareza exclusivamente para a prestação do serviço de gestão de mentoria.</p>
-          <p>Você é o <strong className="text-white">controlador dos dados dos seus mentorados</strong> perante a LGPD — e nós somos o operador. Cada mentorado também pode exportar e anonimizar os próprios dados pelo portal.</p>
+          <p>Você é o <strong className="text-gray-800">controlador dos dados dos seus mentorados</strong> perante a LGPD — e nós somos o operador. Cada mentorado também pode exportar e anonimizar os próprios dados pelo portal.</p>
         </div>
 
         {msg && <p className="text-xs px-3 py-2 rounded-lg" style={{ background: `${C2.green}12`, border: `1px solid ${C2.green}33`, color: C2.green }}>{msg}</p>}
@@ -183,8 +183,8 @@ function LgpdView({ mentorId, accent }: { mentorId: string; accent: string }) {
         </button>
 
         <div className="text-xs rounded-xl px-4 py-3 space-y-1" style={{ background: C2.input, border: `1px solid ${C2.border}` }}>
-          <p className="font-semibold text-white">Solicitar exclusão da conta</p>
-          <p style={{ color: C2.muted }}>Envie um e-mail para <strong className="text-white">contactus@cklareza.com</strong> com o assunto <strong className="text-white">"[LGPD] Exclusão de conta"</strong>. Responderemos em até 15 dias úteis.</p>
+          <p className="font-semibold" style={{ color: C.text }}>Solicitar exclusão da conta</p>
+          <p style={{ color: C2.muted }}>Envie um e-mail para <strong className="text-gray-800">contactus@cklareza.com</strong> com o assunto <strong className="text-gray-800">"[LGPD] Exclusão de conta"</strong>. Responderemos em até 15 dias úteis.</p>
         </div>
 
         <a href="/privacidade" target="_blank" rel="noopener" className="block text-center text-xs underline" style={{ color: C2.muted }}>

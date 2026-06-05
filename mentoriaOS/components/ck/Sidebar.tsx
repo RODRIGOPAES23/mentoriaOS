@@ -27,13 +27,22 @@ interface Props {
   logoUrl?: string | null // logo da empresa
   esconderMarca?: boolean // esconde "MENTORIA INTELIGENTE / CKlareza"
   isAdmin?: boolean       // mostra aba Empresa só para admin
+  mobileOpen?: boolean    // drawer aberto no mobile
+  onMobileClose?: () => void
 }
 
-export default function Sidebar({ active, onChange, onLogout, logoutLabel = "Trocar mentor", collapsed = false, onToggle, marca = "CKlareza", accent = C.green, logoUrl = null, esconderMarca = false, isAdmin = false }: Props) {
+export default function Sidebar({ active, onChange, onLogout, logoutLabel = "Trocar mentor", collapsed = false, onToggle, marca = "CKlareza", accent = C.green, logoUrl = null, esconderMarca = false, isAdmin = false, mobileOpen = false, onMobileClose }: Props) {
   const itens = ITENS.filter(i => !i.adminOnly || isAdmin)
+  const handleNav = (v: CkView) => { onChange(v); onMobileClose?.() }
   return (
+    <>
+      {/* Backdrop — só no mobile quando o drawer está aberto */}
+      {mobileOpen && <div className="fixed inset-0 z-40 bg-black/40 md:hidden" onClick={onMobileClose} />}
     <aside
-      className={`shrink-0 flex flex-col h-screen sticky top-0 transition-all duration-300 ${collapsed ? "w-[68px]" : "w-64"}`}
+      className={`flex flex-col h-screen transition-transform duration-300 md:transition-all
+        fixed md:sticky top-0 left-0 z-50 md:shrink-0
+        w-64 ${collapsed ? "md:w-[68px]" : "md:w-64"}
+        ${mobileOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}
       style={{ background: C.card, borderRight: `1px solid ${C.border}` }}
     >
       {/* Logo + Toggle */}
@@ -45,14 +54,14 @@ export default function Sidebar({ active, onChange, onLogout, logoutLabel = "Tro
         </div>
         {!collapsed && (
           <div className="flex-1 min-w-0">
-            <h1 className="text-[15px] font-bold text-white tracking-tight leading-none truncate">{marca}</h1>
+            <h1 className="text-[15px] font-bold tracking-tight leading-none truncate" style={{ color: C.text }}>{marca}</h1>
             <p className="text-[9px] mt-0.5 tracking-widest" style={{ color: C.muted }}>MENTORIA</p>
           </div>
         )}
         <button
           onClick={onToggle}
           title={collapsed ? "Expandir menu" : "Recolher menu"}
-          className="flex items-center justify-center w-6 h-6 rounded-md transition-all"
+          className="hidden md:flex items-center justify-center w-6 h-6 rounded-md transition-all"
           style={collapsed
             ? { position: "absolute", right: 0, transform: "translateX(50%)", top: 22, background: C.card2, border: `1px solid ${C.border}`, zIndex: 10, color: C.muted }
             : { color: C.muted }}
@@ -70,7 +79,7 @@ export default function Sidebar({ active, onChange, onLogout, logoutLabel = "Tro
           return (
             <button
               key={id}
-              onClick={() => onChange(id)}
+              onClick={() => handleNav(id)}
               title={collapsed ? label : undefined}
               className={`group relative w-full flex items-center transition-all duration-200 rounded-xl ${collapsed ? "justify-center p-2.5" : "gap-3 px-3.5 py-2.5"}`}
               style={isActive
@@ -102,5 +111,6 @@ export default function Sidebar({ active, onChange, onLogout, logoutLabel = "Tro
         {!collapsed && <div className="mt-3"><PoweredBy size="xs" /></div>}
       </div>
     </aside>
+    </>
   )
 }
