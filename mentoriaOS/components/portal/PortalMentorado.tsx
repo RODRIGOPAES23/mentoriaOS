@@ -273,13 +273,30 @@ function AbaCheckin({ mentorado }: { mentorado: Mentorado }) {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState("")
+  // Perguntas personalizadas que o mentor cadastrou (vêm da mesma API do formulário público)
+  const [perguntas, setPerguntas] = useState<{ id: string; label: string; tipo: string; obrigatoria: boolean }[]>([])
+  const [respostas, setRespostas] = useState<Record<string, string>>({})
+
+  useEffect(() => {
+    fetch(`/api/form/${mentorado.id}`)
+      .then(r => r.json())
+      .then(j => { if (Array.isArray(j.perguntas)) setPerguntas(j.perguntas) })
+      .catch(() => {})
+  }, [mentorado.id])
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true); setError("")
     try {
+      // respostas guardadas com o RÓTULO da pergunta (autoexplicativo p/ o mentor)
+      const respostasComLabel: Record<string, string> = {}
+      for (const q of perguntas) {
+        const v = (respostas[q.id] || "").trim()
+        if (v) respostasComLabel[q.label] = v
+      }
       const res = await fetch(`/api/form/${mentorado.id}`, {
-        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form),
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form, respostas_customizadas: respostasComLabel }),
       })
       if (!res.ok) { const j = await res.json(); throw new Error(j.error || "Erro") }
       setSuccess(true)
@@ -292,7 +309,7 @@ function AbaCheckin({ mentorado }: { mentorado: Mentorado }) {
       <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl" style={{ background: `${C.green}20` }}>✅</div>
       <h2 className="text-xl font-bold text-white mb-2">Check-in enviado!</h2>
       <p style={{ color: C.muted }}>Seus dados já estão no painel do seu mentor.</p>
-      <button onClick={() => { setSuccess(false); setForm({ vendas_reais: "", leads_gerados: "", investimento_trafego: "", videos_postados: "", dificuldades_texto: "", tarefas_executadas: "", idioma: "pt", tema: "light" }) }}
+      <button onClick={() => { setSuccess(false); setRespostas({}); setForm({ vendas_reais: "", leads_gerados: "", investimento_trafego: "", videos_postados: "", dificuldades_texto: "", tarefas_executadas: "", idioma: "pt", tema: "light" }) }}
         className="mt-5 px-4 py-2 rounded-lg text-sm font-semibold" style={{ background: `${C.green}18`, border: `1px solid ${C.green}44`, color: C.green }}>
         Novo check-in
       </button>
@@ -364,6 +381,27 @@ function AbaCheckin({ mentorado }: { mentorado: Mentorado }) {
           </div>
         </div>
       </div>
+      {perguntas.length > 0 && (
+        <div className="rounded-2xl p-6 space-y-5" style={{ background: C.card, border: `1px solid ${C.border}` }}>
+          <h3 className="text-sm font-semibold" style={{ color: C.violet }}>✨ Perguntas do seu mentor</h3>
+          {perguntas.map(q => (
+            <div key={q.id}>
+              <label className="block text-xs mb-1.5" style={{ color: C.muted }}>{q.label}{q.obrigatoria ? " *" : ""}</label>
+              {q.tipo === "textarea" ? (
+                <textarea required={q.obrigatoria} value={respostas[q.id] || ""}
+                  onChange={e => setRespostas(r => ({ ...r, [q.id]: e.target.value }))} rows={3}
+                  className="w-full px-3 py-2.5 rounded-lg text-sm text-white placeholder-slate-600 focus:outline-none resize-none"
+                  style={inputStyle} onFocus={e => e.target.style.borderColor = C.green} onBlur={e => e.target.style.borderColor = C.border} />
+              ) : (
+                <input type={q.tipo === "number" ? "number" : "text"} required={q.obrigatoria} value={respostas[q.id] || ""}
+                  onChange={e => setRespostas(r => ({ ...r, [q.id]: e.target.value }))}
+                  className="w-full px-3 py-2.5 rounded-lg text-sm text-white placeholder-slate-600 focus:outline-none"
+                  style={inputStyle} onFocus={e => e.target.style.borderColor = C.green} onBlur={e => e.target.style.borderColor = C.border} />
+              )}
+            </div>
+          ))}
+        </div>
+      )}
       {error && <p className="text-sm rounded-lg px-4 py-3" style={{ background: `${C.red}18`, border: `1px solid ${C.red}44`, color: C.red }}>{error}</p>}
       <button type="submit" disabled={loading}
         className="w-full py-3 rounded-xl font-bold disabled:opacity-50 transition-all"
