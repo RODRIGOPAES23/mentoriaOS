@@ -6,7 +6,8 @@ import type { CheckinRow } from "@/lib/supabase"
 import { getRealtimeClient } from "@/lib/supabase-realtime"
 import { useLocalStorage } from "@/hooks/useLocalStorage"
 import { useEmpresa } from "@/hooks/useEmpresa"
-import { C } from "@/utils/theme"
+import { C, setGlobalTheme, type Theme } from "@/utils/theme"
+import { ThemeCtx } from "@/components/ck/ThemeContext"
 import type { Mentorado, BriefingIA } from "@/components/ck/types"
 
 import Sidebar, { CkView } from "@/components/ck/Sidebar"
@@ -79,6 +80,7 @@ export default function DashboardPage() {
   const [ckView, setCkView] = useState<CkView>("visao-geral")
   const [sidebarCollapsed, setSidebarCollapsed] = useLocalStorage("ck:sidebar-collapsed", false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [theme, setTheme] = useState<Theme>("dark")  // app abre em DARK por padrão
   const [activeTab, setActiveTab] = useState<"pendencias" | "financeiro" | "calls" | "chat" | "materiais">("pendencias")
   const [filtroSidebar, setFiltroSidebar] = useState("")
   const [realtimeStatus, setRealtimeStatus] = useState<"connecting" | "connected" | "error">("connecting")
@@ -334,10 +336,23 @@ export default function DashboardPage() {
     window.location.href = "/selecionar"
   }
 
+  // Tema (light/dark) — carrega do navegador e mantém o proxy C sincronizado
+  useEffect(() => {
+    const saved = localStorage.getItem("ck_theme")
+    if (saved === "light" || saved === "dark") setTheme(saved)
+  }, [])
+  const toggleTheme = () => setTheme(prev => {
+    const next: Theme = prev === "dark" ? "light" : "dark"
+    localStorage.setItem("ck_theme", next)
+    return next
+  })
+  setGlobalTheme(theme)  // C.* passa a resolver o tema atual neste render e nos filhos
+
   // ── RENDER ───────────────────────────────────────────────────────────────────
   return (
-    <div className="flex h-screen overflow-hidden"
-      style={{ background: C.bg, ["--ck-accent" as any]: accent, ["--ck-accent-2" as any]: empresa.cor_secundaria }}>
+    <ThemeCtx.Provider value={theme}>
+    <div key={theme} className="flex h-screen overflow-hidden"
+      style={{ background: C.bg, color: C.text, transition: "background 0.3s, color 0.3s", ["--ck-accent" as any]: accent, ["--ck-accent-2" as any]: empresa.cor_secundaria }}>
       <Sidebar
         active={ckView}
         onChange={setCkView}
@@ -370,6 +385,8 @@ export default function DashboardPage() {
           onConfiguracoes={() => { setConfigTab("geral"); setCkView("configuracoes"); setShowMenuPerfil(false) }}
           onSair={sair}
           onOpenMobileMenu={() => setMobileMenuOpen(true)}
+          theme={theme}
+          onToggleTheme={toggleTheme}
         />
 
         <main className="flex-1 overflow-y-auto">
@@ -491,5 +508,6 @@ export default function DashboardPage() {
         <HistoricoModal selected={selected} historico={historico} onClose={() => setShowHistoricoModal(false)} />
       )}
     </div>
+    </ThemeCtx.Provider>
   )
 }

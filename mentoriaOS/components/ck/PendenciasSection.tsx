@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { ChevronDown, Plus, Trash2, AlertCircle, Clock } from "lucide-react"
 import { getRealtimeClient } from "@/lib/supabase-realtime"
+import { C } from "@/utils/theme"
 
 interface Tarefa {
   id: string
@@ -181,11 +182,11 @@ export default function PendenciasSection({ mentoradoId, mentorId }: PendenciasS
   return (
     <div className="mb-6 space-y-4">
       {/* PENDÊNCIAS */}
-      <div className="rounded-lg bg-white border border-gray-200 p-5 hover:border-gray-300 transition-all">
+      <div className="rounded-lg p-5 transition-all" style={{ background: C.card, border: `1px solid ${C.border}` }}>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="w-1 h-6 bg-gradient-to-b from-amber-400 to-orange-500 rounded-full" />
-            <h3 className="text-lg font-semibold text-gray-800">Pendências</h3>
+            <h3 className="text-lg font-semibold" style={{ color: C.text }}>Pendências</h3>
             {tarefasPending.length > 0 && (
               <span className="inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-gradient-to-br from-amber-500 to-orange-600 rounded-full">
                 {tarefasPending.length}
@@ -211,7 +212,7 @@ export default function PendenciasSection({ mentoradoId, mentorId }: PendenciasS
                   className={`flex items-start gap-3 p-3 rounded-lg transition-colors group ${
                     isVencida ? "bg-red-500/10 border border-red-500/20" :
                     isHoje ? "bg-yellow-500/10 border border-yellow-500/20" :
-                    "bg-gray-50 hover:bg-gray-100"
+                    ""
                   }`}
                 >
                   <input
@@ -221,7 +222,7 @@ export default function PendenciasSection({ mentoradoId, mentorId }: PendenciasS
                     className="mt-1 w-5 h-5 rounded border border-gray-300 bg-white cursor-pointer accent-green-500"
                   />
                   <div className="flex-1 min-w-0">
-                    <p className="text-gray-800 text-sm break-words">{tarefa.texto}</p>
+                    <p className="text-sm break-words" style={{ color: C.text }}>{tarefa.texto}</p>
                     {renderBadgeData(tarefa.data_vencimento)}
                   </div>
                   <button
@@ -237,20 +238,20 @@ export default function PendenciasSection({ mentoradoId, mentorId }: PendenciasS
           )}
         </div>
 
-        <form onSubmit={criarTarefa} className="flex flex-col gap-2 pt-3 border-t border-gray-200">
+        <form onSubmit={criarTarefa} className="flex flex-col gap-2 pt-3" style={{ borderTop: `1px solid ${C.border}` }}>
           <input
             type="text"
             placeholder="Nova tarefa..."
             value={novoTexto}
             onChange={(e) => setNovoTexto(e.target.value)}
-            className="w-full px-3 py-2 rounded bg-gray-50 border border-gray-200 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-gray-400 transition-colors text-sm"
+            className="w-full px-3 py-2 rounded focus:outline-none transition-colors text-sm" style={{ background: C.input, border: `1px solid ${C.border}`, color: C.text }}
           />
           <div className="flex gap-2">
             <input
               type="date"
               value={novaDataVencimento}
               onChange={(e) => setNovaDataVencimento(e.target.value)}
-              className="flex-1 px-3 py-2 rounded bg-gray-50 border border-gray-200 text-gray-800 focus:outline-none focus:border-gray-400 transition-colors text-sm"
+              className="flex-1 px-3 py-2 rounded focus:outline-none transition-colors text-sm" style={{ background: C.input, border: `1px solid ${C.border}`, color: C.text }}
             />
             <button
               type="submit"

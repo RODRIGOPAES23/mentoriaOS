@@ -37,7 +37,7 @@ export default function ConfiguracoesView({
     { id: "lgpd" as const, label: "Dados", icon: ShieldCheck },
   ]
 
-  const inputStyle = { background: C.input, border: `1px solid ${C.border}` }
+  const inputStyle = { background: C.input, border: `1px solid ${C.border}`, color: C.text }
   const focus = (e: any) => (e.target.style.borderColor = accent)
   const blur = (e: any) => (e.target.style.borderColor = C.border)
 
@@ -139,7 +139,7 @@ export default function ConfiguracoesView({
 function LgpdView({ mentorId, accent }: { mentorId: string; accent: string }) {
   const [exportando, setExportando] = useState(false)
   const [msg, setMsg] = useState("")
-  const C2 = { card: "#0f2540", input: "#0c1c2c", border: "#1e3a5f", muted: "#4d7fa8", blue: "#4c9aff", green: "#00d68f" }
+  const C2 = C  // usa a paleta reativa (light/dark)
 
   const exportar = async () => {
     setExportando(true); setMsg("")
@@ -170,7 +170,7 @@ function LgpdView({ mentorId, accent }: { mentorId: string; accent: string }) {
 
         <div className="text-xs space-y-2 leading-relaxed" style={{ color: C2.muted }}>
           <p>Os dados da sua conta (nome, e-mail, metodologia) e o registro dos seus mentorados são tratados pela CKlareza exclusivamente para a prestação do serviço de gestão de mentoria.</p>
-          <p>Você é o <strong className="text-gray-800">controlador dos dados dos seus mentorados</strong> perante a LGPD — e nós somos o operador. Cada mentorado também pode exportar e anonimizar os próprios dados pelo portal.</p>
+          <p>Você é o <strong style={{ color: C.text }}>controlador dos dados dos seus mentorados</strong> perante a LGPD — e nós somos o operador. Cada mentorado também pode exportar e anonimizar os próprios dados pelo portal.</p>
         </div>
 
         {msg && <p className="text-xs px-3 py-2 rounded-lg" style={{ background: `${C2.green}12`, border: `1px solid ${C2.green}33`, color: C2.green }}>{msg}</p>}
@@ -184,7 +184,7 @@ function LgpdView({ mentorId, accent }: { mentorId: string; accent: string }) {
 
         <div className="text-xs rounded-xl px-4 py-3 space-y-1" style={{ background: C2.input, border: `1px solid ${C2.border}` }}>
           <p className="font-semibold" style={{ color: C.text }}>Solicitar exclusão da conta</p>
-          <p style={{ color: C2.muted }}>Envie um e-mail para <strong className="text-gray-800">contactus@cklareza.com</strong> com o assunto <strong className="text-gray-800">"[LGPD] Exclusão de conta"</strong>. Responderemos em até 15 dias úteis.</p>
+          <p style={{ color: C2.muted }}>Envie um e-mail para <strong style={{ color: C.text }}>contactus@cklareza.com</strong> com o assunto <strong style={{ color: C.text }}>"[LGPD] Exclusão de conta"</strong>. Responderemos em até 15 dias úteis.</p>
         </div>
 
         <a href="/privacidade" target="_blank" rel="noopener" className="block text-center text-xs underline" style={{ color: C2.muted }}>

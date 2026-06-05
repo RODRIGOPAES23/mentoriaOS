@@ -67,7 +67,7 @@ export default function MaterialEntregas({ mentoradoId, mentorId }: Props) {
     buscar()
   }
 
-  const inputStyle = { background: C.input, border: `1px solid ${C.border}` }
+  const inputStyle = { background: C.input, border: `1px solid ${C.border}`, color: C.text }
 
   return (
     <div className="rounded-2xl p-6" style={{ background: C.card, border: `1px solid ${C.border}` }}>
@@ -77,7 +77,7 @@ export default function MaterialEntregas({ mentoradoId, mentorId }: Props) {
             <Package className="w-4 h-4" style={{ color: C.blue }} />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-white">Materiais a Entregar</h3>
+            <h3 className="text-sm font-semibold" style={{ color: C.text }}>Materiais a Entregar</h3>
             <p className="text-[11px]" style={{ color: C.muted }}>To-do interno: o que você prometeu enviar</p>
           </div>
         </div>
@@ -124,7 +124,7 @@ export default function MaterialEntregas({ mentoradoId, mentorId }: Props) {
                   <Icon className="w-3.5 h-3.5" style={{ color: st.cor }} />
                 </button>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-white truncate">{m.descricao_material}</p>
+                  <p className="text-sm truncate" style={{ color: C.text }}>{m.descricao_material}</p>
                   <div className="flex items-center gap-2 mt-0.5">
                     {m.tipo_material && <span className="text-[10px]" style={{ color: C.muted }}>{m.tipo_material}</span>}
                     {m.data_prometida && <span className="text-[10px]" style={{ color: C.muted }}>· até {new Date(m.data_prometida).toLocaleDateString("pt-BR")}</span>}

@@ -74,7 +74,7 @@ export default function TarefasPontuaisMentor({ mentoradoId, mentorId }: Props) 
     <div className="space-y-4">
       <div className="flex items-center gap-2">
         <AlertCircle className="w-5 h-5" style={{ color: C.amber }} />
-        <h3 className="text-base font-semibold text-white">Tarefas Pontuais</h3>
+        <h3 className="text-base font-semibold" style={{ color: C.text }}>Tarefas Pontuais</h3>
         <span className="text-[11px]" style={{ color: C.muted }}>· você valida as subtarefas concluídas</span>
       </div>
 
@@ -89,7 +89,7 @@ export default function TarefasPontuaisMentor({ mentoradoId, mentorId }: Props) 
               <button onClick={() => setExpandedId(expandedId === tarefa.id ? null : tarefa.id)}
                 className="w-full text-left rounded-2xl p-4 transition-all" style={{ background: C.card, border: `1px solid ${C.border}` }}>
                 <div className="mb-3">
-                  <h4 className="font-semibold text-white mb-1">{tarefa.titulo}</h4>
+                  <h4 className="font-semibold mb-1" style={{ color: C.text }}>{tarefa.titulo}</h4>
                   {tarefa.descricao && <p className="text-sm" style={{ color: C.muted }}>{tarefa.descricao}</p>}
                 </div>
                 <div className="flex items-center gap-3">
@@ -107,7 +107,7 @@ export default function TarefasPontuaisMentor({ mentoradoId, mentorId }: Props) 
                 {expandedId === tarefa.id && (
                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
                     className="rounded-b-2xl p-4 overflow-hidden" style={{ background: C.input, border: `1px solid ${C.border}`, borderTop: "none" }}>
-                    <p className="text-sm font-semibold text-white mb-3">Subtarefas:</p>
+                    <p className="text-sm font-semibold mb-3" style={{ color: C.text }}>Subtarefas:</p>
                     <div className="space-y-2">
                       {tarefa.tarefas_pontuais_subtarefas.map(sub => {
                         const validado = sub.status === "validado"

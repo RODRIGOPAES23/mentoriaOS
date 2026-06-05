@@ -71,7 +71,7 @@ export function Bloco1Financeiro({ vence_24h, vence_2_dias, vence_3_dias, total_
             className="rounded-xl p-2.5 text-center transition-all hover:-translate-y-0.5"
             style={{ background: `${j.cor}14`, border: `1px solid ${j.cor}33` }}>
             <p className="text-[10px] mb-0.5" style={{ color: j.cor }}>{j.label}</p>
-            <p className="text-base font-bold text-white">{fmt(j.valor)}</p>
+            <p className="text-base font-bold" style={{ color: C.text }}>{fmt(j.valor)}</p>
           </button>
         ))}
       </div>
@@ -96,7 +96,7 @@ export function Bloco1Financeiro({ vence_24h, vence_2_dias, vence_3_dias, total_
                   <p className="text-sm font-semibold truncate" style={{ color: C.text }}>{p.nome}</p>
                   <p className="text-[11px]" style={{ color: cor }}>{prazoLabel(p)}</p>
                 </div>
-                <p className="text-sm font-bold text-white shrink-0">{fmt(p.valor)}</p>
+                <p className="text-sm font-bold shrink-0" style={{ color: C.text }}>{fmt(p.valor)}</p>
                 <ChevronRight className="w-4 h-4 shrink-0" style={{ color: C.muted }} />
               </button>
             )

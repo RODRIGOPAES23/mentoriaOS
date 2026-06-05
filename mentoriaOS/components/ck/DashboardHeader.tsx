@@ -1,8 +1,8 @@
 "use client"
 
 import { RefObject } from "react"
-import { AlertCircle, ChevronDown, Settings, LogOut, Sparkles, DollarSign, Menu } from "lucide-react"
-import { C } from "@/utils/theme"
+import { AlertCircle, ChevronDown, Settings, LogOut, Sparkles, DollarSign, Menu, Sun, Moon } from "lucide-react"
+import { C, type Theme } from "@/utils/theme"
 
 interface Props {
   moduleLabel: string
@@ -19,13 +19,15 @@ interface Props {
   onConfiguracoes: () => void
   onSair: () => void
   onOpenMobileMenu?: () => void
+  theme?: Theme
+  onToggleTheme?: () => void
 }
 
 /** Barra superior do dashboard do mentor (presenter puro). */
 export default function DashboardHeader({
   moduleLabel, realtimeConnected, mentorNome, mentorFotoUrl, tarefasVencidas, cobrancasVencidas,
   showMenu, setShowMenu, menuRef, onVencidas, onCobrancasVencidas,
-  onConfiguracoes, onSair, onOpenMobileMenu,
+  onConfiguracoes, onSair, onOpenMobileMenu, theme, onToggleTheme,
 }: Props) {
   const itensMenu = [
     { label: "Configurações", icon: Settings, onClick: onConfiguracoes },
@@ -57,6 +59,13 @@ export default function DashboardHeader({
       </div>
 
       <div className="flex items-center gap-3">
+        {onToggleTheme && (
+          <button onClick={onToggleTheme} title={theme === "dark" ? "Tema claro" : "Tema escuro"} aria-label="Alternar tema"
+            className="flex items-center justify-center w-8 h-8 rounded-lg transition-all"
+            style={{ color: C.gold, border: `1px solid ${C.border}`, background: `${C.gold}12` }}>
+            {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
+        )}
         {tarefasVencidas > 0 && (
           <button onClick={onVencidas}
             title="Ver atividades atrasadas"
