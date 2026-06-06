@@ -2,8 +2,26 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { Check, ArrowRight } from "lucide-react"
+import { Check, ArrowRight, Loader2 } from "lucide-react"
 import { SC } from "@/components/site/SiteChrome"
+
+async function iniciarCheckout(mentorados: number, setLoading: (v: boolean) => void) {
+  setLoading(true)
+  try {
+    const res = await fetch("/api/stripe/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mentorados }),
+    })
+    const data = await res.json()
+    if (data.url) window.location.href = data.url
+    else alert("Erro ao iniciar checkout. Tente novamente.")
+  } catch {
+    alert("Erro de conexão. Tente novamente.")
+  } finally {
+    setLoading(false)
+  }
+}
 
 // ─── Lógica de preço por mentorado ────────────────────────────────────────────
 // Âncoras: 10 → R$98,50 | 30 → R$78,80 | 100 → R$59,10
@@ -33,7 +51,8 @@ const PLANOS = [
     feats: ["Dashboard de operação", "Financeiro + cobranças", "Atividades em Kanban", "Portal do aluno", "Briefing com IA", "Suporte por email"],
     destaque: false,
     href: "/login",
-    cta: "Começar Grátis",
+    cta: "Começar Grátis — 14 dias",
+    mentorados_exemplo: 10,
   },
   {
     nome: "Empresa",
@@ -45,7 +64,8 @@ const PLANOS = [
     feats: ["Tudo do Mentor", "Marca, cores e domínio próprios", "Vários mentores", "Radar de churn antecipado", "Analytics avançado", "Suporte prioritário (4h)"],
     destaque: true,
     href: "/login",
-    cta: "Começar Grátis",
+    cta: "Começar Grátis — 14 dias",
+    mentorados_exemplo: 30,
   },
   {
     nome: "Enterprise",
@@ -58,6 +78,7 @@ const PLANOS = [
     destaque: false,
     href: "/contato",
     cta: "Falar com a gente",
+    mentorados_exemplo: 100,
   },
 ]
 
@@ -65,6 +86,7 @@ const TABELA = [5, 10, 20, 30, 50, 100]
 
 export default function PricingCalc() {
   const [n, setN] = useState(10)
+  const [loading, setLoading] = useState(false)
 
   return (
     <>
@@ -159,13 +181,18 @@ export default function PricingCalc() {
 
           {/* CTA */}
           <div className="text-center">
-            <Link href="/login"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all hover:-translate-y-0.5"
+            <button
+              onClick={() => iniciarCheckout(n, setLoading)}
+              disabled={loading}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all hover:-translate-y-0.5 disabled:opacity-70 disabled:cursor-not-allowed"
               style={{ background: SC.gold, color: "#04121a", boxShadow: `0 8px 24px ${SC.gold}40` }}>
-              Começar com {n} mentorados <ArrowRight className="w-4 h-4" />
-            </Link>
+              {loading
+                ? <><Loader2 className="w-4 h-4 animate-spin" /> Abrindo checkout…</>
+                : <>Começar com {n} mentorados — 14 dias grátis <ArrowRight className="w-4 h-4" /></>
+              }
+            </button>
             <p className="text-xs mt-3" style={{ color: SC.muted }}>
-              ✦ 50% de desconto para novos clientes no primeiro mês
+              ✦ Sem cartão para o trial · Cancele quando quiser
             </p>
           </div>
         </div>
@@ -256,13 +283,23 @@ export default function PricingCalc() {
               ))}
             </ul>
 
-            <Link href={p.href}
-              className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl font-bold transition-all"
-              style={p.destaque
-                ? { background: SC.gold, color: "#1a1407" }
-                : { background: "transparent", border: `1px solid ${SC.border}`, color: SC.text }}>
-              {p.cta} <ArrowRight className="w-4 h-4" />
-            </Link>
+            {p.nome === "Enterprise" ? (
+              <Link href={p.href}
+                className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl font-bold transition-all"
+                style={{ background: "transparent", border: `1px solid ${SC.border}`, color: SC.text }}>
+                {p.cta} <ArrowRight className="w-4 h-4" />
+              </Link>
+            ) : (
+              <button
+                onClick={() => iniciarCheckout(p.mentorados_exemplo, setLoading)}
+                disabled={loading}
+                className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl font-bold transition-all disabled:opacity-70"
+                style={p.destaque
+                  ? { background: SC.gold, color: "#1a1407" }
+                  : { background: "transparent", border: `1px solid ${SC.border}`, color: SC.text }}>
+                {p.cta} <ArrowRight className="w-4 h-4" />
+              </button>
+            )}
           </div>
         ))}
       </section>
