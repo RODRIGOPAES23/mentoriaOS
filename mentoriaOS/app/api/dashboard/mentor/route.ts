@@ -92,9 +92,11 @@ export async function GET(request: NextRequest) {
         mentorados?.map((m) => m.id) || []
       )
 
-    const alunoMaisAtrasado = progresso?.reduce((prev, curr) => {
-      return (curr.tarefas_atrasadas || 0) > (prev.tarefas_atrasadas || 0) ? curr : prev
-    })
+    const alunoMaisAtrasado = progresso && progresso.length > 0
+      ? progresso.reduce((prev, curr) =>
+          (curr.tarefas_atrasadas || 0) > (prev.tarefas_atrasadas || 0) ? curr : prev
+        )
+      : null
 
     // BLOCO 4: Calendário de calls futuras
     const { data: calls } = await supabaseAdmin

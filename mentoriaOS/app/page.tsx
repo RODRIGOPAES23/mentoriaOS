@@ -5,7 +5,7 @@ import Link from "next/link"
 import {
   Sparkles, LayoutDashboard, DollarSign, KanbanSquare, Brain,
   Building2, ArrowRight, Check, Phone, ShieldCheck, Star, Globe, Heart, Sun, Moon,
-  Clock, TrendingUp, AlertCircle, ChevronDown, ChevronUp
+  Clock, TrendingUp, AlertCircle, ChevronDown, ChevronUp, Play, Zap, Target
 } from "lucide-react"
 import { LifetimeValueCTA, SiteFooter } from "@/components/site/SiteChrome"
 
@@ -31,288 +31,365 @@ const LANGS: { code: Lang; label: string }[] = [
   { code: "pt", label: "PT" }, { code: "en", label: "EN" }, { code: "es", label: "ES" },
 ]
 
+// ─── COPY ─────────────────────────────────────────────────────────────────────
 const T: Record<Lang, any> = {
   pt: {
-    nav: ["Recursos", "White-label", "Propósito", "Planos"], entrar: "Entrar",
+    nav: ["Recursos", "Preços", "Cases", "FAQ"], entrar: "Entrar",
 
-    // HERO NOVO (Hormozi-style: dor + ganho financeiro direto)
+    // HERO
     badge: "Usado por mentores high-ticket no Brasil",
-    h1a: "Pare de perder", h1b: "10 horas por semana",
-    h1c: "em admin da sua mentoria.",
-    sub: "CKlareza automatiza briefing de calls com IA, centraliza financeiro e mostra quem vai cancelar antes que aconteça. Escale de 10 para 20 alunos ",
-    subStrong: "sem trabalhar mais.",
-    cta1: "Testar Grátis (sem cartão)", cta2: "Ver Demo 2 min",
+    h1a: "Pare de perder", h1b: "7h30 por semana",
+    h1c: "preparando calls que você poderia não preparar.",
+    sub: "CKlareza automatiza o briefing com IA, centraliza financeiro e mostra quem vai cancelar com 30 dias de antecedência. Opere mais, trabalhe menos — ",
+    subStrong: "com a sua marca.",
+    cta1: "Ver Demo — 2 minutos",
+    cta2: "Criar conta gratuita →",
     trust: ["Sem cartão para testar", "Dados protegidos (LGPD)", "Setup em 5 minutos"],
 
     // PROVA SOCIAL
     proofLabel: "RESULTADO REAL",
     proofTitle: "De 45 min para 2 min por call.",
-    proofDesc: "Termo Laser usou CKlareza para escalar a operação. Churn caiu pela metade. Tempo de prep de call caiu de 45 min para 2 min. MRR cresceu 40%.",
+    proofDesc: "Termo Laser usou CKlareza para escalar a operação. A equipe parou de perder noites preparando pautas. Churn caiu pela metade. MRR cresceu 40%.",
     proofName: "— Termo Laser, agência de infoprodutos",
+    proofStats: [["−50%", "Churn"], ["+40%", "MRR"], ["45→2min", "Prep/call"]],
 
-    // DOR
+    // DOR + IMPLICAÇÕES
     painLabel: "VOCÊ RECONHECE ISSO?",
     painTitle: "A realidade de 90% dos mentores:",
     pains: [
-      "45 minutos preparando pauta pra CADA call (10 alunos = 7h30 por semana)",
-      "Não sabe quais alunos vão cancelar até sumirem do WhatsApp",
-      "Financeiro espalhado em planilhas, pagamentos perdidos",
-      "Parece amador usando links de terceiros (Calendly genérico, formulários avulsos)",
+      {
+        dor: "45 minutos preparando pauta pra CADA call (10 alunos = 7h30 por semana)",
+        impl: "São 7h30 semanais que deveriam ir para captação, posicionamento e crescimento. Em vez disso, você está esgotado com operação — e sua energia criativa vai embora antes da primeira call.",
+      },
+      {
+        dor: "Não sabe quais alunos vão cancelar até sumirem do WhatsApp",
+        impl: "Cada cancelamento high-ticket que você poderia ter evitado é R$5.000 a R$20.000 que saem da sua receita. Sem sistema, você só descobre quando já é tarde demais para agir.",
+      },
+      {
+        dor: "Financeiro espalhado em planilhas, pagamentos perdidos",
+        impl: "Sem visibilidade real do MRR, você não consegue decidir se vale contratar, anunciar ou aumentar o preço. Você opera no escuro em um negócio que deveria ter total previsibilidade.",
+      },
+      {
+        dor: "Parece amador usando Calendly genérico, formulários avulsos, Google Drive",
+        impl: "No high-ticket, percepção é tudo. Um mentor com ferramenta genérica cobra menos, retém menos e escala mais devagar — porque o aluno não sente que está em algo premium.",
+      },
     ],
 
-    // SOLUÇÃO
+    // IMAGINE
+    imagineLabel: "AGORA IMAGINE",
+    imagineTitle: "Como seria sua rotina se...",
+    imagines: [
+      "A pauta da call estivesse pronta 30 segundos após o check-in do aluno — sem você tocar em nada",
+      "Você soubesse com 30 dias de antecedência exatamente quem está pensando em cancelar",
+      "Seu MRR estivesse sempre visível e atualizado, sem planilha, sem adivinhação",
+      "Seus alunos vissem só a sua marca — logo, cores, domínio próprio — do check-in ao portal",
+    ],
+    imagineCta: "Isso existe. E você pode testar hoje.",
+
+    // SOLUÇÃO — FEATURES (benefícios, não vantagens)
     solLabel: "A SOLUÇÃO",
     solTitle: "CKlareza resolve tudo isso em uma tela.",
-
-    mock: ["A receber", "Calls na semana", "Tarefas atrasadas", "Mentorados"],
-    recT: "Tudo para operar sua mentoria", recS: "Um sistema, não dez planilhas.",
-    vidT: "Veja a CKlareza em ação", vidS: "Em 2 minutos, veja como a IA prepara suas calls.",
-    vid1: "Conheça a plataforma", vid2: "Organização & banco de dados",
     feats: [
-      ["Briefing com IA em 30 segundos", "A IA lê o check-in do aluno e entrega a pauta exata da call. De 45 min para 30 seg. Economize 7h+ por semana."],
-      ["Radar de churn antecipado", "Veja quem está estagnado e vai cancelar em 30 dias. Aja antes — salve o contrato antes de perder."],
-      ["Financeiro centralizado", "Cobranças, inadimplência e projeção de MRR. Saiba exatamente quanto você vai faturar esse mês."],
-      ["Atividades em Kanban", "As tarefas de todos os alunos num quadro: a fazer, atrasadas e concluídas. Zero planilha."],
-      ["Portal do aluno profissional", "Seu aluno faz check-in, acompanha a jornada e se sente parte de algo sério. Aumenta retenção."],
-      ["White-label de verdade", "Sua marca, suas cores, seu domínio. Seus alunos veem só você — o motor é CKlareza."],
-    ],
-    wlLabel: "WHITE-LABEL", wlT: "Sua marca. Nosso motor.",
-    wlText: "Seus clientes com CKlareza na sua marca, seu estilo, seu método e sua filosofia.",
-    wlBullets: ["Logo, cores e domínio próprios", "Vários mentores por empresa", "Cada um vê só o que é seu", "Revenda para outros clientes"],
-    wlCardT: "Painel de controle do dono", wlCardD: "Gerencie todas as empresas, mentores e mentorados num só lugar.",
-    propLabel: "NOSSO PROPÓSITO", propT: "Transformar vidas.",
-    propText: "Não vendemos software — damos ao mentor o tempo e a clareza para fazer o que importa: transformar a vida de quem confia nele. Cada recurso aqui existe para isso.",
-
-    // PRICING NOVO (transparente)
-    priceLabel: "PLANOS",
-    priceTitle: "Simples, transparente, justo.",
-    priceDesc: "Sem surpresas. Cancele quando quiser.",
-    plans: [
       {
-        name: "Starter",
-        price: "R$297",
-        period: "/mês",
-        desc: "Para mentores solo começando a profissionalizar.",
-        features: ["Até 10 mentorados", "Dashboard de operação", "Briefing com IA", "Financeiro básico", "Portal do aluno", "Suporte por email"],
-        cta: "Começar Grátis",
-        highlight: false,
+        title: "Entre em cada call com autoridade total",
+        desc: "A IA lê o check-in do aluno e entrega a pauta exata — o que discutir, onde ele travou, o que priorizar. De 45 min de preparação para 30 segundos. Isso é o que justifica o seu ticket alto.",
       },
       {
-        name: "Professional",
-        price: "R$697",
-        period: "/mês",
-        desc: "Para mentores que querem escalar sem trabalhar mais.",
-        features: ["Até 30 mentorados", "Tudo do Starter", "Radar de churn antecipado", "Analytics avançado", "White-label básico", "Suporte prioritário (4h)"],
-        cta: "Começar Grátis",
-        highlight: true,
-        badge: "MAIS POPULAR",
+        title: "Salve contratos antes de perdê-los",
+        desc: "O Radar de Churn detecta quem está esfriando e te avisa com 30 dias de antecedência. Se salvar 1 contrato de R$10.000 no ano, o CKlareza já se pagou por mais de 10 meses.",
       },
       {
-        name: "Enterprise",
-        price: "Sob consulta",
-        period: "",
-        desc: "Para agências e operações com múltiplos mentores.",
-        features: ["Mentorados ilimitados", "Tudo do Professional", "White-label completo", "Múltiplos mentores", "SLA 99.9%", "Gerente de conta dedicado"],
-        cta: "Falar com Vendas",
-        highlight: false,
+        title: "Previsibilidade total do seu caixa",
+        desc: "Cobranças, inadimplência e projeção de MRR num dashboard. Decida sobre investimento, contratação e expansão com dados — não com chute.",
+      },
+      {
+        title: "Zero planilha, zero caos de tarefas",
+        desc: "As atividades de todos os alunos num Kanban único. A fazer, atrasadas, concluídas. Você sabe exatamente onde cada aluno está em 5 segundos.",
+      },
+      {
+        title: "Portal premium que aumenta retenção",
+        desc: "Seu aluno faz check-in, acompanha a jornada e se sente parte de algo sério. Um portal profissional comunica valor — e alunos que sentem o valor cancelam menos.",
+      },
+      {
+        title: "Sua marca, não a nossa",
+        desc: "Logo, cores e domínio próprios. Seus alunos veem só você — o motor é CKlareza. Você entrega uma experiência premium sem construir tecnologia do zero.",
       },
     ],
 
-    ctaT: "Pronto para recuperar suas 10 horas semanais?", ctaS: "Teste grátis por 14 dias. Sem cartão. Setup em 5 minutos.", ctaBtn: "Começar Agora — É Grátis",
-    foot: "Entrar →",
-    faqT: "Perguntas frequentes",
-    segLabel: "CONFIANÇA", segT: "Segurança em primeiro lugar", segS: "Construída para empresas que levam privacidade e proteção de dados a sério.",
-    segItens: ["100 em SEO e Boas Práticas — Google PageSpeed", "Conforme à LGPD (Lei 13.709/2018)", "Dados criptografados (em trânsito e repouso)", "Isolamento de dados por papel e empresa"],
-    segCta: "Saiba mais sobre segurança",
-    faq: [
-      ["Quanto tempo leva para configurar?", "5 minutos. Você cria conta, importa seus alunos e já está operando. Sem instalação, 100% web."],
-      ["Realmente funciona com IA para briefing?", "Sim. A IA lê o check-in do aluno (enviado pelo portal) e gera a pauta da call automaticamente. Clientes economizam 7-10h por semana."],
-      ["O CKlareza é white-label?", "Sim, nos planos Professional e Enterprise. Você usa seu logo, suas cores e seu domínio. Seus alunos veem só a sua marca."],
-      ["Para quem é o CKlareza?", "Para mentores e empresas de mentoria high-ticket que querem profissionalizar a operação, reduzir churn e escalar sem trabalhar mais."],
-      ["Posso cancelar quando quiser?", "Sim. Sem multa, sem burocracia. Cancele com 1 clique."],
-      ["Preciso instalar algo?", "Não. É 100% web, sem instalação. Acesse pelo navegador e teste sem cartão."],
+    // ROI CHURN
+    churnLabel: "ROI DO RADAR DE CHURN",
+    churnTitle: "1 contrato salvo paga a ferramenta por 10 meses.",
+    churnDesc: "Mentores high-ticket têm contratos de R$5.000 a R$20.000/mês. O Radar detecta sinais de esfriamento antes do aluno decidir cancelar.",
+    churnCalc: [
+      ["1 contrato de R$10k salvo/ano", "R$10.000 protegidos"],
+      ["Custo anual do CKlareza (10 alunos)", "R$11.820/ano"],
+      ["ROI mínimo no 1º ano", "≈ 10x"],
     ],
+    churnNote: "E isso contando só 1 contrato salvo — a maioria dos mentores evita 2 a 4 cancelamentos por ano.",
+
+    // CALCULADORA
     calcLabel: "CALCULADORA DE DESCONTO",
-    calcTitle: "Calcule seu desconto real",
-    calcSub: "Mova o slider e veja quanto você paga por mês",
+    calcTitle: "Quanto você paga por mentorado?",
+    calcSub: "Mova o slider e veja o preço exato para o seu volume",
     calcSliderLabel: "Número de mentorados",
     calcPerUnit: "por mentorado/mês",
     calcTotal: "Total mensal",
-    calcSavings: "Você economiza vs. contratar gestor",
+    calcSavings: "Economia/ano",
     calcDiscount: "de desconto",
-    calcCta: "Começar com este plano",
-    calcNote: "50% de desconto para novos clientes no primeiro mês",
+    calcCta: "Criar conta gratuita com",
+    calcNote: "Trial de 14 dias · sem cartão · sem compromisso",
+
+    // PRICING
+    priceLabel: "PLANOS",
+    priceTitle: "Transparente por mentorado.",
+    priceDesc: "Pague pelo que usa. Volume alto = desconto automático. Cancele quando quiser.",
+
+    // WHITE-LABEL
+    wlLabel: "WHITE-LABEL",
+    wlT: "Sua marca. Nosso motor.",
+    wlText: "Seus clientes experienciam o CKlareza com o seu branding — logo, cores, domínio e método. Você aparece como proprietário da tecnologia.",
+    wlBullets: ["Logo, cores e domínio próprios", "Vários mentores por empresa", "Cada um vê só o que é seu", "Revenda para outros clientes"],
+    wlCardT: "Painel de controle do dono", wlCardD: "Gerencie todas as empresas, mentores e mentorados num só lugar.",
+
+    // SEGURANÇA
+    segLabel: "CONFIANÇA",
+    segT: "Segurança em primeiro lugar",
+    segS: "Construída para operações que levam dados dos alunos a sério.",
+    segItens: ["100 em SEO e Boas Práticas — Google PageSpeed", "Conforme à LGPD (Lei 13.709/2018)", "Dados criptografados (em trânsito e repouso)", "Isolamento de dados por papel e empresa"],
+    segCta: "Saiba mais sobre segurança",
+
+    // FAQ
+    faqT: "Perguntas frequentes",
+    faq: [
+      ["Quanto tempo leva para configurar?", "5 minutos. Você cria conta, importa seus alunos e já está operando. Sem instalação, 100% web."],
+      ["Preciso de cartão de crédito para testar?", "Não. Você cria conta gratuitamente, explora o sistema e só entra com cartão quando quiser assinar."],
+      ["O Radar de Churn realmente funciona?", "Sim. Ele analisa frequência de check-ins, padrões de resposta e engajamento do aluno — e te avisa quando o sinal muda. Mentores que usam o Radar agem antes que o aluno decida cancelar."],
+      ["O briefing com IA substitui meu julgamento?", "Não — ele potencializa. A IA organiza o que o aluno trouxe e sugere a pauta. Você decide o que usar. O resultado é entrar na call com 10x mais clareza, em 30 segundos."],
+      ["O CKlareza é white-label?", "Sim, nos planos com mais de 20 mentorados. Você usa seu logo, suas cores e seu domínio. Seus alunos veem só a sua marca."],
+      ["Para quem é o CKlareza?", "Para mentores e empresas de mentoria high-ticket que querem profissionalizar a operação, reduzir churn e escalar sem trabalhar mais horas."],
+      ["Posso cancelar quando quiser?", "Sim. Sem multa, sem burocracia. Cancele com 1 clique."],
+    ],
+
+    // CTA FINAL
+    ctaT: "Pronto para entrar na próxima call com clareza total?",
+    ctaS: "Crie sua conta gratuita. Explore o sistema. Veja a IA preparar uma call em 30 segundos.",
+    ctaBtn: "Criar conta gratuita — sem cartão",
+    ctaSub: "Ou se preferir, veja a demo primeiro",
   },
+
   en: {
-    nav: ["Features", "White-label", "Purpose", "Plans"], entrar: "Sign in",
+    nav: ["Features", "Pricing", "Cases", "FAQ"], entrar: "Sign in",
     badge: "Used by high-ticket mentors in Brazil",
-    h1a: "Stop losing", h1b: "10 hours a week",
-    h1c: "on mentorship admin.",
-    sub: "CKlareza automates call briefing with AI, centralizes finances and shows who's about to cancel before it happens. Scale from 10 to 20 students ",
-    subStrong: "without working more.",
-    cta1: "Try Free (no card)", cta2: "Watch 2-min Demo",
-    trust: ["No card to try", "Protected data (LGPD)", "5-minute setup"],
+    h1a: "Stop losing", h1b: "7.5 hours a week",
+    h1c: "preparing calls you shouldn't have to prepare.",
+    sub: "CKlareza automates briefing with AI, centralizes finances and shows who's about to cancel 30 days in advance. Operate more, work less — ",
+    subStrong: "under your brand.",
+    cta1: "Watch Demo — 2 minutes",
+    cta2: "Create free account →",
+    trust: ["No card to test", "Protected data (LGPD)", "5-minute setup"],
     proofLabel: "REAL RESULT",
     proofTitle: "From 45 min to 2 min per call.",
-    proofDesc: "Termo Laser used CKlareza to scale their operation. Churn dropped by half. Call prep time dropped from 45 min to 2 min. MRR grew 40%.",
+    proofDesc: "Termo Laser used CKlareza to scale operations. The team stopped losing nights preparing agendas. Churn dropped in half. MRR grew 40%.",
     proofName: "— Termo Laser, infoproduct agency",
+    proofStats: [["−50%", "Churn"], ["+40%", "MRR"], ["45→2min", "Prep/call"]],
     painLabel: "SOUND FAMILIAR?",
     painTitle: "The reality for 90% of mentors:",
     pains: [
-      "45 minutes preparing agenda for EACH call (10 students = 7.5h/week gone)",
-      "No idea which students will cancel until they vanish from WhatsApp",
-      "Finances scattered across spreadsheets, payments lost",
-      "Looks amateur using generic third-party links",
+      {
+        dor: "45 minutes preparing agenda for EACH call (10 students = 7.5h/week gone)",
+        impl: "That's 7.5h weekly that should go toward acquisition, positioning and growth. Instead, you're exhausted by operations — and your creative energy disappears before the first call.",
+      },
+      {
+        dor: "No idea which students will cancel until they vanish from WhatsApp",
+        impl: "Every high-ticket cancellation you could have prevented is $1,000–$4,000 leaving your revenue. Without a system, you only find out when it's already too late to act.",
+      },
+      {
+        dor: "Finances scattered across spreadsheets, payments lost",
+        impl: "Without real MRR visibility, you can't decide whether to hire, advertise or raise prices. You're operating blind in a business that should have total predictability.",
+      },
+      {
+        dor: "Looks amateur using generic Calendly, random forms, Google Drive",
+        impl: "In high-ticket, perception is everything. A mentor with generic tools charges less, retains less and scales slower — because students don't feel they're in something premium.",
+      },
     ],
+    imagineLabel: "NOW IMAGINE",
+    imagineTitle: "What if your routine looked like this...",
+    imagines: [
+      "The call agenda ready 30 seconds after the student's check-in — without you touching anything",
+      "You knew 30 days in advance exactly who is thinking about canceling",
+      "Your MRR always visible and updated — no spreadsheet, no guessing",
+      "Your students only see your brand — logo, colors, custom domain — from check-in to portal",
+    ],
+    imagineCta: "This exists. And you can try it today.",
     solLabel: "THE SOLUTION",
     solTitle: "CKlareza solves all of this in one screen.",
-    mock: ["To receive", "Calls this week", "Overdue tasks", "Mentees"],
-    recT: "Everything to run your mentorship", recS: "One system, not ten spreadsheets.",
-    vidT: "See CKlareza in action", vidS: "In 2 minutes, see how AI prepares your calls.",
-    vid1: "Meet the platform", vid2: "Organization & database",
     feats: [
-      ["AI Briefing in 30 seconds", "AI reads the student's check-in and delivers the exact call agenda. From 45 min to 30 sec. Save 7h+ per week."],
-      ["Churn radar", "See who's stagnant and about to cancel in 30 days. Act before it happens."],
-      ["Centralized finances", "Charges, overdue and MRR forecast. Know exactly how much you'll earn this month."],
-      ["Kanban activities", "All students' tasks on one board: to do, overdue and done. Zero spreadsheet."],
-      ["Professional student portal", "Your student checks in, tracks their journey. Increases retention."],
-      ["True white-label", "Your brand, your colors, your domain. Students only see you."],
+      { title: "Enter every call with complete authority", desc: "AI reads the student's check-in and delivers the exact agenda — what to discuss, where they're stuck, what to prioritize. From 45 min of prep to 30 seconds. That's what justifies your high ticket." },
+      { title: "Save contracts before losing them", desc: "The Churn Radar detects who's cooling off and alerts you 30 days in advance. If it saves 1 contract of $2,000 this year, CKlareza has already paid for itself for over 10 months." },
+      { title: "Total cash flow predictability", desc: "Charges, overdue and MRR forecast in one dashboard. Decide on investment, hiring and expansion with data — not guesswork." },
+      { title: "Zero spreadsheet, zero task chaos", desc: "All students' activities in a single Kanban. To do, overdue, done. You know exactly where each student is in 5 seconds." },
+      { title: "Premium portal that increases retention", desc: "Your student checks in, tracks their journey and feels part of something serious. A professional portal communicates value — and students who feel value cancel less." },
+      { title: "Your brand, not ours", desc: "Own logo, colors and domain. Your students only see you — the engine is CKlareza. You deliver a premium experience without building technology from scratch." },
     ],
-    wlLabel: "WHITE-LABEL", wlT: "Your brand. Our engine.",
-    wlText: "Your clients experience CKlareza under your brand, your style, your method and your philosophy.",
-    wlBullets: ["Own logo, colors and domain", "Multiple mentors per company", "Each sees only what's theirs", "Resell to other clients"],
-    wlCardT: "Owner control panel", wlCardD: "Manage all companies, mentors and mentees in one place.",
-    propLabel: "OUR PURPOSE", propT: "Transform lives.",
-    propText: "We don't sell software — we give mentors the time and clarity to do what matters: transform the life of those who trust them.",
-    priceLabel: "PRICING",
-    priceTitle: "Simple, transparent, fair.",
-    priceDesc: "No surprises. Cancel anytime.",
-    plans: [
-      { name: "Starter", price: "$59", period: "/mo", desc: "For solo mentors starting to professionalize.", features: ["Up to 10 mentees", "Operations dashboard", "AI briefing", "Basic finances", "Student portal", "Email support"], cta: "Start Free", highlight: false },
-      { name: "Professional", price: "$139", period: "/mo", desc: "For mentors who want to scale without working more.", features: ["Up to 30 mentees", "Everything in Starter", "Churn radar", "Advanced analytics", "Basic white-label", "Priority support (4h)"], cta: "Start Free", highlight: true, badge: "MOST POPULAR" },
-      { name: "Enterprise", price: "Custom", period: "", desc: "For agencies and multi-mentor operations.", features: ["Unlimited mentees", "Everything in Professional", "Full white-label", "Multiple mentors", "99.9% SLA", "Dedicated account manager"], cta: "Talk to Sales", highlight: false },
+    churnLabel: "CHURN RADAR ROI",
+    churnTitle: "1 saved contract pays the tool for 10 months.",
+    churnDesc: "High-ticket mentors have contracts from $1,000 to $4,000/month. The Radar detects cooling signals before the student decides to cancel.",
+    churnCalc: [
+      ["1 contract of $2k saved/year", "$2,000 protected"],
+      ["Annual CKlareza cost (10 students)", "$2,400/year"],
+      ["Minimum ROI in year 1", "≈ 10x"],
     ],
-    ctaT: "Ready to get your 10 hours back?", ctaS: "Free 14-day trial. No card. 5-minute setup.", ctaBtn: "Start Now — It's Free",
-    foot: "Sign in →",
-    faqT: "Frequently asked questions",
-    segLabel: "TRUST", segT: "Security first", segS: "Built for companies that take privacy and data protection seriously.",
-    segItens: ["100 in SEO & Best Practices — Google PageSpeed", "LGPD compliant (Law 13.709/2018)", "Encrypted data (in transit and at rest)", "Data isolation by role and company"],
-    segCta: "Learn more about security",
-    faq: [
-      ["How long does setup take?", "5 minutes. Create account, import your students and you're running. No install, 100% web."],
-      ["Does the AI briefing really work?", "Yes. AI reads the student check-in and generates the call agenda automatically. Clients save 7-10h/week."],
-      ["Is CKlareza white-label?", "Yes, on Professional and Enterprise plans. Use your own logo, colors and domain."],
-      ["Who is CKlareza for?", "For high-ticket mentors and mentorship companies that want to reduce churn and scale without working more."],
-      ["Can I cancel anytime?", "Yes. No penalty, no hassle. Cancel with 1 click."],
-      ["Do I need to install anything?", "No. 100% web. Access from the browser and try without a card."],
-    ],
+    churnNote: "And that's counting just 1 saved contract — most mentors prevent 2 to 4 cancellations per year.",
     calcLabel: "DISCOUNT CALCULATOR",
-    calcTitle: "Calculate your real discount",
-    calcSub: "Move the slider and see how much you pay per month",
+    calcTitle: "What do you pay per mentee?",
+    calcSub: "Move the slider and see the exact price for your volume",
     calcSliderLabel: "Number of mentees",
     calcPerUnit: "per mentee/month",
     calcTotal: "Monthly total",
-    calcSavings: "You save vs. hiring a manager",
+    calcSavings: "Annual savings",
     calcDiscount: "discount",
-    calcCta: "Start with this plan",
-    calcNote: "50% off for new customers in the first month",
+    calcCta: "Create free account with",
+    calcNote: "14-day trial · no card · no commitment",
+    priceLabel: "PRICING",
+    priceTitle: "Transparent per mentee.",
+    priceDesc: "Pay for what you use. High volume = automatic discount. Cancel anytime.",
+    wlLabel: "WHITE-LABEL", wlT: "Your brand. Our engine.",
+    wlText: "Your clients experience CKlareza with your branding — logo, colors, domain and method.",
+    wlBullets: ["Own logo, colors and domain", "Multiple mentors per company", "Each sees only what's theirs", "Resell to other clients"],
+    wlCardT: "Owner control panel", wlCardD: "Manage all companies, mentors and mentees in one place.",
+    segLabel: "TRUST", segT: "Security first", segS: "Built for operations that take student data seriously.",
+    segItens: ["100 in SEO & Best Practices — Google PageSpeed", "LGPD compliant (Law 13.709/2018)", "Encrypted data (in transit and at rest)", "Data isolation by role and company"],
+    segCta: "Learn more about security",
+    faqT: "Frequently asked questions",
+    faq: [
+      ["How long does setup take?", "5 minutes. Create account, import your students and you're running. No install, 100% web."],
+      ["Do I need a credit card to test?", "No. You create an account for free, explore the system, and only add a card when you want to subscribe."],
+      ["Does the Churn Radar really work?", "Yes. It analyzes check-in frequency, response patterns and student engagement — and alerts you when the signal changes. Mentors who use the Radar act before the student decides to cancel."],
+      ["Does AI briefing replace my judgment?", "No — it amplifies it. AI organizes what the student brought and suggests the agenda. You decide what to use. The result is entering the call with 10x more clarity in 30 seconds."],
+      ["Is CKlareza white-label?", "Yes, on plans with more than 20 mentees. Use your own logo, colors and domain."],
+      ["Who is CKlareza for?", "For high-ticket mentors and mentorship companies who want to professionalize operations, reduce churn and scale without working more hours."],
+      ["Can I cancel anytime?", "Yes. No penalty, no hassle. Cancel with 1 click."],
+    ],
+    ctaT: "Ready to enter your next call with complete clarity?",
+    ctaS: "Create your free account. Explore the system. Watch AI prepare a call in 30 seconds.",
+    ctaBtn: "Create free account — no card",
+    ctaSub: "Or watch the demo first",
   },
+
   es: {
-    nav: ["Recursos", "White-label", "Propósito", "Planes"], entrar: "Entrar",
+    nav: ["Recursos", "Precios", "Cases", "FAQ"], entrar: "Entrar",
     badge: "Usado por mentores high-ticket en Brasil",
-    h1a: "Deja de perder", h1b: "10 horas por semana",
-    h1c: "en admin de tu mentoría.",
-    sub: "CKlareza automatiza el briefing de calls con IA, centraliza finanzas y muestra quién va a cancelar antes de que pase. Escala de 10 a 20 alumnos ",
-    subStrong: "sin trabajar más.",
-    cta1: "Probar Gratis (sin tarjeta)", cta2: "Ver Demo 2 min",
+    h1a: "Deja de perder", h1b: "7h30 por semana",
+    h1c: "preparando calls que no deberías preparar.",
+    sub: "CKlareza automatiza el briefing con IA, centraliza finanzas y muestra quién va a cancelar con 30 días de antelación. Opera más, trabaja menos — ",
+    subStrong: "con tu marca.",
+    cta1: "Ver Demo — 2 minutos",
+    cta2: "Crear cuenta gratuita →",
     trust: ["Sin tarjeta para probar", "Datos protegidos (LGPD)", "Setup en 5 minutos"],
     proofLabel: "RESULTADO REAL",
     proofTitle: "De 45 min a 2 min por call.",
-    proofDesc: "Termo Laser usó CKlareza para escalar la operación. El churn cayó a la mitad. El tiempo de preparación de call bajó de 45 min a 2 min. El MRR creció 40%.",
+    proofDesc: "Termo Laser usó CKlareza para escalar la operación. El equipo dejó de perder noches preparando agendas. El churn cayó a la mitad. El MRR creció 40%.",
     proofName: "— Termo Laser, agencia de infoproductos",
+    proofStats: [["−50%", "Churn"], ["+40%", "MRR"], ["45→2min", "Prep/call"]],
     painLabel: "¿TE SUENA FAMILIAR?",
     painTitle: "La realidad del 90% de los mentores:",
     pains: [
-      "45 minutos preparando agenda para CADA call (10 alumnos = 7,5h/semana perdidas)",
-      "No sabes qué alumnos van a cancelar hasta que desaparecen del WhatsApp",
-      "Finanzas dispersas en planillas, pagos perdidos",
-      "Parece amateur usando links genéricos de terceros",
+      {
+        dor: "45 minutos preparando agenda para CADA call (10 alumnos = 7,5h/semana perdidas)",
+        impl: "Son 7h30 semanales que deberían ir a captación, posicionamiento y crecimiento. En cambio, llegas agotado a la operación — y tu energía creativa se va antes de la primera call.",
+      },
+      {
+        dor: "No sabes qué alumnos van a cancelar hasta que desaparecen del WhatsApp",
+        impl: "Cada cancelación high-ticket que podrías haber evitado son $1,000–$4,000 que salen de tu facturación. Sin sistema, solo lo descubres cuando ya es demasiado tarde.",
+      },
+      {
+        dor: "Finanzas dispersas en planillas, pagos perdidos",
+        impl: "Sin visibilidad real del MRR, no puedes decidir si contratar, anunciar o subir el precio. Operas a ciegas en un negocio que debería tener total previsibilidad.",
+      },
+      {
+        dor: "Parece amateur usando Calendly genérico, formularios sueltos, Google Drive",
+        impl: "En high-ticket, la percepción lo es todo. Un mentor con herramienta genérica cobra menos, retiene menos y escala más lento — porque el alumno no siente que está en algo premium.",
+      },
     ],
+    imagineLabel: "AHORA IMAGINA",
+    imagineTitle: "¿Cómo sería tu rutina si...",
+    imagines: [
+      "La agenda de la call estuviera lista 30 segundos después del check-in del alumno — sin que toques nada",
+      "Supieras con 30 días de antelación exactamente quién está pensando en cancelar",
+      "Tu MRR siempre visible y actualizado — sin planilla, sin adivinar",
+      "Tus alumnos solo vieran tu marca — logo, colores, dominio propio — del check-in al portal",
+    ],
+    imagineCta: "Esto existe. Y puedes probarlo hoy.",
     solLabel: "LA SOLUCIÓN",
     solTitle: "CKlareza resuelve todo esto en una pantalla.",
-    mock: ["Por cobrar", "Calls esta semana", "Tareas vencidas", "Mentoreados"],
-    recT: "Todo para operar tu mentoría", recS: "Un sistema, no diez planillas.",
-    vidT: "Mira CKlareza en acción", vidS: "En 2 minutos, mira cómo la IA prepara tus calls.",
-    vid1: "Conoce la plataforma", vid2: "Organización y base de datos",
     feats: [
-      ["Briefing con IA en 30 segundos", "La IA lee el check-in del alumno y entrega la agenda exacta de la call. De 45 min a 30 seg. Ahorra 7h+ por semana."],
-      ["Radar de churn anticipado", "Ve quién está estancado y va a cancelar en 30 días. Actúa antes de perderlo."],
-      ["Finanzas centralizadas", "Cobros, morosidad y proyección de MRR. Sabe exactamente cuánto vas a facturar este mes."],
-      ["Actividades en Kanban", "Las tareas de todos los alumnos en un tablero. Cero planilla."],
-      ["Portal del alumno profesional", "Tu alumno hace check-in y sigue su jornada. Aumenta la retención."],
-      ["White-label real", "Tu marca, tus colores, tu dominio. Tus alumnos solo ven a ti."],
+      { title: "Entra a cada call con autoridad total", desc: "La IA lee el check-in del alumno y entrega la agenda exacta — qué discutir, dónde se bloqueó, qué priorizar. De 45 min de preparación a 30 segundos. Eso es lo que justifica tu ticket alto." },
+      { title: "Salva contratos antes de perderlos", desc: "El Radar de Churn detecta quién se está enfriando y te avisa con 30 días de antelación. Si salva 1 contrato de $2,000 en el año, CKlareza ya se pagó por más de 10 meses." },
+      { title: "Previsibilidad total de tu caja", desc: "Cobros, morosidad y proyección de MRR en un dashboard. Decide sobre inversión, contratación y expansión con datos — no con intuición." },
+      { title: "Cero planilla, cero caos de tareas", desc: "Las actividades de todos los alumnos en un Kanban único. Por hacer, vencidas, completadas. Sabes exactamente dónde está cada alumno en 5 segundos." },
+      { title: "Portal premium que aumenta la retención", desc: "Tu alumno hace check-in, sigue su jornada y se siente parte de algo serio. Un portal profesional comunica valor — y los alumnos que sienten el valor cancelan menos." },
+      { title: "Tu marca, no la nuestra", desc: "Logo, colores y dominio propios. Tus alumnos solo ven a ti — el motor es CKlareza. Ofreces una experiencia premium sin construir tecnología desde cero." },
     ],
-    wlLabel: "WHITE-LABEL", wlT: "Tu marca. Nuestro motor.",
-    wlText: "Tus clientes con CKlareza en tu marca, tu estilo, tu método y tu filosofía.",
-    wlBullets: ["Logo, colores y dominio propios", "Varios mentores por empresa", "Cada uno ve solo lo suyo", "Revende a otros clientes"],
-    wlCardT: "Panel de control del dueño", wlCardD: "Gestiona todas las empresas, mentores y mentoreados en un solo lugar.",
-    propLabel: "NUESTRO PROPÓSITO", propT: "Transformar vidas.",
-    propText: "No vendemos software — le damos al mentor el tiempo y la claridad para hacer lo que importa: transformar la vida de quien confía en él.",
-    priceLabel: "PLANES",
-    priceTitle: "Simple, transparente, justo.",
-    priceDesc: "Sin sorpresas. Cancela cuando quieras.",
-    plans: [
-      { name: "Starter", price: "R$297", period: "/mes", desc: "Para mentores solo que empiezan a profesionalizarse.", features: ["Hasta 10 mentoreados", "Panel de operación", "Briefing con IA", "Finanzas básicas", "Portal del alumno", "Soporte por email"], cta: "Comenzar Gratis", highlight: false },
-      { name: "Professional", price: "R$697", period: "/mes", desc: "Para mentores que quieren escalar sin trabajar más.", features: ["Hasta 30 mentoreados", "Todo el Starter", "Radar de churn", "Analytics avanzado", "White-label básico", "Soporte prioritario (4h)"], cta: "Comenzar Gratis", highlight: true, badge: "MÁS POPULAR" },
-      { name: "Enterprise", price: "A consultar", period: "", desc: "Para agencias y operaciones multi-mentor.", features: ["Mentoreados ilimitados", "Todo el Professional", "White-label completo", "Múltiples mentores", "SLA 99.9%", "Account manager dedicado"], cta: "Hablar con Ventas", highlight: false },
+    churnLabel: "ROI DEL RADAR DE CHURN",
+    churnTitle: "1 contrato salvado paga la herramienta por 10 meses.",
+    churnDesc: "Los mentores high-ticket tienen contratos de $1,000 a $4,000/mes. El Radar detecta señales de enfriamiento antes de que el alumno decida cancelar.",
+    churnCalc: [
+      ["1 contrato de $2k salvado/año", "$2,000 protegidos"],
+      ["Costo anual de CKlareza (10 alumnos)", "$2,400/año"],
+      ["ROI mínimo en el 1er año", "≈ 10x"],
     ],
-    ctaT: "¿Listo para recuperar tus 10 horas semanales?", ctaS: "Prueba gratis por 14 días. Sin tarjeta. Setup en 5 minutos.", ctaBtn: "Empezar Ahora — Es Gratis",
-    foot: "Entrar →",
-    faqT: "Preguntas frecuentes",
-    segLabel: "CONFIANZA", segT: "Seguridad primero", segS: "Construida para empresas que se toman en serio la privacidad y la protección de datos.",
-    segItens: ["100 en SEO y Buenas Prácticas — Google PageSpeed", "Conforme a LGPD (Ley 13.709/2018)", "Datos cifrados (en tránsito y reposo)", "Aislamiento de datos por rol y empresa"],
-    segCta: "Conoce más sobre seguridad",
-    faq: [
-      ["¿Cuánto tiempo lleva la configuración?", "5 minutos. Crea cuenta, importa tus alumnos y ya estás operando. Sin instalación, 100% web."],
-      ["¿El briefing con IA realmente funciona?", "Sí. La IA lee el check-in del alumno y genera la agenda de la call automáticamente. Los clientes ahorran 7-10h/semana."],
-      ["¿CKlareza es white-label?", "Sí, en los planes Professional y Enterprise. Usa tu logo, tus colores y tu dominio."],
-      ["¿Para quién es CKlareza?", "Para mentores y empresas de mentoría high-ticket que quieren reducir el churn y escalar sin trabajar más."],
-      ["¿Puedo cancelar cuando quiera?", "Sí. Sin multa, sin burocracia. Cancela con 1 clic."],
-      ["¿Necesito instalar algo?", "No. 100% web. Accede desde el navegador y pruébalo sin tarjeta."],
-    ],
+    churnNote: "Y eso contando solo 1 contrato salvado — la mayoría de los mentores evitan 2 a 4 cancelaciones por año.",
     calcLabel: "CALCULADORA DE DESCUENTO",
-    calcTitle: "Calcula tu descuento real",
-    calcSub: "Mueve el slider y ve cuánto pagas por mes",
+    calcTitle: "¿Cuánto pagas por mentoreado?",
+    calcSub: "Mueve el slider y ve el precio exacto para tu volumen",
     calcSliderLabel: "Número de mentoreados",
     calcPerUnit: "por mentoreado/mes",
     calcTotal: "Total mensual",
-    calcSavings: "Ahorras vs. contratar gestor",
+    calcSavings: "Ahorro/año",
     calcDiscount: "de descuento",
-    calcCta: "Empezar con este plan",
-    calcNote: "50% de descuento para nuevos clientes el primer mes",
+    calcCta: "Crear cuenta gratuita con",
+    calcNote: "Trial de 14 días · sin tarjeta · sin compromiso",
+    priceLabel: "PLANES",
+    priceTitle: "Transparente por mentoreado.",
+    priceDesc: "Paga por lo que usas. Volumen alto = descuento automático. Cancela cuando quieras.",
+    wlLabel: "WHITE-LABEL", wlT: "Tu marca. Nuestro motor.",
+    wlText: "Tus clientes experimentan CKlareza con tu branding — logo, colores, dominio y método.",
+    wlBullets: ["Logo, colores y dominio propios", "Varios mentores por empresa", "Cada uno ve solo lo suyo", "Revende a otros clientes"],
+    wlCardT: "Panel de control del dueño", wlCardD: "Gestiona todas las empresas, mentores y mentoreados en un solo lugar.",
+    segLabel: "CONFIANZA", segT: "Seguridad primero", segS: "Construida para operaciones que se toman en serio los datos de sus alumnos.",
+    segItens: ["100 en SEO y Buenas Prácticas — Google PageSpeed", "Conforme a LGPD (Ley 13.709/2018)", "Datos cifrados (en tránsito y reposo)", "Aislamiento de datos por rol y empresa"],
+    segCta: "Conoce más sobre seguridad",
+    faqT: "Preguntas frecuentes",
+    faq: [
+      ["¿Cuánto tiempo lleva la configuración?", "5 minutos. Crea cuenta, importa tus alumnos y ya estás operando. Sin instalación, 100% web."],
+      ["¿Necesito tarjeta de crédito para probar?", "No. Creas cuenta gratis, exploras el sistema y solo pones tarjeta cuando quieras suscribirte."],
+      ["¿El Radar de Churn realmente funciona?", "Sí. Analiza frecuencia de check-ins, patrones de respuesta y engagement del alumno — y te avisa cuando la señal cambia. Los mentores que usan el Radar actúan antes de que el alumno decida cancelar."],
+      ["¿El briefing con IA reemplaza mi criterio?", "No — lo amplifica. La IA organiza lo que el alumno trajo y sugiere la agenda. Tú decides qué usar. El resultado es entrar a la call con 10x más claridad en 30 segundos."],
+      ["¿CKlareza es white-label?", "Sí, en planes con más de 20 mentoreados. Usa tu logo, tus colores y tu dominio."],
+      ["¿Para quién es CKlareza?", "Para mentores y empresas de mentoría high-ticket que quieren reducir el churn y escalar sin trabajar más horas."],
+      ["¿Puedo cancelar cuando quiera?", "Sí. Sin multa, sin burocracia. Cancela con 1 clic."],
+    ],
+    ctaT: "¿Listo para entrar a tu próxima call con claridad total?",
+    ctaS: "Crea tu cuenta gratuita. Explora el sistema. Mira a la IA preparar una call en 30 segundos.",
+    ctaBtn: "Crear cuenta gratuita — sin tarjeta",
+    ctaSub: "O mira la demo primero",
   },
 }
 
-// ─── Lógica de preço por mentorado ────────────────────────────────────────────
-// Pontos âncora: 10→R$98,50  |  30→R$78,80  |  100→R$59,10
-// Base (sem CKlareza, gestor manual): R$197/mentorado
-function calcPrecoUnit(n: number): number {
-  if (n <= 20) return 98.50
-  if (n <= 30) {
-    // interpolação linear 20→98,50  30→78,80
-    const t = (n - 20) / 10
-    return 98.50 + t * (78.80 - 98.50)
-  }
-  // interpolação linear 30→78,80  100→59,10
-  const t = Math.min((n - 30) / 70, 1)
-  return 78.80 + t * (59.10 - 78.80)
+// ─── Lógica de preço ──────────────────────────────────────────────────────────
+// Base: R$197/mentorado · Descontos fixos por faixa:
+// até 20 → 50% off (R$98,50) | 21-50 → 60% off (R$78,80)
+// 51-99  → 70% off (R$59,10) | 100+  → 80% off (R$39,40)
+function calcDescPct(n: number): number {
+  if (n <= 20) return 50
+  if (n <= 50) return 60
+  if (n <= 99) return 70
+  return 80
 }
+function calcPrecoUnit(n: number): number { return 197 * (1 - calcDescPct(n) / 100) }
 function calcTotal(n: number): number { return Math.round(calcPrecoUnit(n) * n) }
-function calcDesconto(n: number): number {
-  const semCK = 197 * n
-  return Math.round((1 - calcTotal(n) / semCK) * 100)
-}
-function calcEconomia(n: number): number { return Math.round(197 * n - calcTotal(n) ) }
+function calcDesconto(n: number): number { return calcDescPct(n) }
+function calcEconomia(n: number): number { return Math.round(197 * n - calcTotal(n)) }
 
 function Logo({ size = "md", c }: { size?: "md" | "sm"; c: any }) {
   return (
@@ -334,6 +411,7 @@ export default function LandingPage() {
   const [theme, setTheme] = useState<Theme>("dark")
   const [openFaq, setOpenFaq] = useState<number | null>(null)
   const [calcN, setCalcN] = useState(10)
+  const [openPain, setOpenPain] = useState<number | null>(null)
 
   useEffect(() => {
     const saved = localStorage.getItem("ck_lang") as Lang | null
@@ -365,7 +443,7 @@ export default function LandingPage() {
   return (
     <div style={{ background: c.bg, color: c.ink, transition: "background 0.3s, color 0.3s" }} className="min-h-screen">
 
-      {/* NAV */}
+      {/* ── NAV ── */}
       <header className="sticky top-0 z-40 backdrop-blur-md" style={{ background: `${c.bg}cc`, borderBottom: `1px solid ${c.border}` }}>
         <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
           <Logo c={c} />
@@ -400,35 +478,56 @@ export default function LandingPage() {
                 </>
               )}
             </div>
-            <Link href="/login" className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all" style={{ background: c.gold, color: c.onAccent, boxShadow: `0 6px 20px ${c.gold}40` }}>
+            <Link href="/login"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all"
+              style={{ background: c.gold, color: c.onAccent, boxShadow: `0 6px 20px ${c.gold}40` }}>
               {t.entrar} <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         </div>
       </header>
 
-      {/* HERO — Hormozi style: dor + ganho direto */}
+      {/* ── HERO ── */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0" style={{ background: `radial-gradient(60% 50% at 50% 0%, ${c.gold}1f 0%, transparent 70%)` }} />
         <div className="relative max-w-4xl mx-auto px-5 pt-14 pb-8 text-center">
-          <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold mb-6" style={{ background: `${c.gold}18`, border: `1px solid ${c.gold}40`, color: c.goldDeep }}>
+          <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold mb-6"
+            style={{ background: `${c.gold}18`, border: `1px solid ${c.gold}40`, color: c.goldDeep }}>
             <Star className="w-3.5 h-3.5" style={{ color: c.goldDeep }} /> {t.badge}
           </span>
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.05]" style={{ color: c.ink }}>
-            {t.h1a} <span style={{ color: "#ef4444" }}>{t.h1b}</span><br />
-            <span style={{ color: c.ink }}>{t.h1c}</span>
+            <span style={{ color: "#ef4444" }}>Quanto você pagaria</span>{" "}
+            <span style={{ color: c.ink }}>para não errar?</span>
           </h1>
-          <p className="text-lg md:text-xl mt-6 max-w-2xl mx-auto leading-relaxed" style={{ color: c.muted }}>
-            {t.sub}<span className="font-semibold" style={{ color: c.ink }}>{t.subStrong}</span>
+          <p className="text-lg md:text-xl mt-5 max-w-2xl mx-auto leading-relaxed" style={{ color: c.muted }}>
+            Pare de perder <strong style={{ color: c.ink }}>7h30 por semana</strong> preparando calls
+            que você poderia simplesmente <em>não preparar</em>.
           </p>
+          <p className="text-base md:text-lg mt-3 max-w-2xl mx-auto leading-relaxed" style={{ color: c.muted }}>
+            A CKlareza automatiza o seu briefing com{" "}
+            <strong style={{ color: c.ink }}>Inteligência Artificial</strong>, centraliza a gestão financeira
+            e prevê quem vai cancelar com{" "}
+            <strong style={{ color: c.ink }}>30 dias de antecedência</strong>.
+            Opere mais, trabalhe menos —{" "}
+            <strong style={{ color: c.gold }}>tudo com a sua marca</strong>.
+          </p>
+
+          {/* CTAs — Demo primeiro (Avanço), depois conta */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-9">
-            <Link href="/login" className="flex items-center gap-2 px-6 py-3.5 rounded-xl text-base font-bold transition-all hover:-translate-y-0.5" style={{ background: c.gold, color: c.onAccent, boxShadow: `0 10px 30px ${c.gold}40` }}>
-              {t.cta1} <ArrowRight className="w-5 h-5" />
-            </Link>
-            <a href="#prova" className="px-6 py-3.5 rounded-xl text-base font-semibold transition-all" style={{ background: c.card, border: `1px solid ${c.border}`, color: c.ink }}
+            <a href="#video"
+              className="flex items-center gap-2 px-6 py-3.5 rounded-xl text-base font-bold transition-all hover:-translate-y-0.5"
+              style={{ background: c.gold, color: c.onAccent, boxShadow: `0 10px 30px ${c.gold}40` }}>
+              <Play className="w-4 h-4" /> {t.cta1}
+            </a>
+            <Link href="/comecar"
+              className="px-6 py-3.5 rounded-xl text-base font-semibold transition-all"
+              style={{ background: c.card, border: `1px solid ${c.border}`, color: c.ink }}
               onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = c.card2}
-              onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = c.card}>{t.cta2}</a>
+              onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = c.card}>
+              {t.cta2}
+            </Link>
           </div>
+
           {/* Trust signals */}
           <div className="flex flex-wrap items-center justify-center gap-4 mt-6">
             {t.trust.map((tr: string, i: number) => (
@@ -439,28 +538,40 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* VIDEO */}
-        <div className="relative max-w-3xl mx-auto px-5 pb-6">
-          <div className="rounded-2xl overflow-hidden" style={{ background: "#000", border: `2px solid ${c.gold}55`, boxShadow: `0 30px 90px -25px ${c.gold}55` }}>
+        {/* VIDEO — Demonstração de Capacidade */}
+        <div id="video" className="relative max-w-3xl mx-auto px-5 pb-6">
+          <div className="rounded-2xl overflow-hidden"
+            style={{ background: "#000", border: `2px solid ${c.gold}55`, boxShadow: `0 30px 90px -25px ${c.gold}55` }}>
             <video src="/video-cklareza.mp4" autoPlay muted loop playsInline controls className="w-full h-auto block" />
           </div>
           <p className="text-center text-sm mt-3 font-semibold flex items-center justify-center gap-2" style={{ color: c.muted }}>
-            <Sparkles className="w-3.5 h-3.5" style={{ color: c.gold }} /> {t.vid1}
+            <Sparkles className="w-3.5 h-3.5" style={{ color: c.gold }} /> Conheça a plataforma em 2 minutos
           </p>
+          {/* CTA abaixo do vídeo — Avanço natural */}
+          <div className="text-center mt-5">
+            <Link href="/comecar"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all hover:-translate-y-0.5"
+              style={{ background: c.gold, color: c.onAccent, boxShadow: `0 8px 24px ${c.gold}40` }}>
+              {t.cta2} <ArrowRight className="w-4 h-4" />
+            </Link>
+            <p className="text-xs mt-2" style={{ color: c.muted }}>Sem cartão · Setup em 5 min</p>
+          </div>
         </div>
       </section>
 
-      {/* PROVA SOCIAL — Case Termo Laser */}
+      {/* ── PROVA SOCIAL — Case Termo Laser ── */}
       <section id="prova" className="max-w-4xl mx-auto px-5 py-16">
-        <div className="rounded-2xl p-8 md:p-12 text-center" style={{ background: `${c.gold}10`, border: `2px solid ${c.gold}40` }}>
-          <span className="inline-block px-3 py-1 rounded-full text-xs font-bold mb-4" style={{ background: `${c.gold}20`, color: c.goldDeep }}>
+        <div className="rounded-2xl p-8 md:p-12 text-center"
+          style={{ background: `${c.gold}10`, border: `2px solid ${c.gold}40` }}>
+          <span className="inline-block px-3 py-1 rounded-full text-xs font-bold mb-4"
+            style={{ background: `${c.gold}20`, color: c.goldDeep }}>
             {t.proofLabel}
           </span>
           <p className="text-3xl md:text-4xl font-extrabold mb-4" style={{ color: c.gold }}>{t.proofTitle}</p>
           <p className="text-lg max-w-2xl mx-auto mb-4" style={{ color: c.muted }}>{t.proofDesc}</p>
           <p className="text-sm font-semibold" style={{ color: c.muted }}>{t.proofName}</p>
           <div className="grid grid-cols-3 gap-6 mt-8">
-            {[["−50%", "Churn"], ["40%", "MRR"], ["45min→2min", "Prep/call"]].map(([val, label]) => (
+            {t.proofStats.map(([val, label]: string[]) => (
               <div key={label} className="text-center">
                 <p className="text-2xl md:text-3xl font-extrabold" style={{ color: c.gold }}>{val}</p>
                 <p className="text-sm mt-1" style={{ color: c.muted }}>{label}</p>
@@ -470,38 +581,89 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* DOR */}
+      {/* ── DOR COM IMPLICAÇÕES ── */}
       <section className="max-w-4xl mx-auto px-5 py-12">
         <div className="text-center mb-10">
-          <span className="inline-block px-3 py-1 rounded-full text-xs font-bold mb-3" style={{ background: `${c.border}`, color: c.muted }}>
+          <span className="inline-block px-3 py-1 rounded-full text-xs font-bold mb-3"
+            style={{ background: c.border, color: c.muted }}>
             {t.painLabel}
           </span>
           <h2 className="text-3xl md:text-4xl font-extrabold" style={{ color: c.ink }}>{t.painTitle}</h2>
         </div>
-        <div className="grid md:grid-cols-2 gap-4">
-          {t.pains.map((pain: string, i: number) => (
-            <div key={i} className="flex items-start gap-3 p-4 rounded-xl" style={{ background: `rgba(239,68,68,0.05)`, border: `1px solid rgba(239,68,68,0.15)` }}>
-              <AlertCircle className="w-5 h-5 mt-0.5 shrink-0" style={{ color: "#ef4444" }} />
-              <p style={{ color: c.muted }}>{pain}</p>
+        <div className="space-y-3">
+          {t.pains.map((pain: { dor: string; impl: string }, i: number) => (
+            <div key={i} className="rounded-xl overflow-hidden"
+              style={{ border: `1px solid rgba(239,68,68,0.2)`, background: `rgba(239,68,68,0.03)` }}>
+              <button
+                className="w-full flex items-start gap-3 p-5 text-left"
+                onClick={() => setOpenPain(openPain === i ? null : i)}>
+                <AlertCircle className="w-5 h-5 mt-0.5 shrink-0" style={{ color: "#ef4444" }} />
+                <span className="flex-1 font-semibold" style={{ color: c.ink }}>{pain.dor}</span>
+                <span className="shrink-0 mt-0.5" style={{ color: c.muted }}>
+                  {openPain === i
+                    ? <ChevronUp className="w-4 h-4" />
+                    : <ChevronDown className="w-4 h-4" />}
+                </span>
+              </button>
+              {openPain === i && (
+                <div className="px-5 pb-5 pt-0">
+                  <div className="flex gap-2.5 p-4 rounded-lg"
+                    style={{ background: `rgba(239,68,68,0.07)`, borderLeft: `3px solid rgba(239,68,68,0.4)` }}>
+                    <Target className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "#ef4444" }} />
+                    <p className="text-sm leading-relaxed" style={{ color: c.muted }}>{pain.impl}</p>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
       </section>
 
-      {/* SOLUÇÃO — FEATURES */}
+      {/* ── IMAGINE — Necessidade de Solução (SPIN) ── */}
+      <section className="max-w-4xl mx-auto px-5 py-16">
+        <div className="rounded-2xl p-8 md:p-12"
+          style={{ background: `${c.teal}08`, border: `2px solid ${c.teal}30` }}>
+          <div className="text-center mb-8">
+            <span className="inline-block px-3 py-1 rounded-full text-xs font-bold mb-3"
+              style={{ background: `${c.teal}18`, color: c.teal }}>
+              {t.imagineLabel}
+            </span>
+            <h2 className="text-3xl md:text-4xl font-extrabold" style={{ color: c.ink }}>
+              {t.imagineTitle}
+            </h2>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-4 mb-8">
+            {t.imagines.map((item: string, i: number) => (
+              <div key={i} className="flex items-start gap-3 p-4 rounded-xl"
+                style={{ background: c.card, border: `1px solid ${c.border}` }}>
+                <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5"
+                  style={{ background: `${c.teal}20` }}>
+                  <Check className="w-3.5 h-3.5" style={{ color: c.teal }} />
+                </div>
+                <p className="text-sm leading-relaxed" style={{ color: c.muted }}>{item}</p>
+              </div>
+            ))}
+          </div>
+          <p className="text-center text-base font-bold" style={{ color: c.teal }}>{t.imagineCta}</p>
+        </div>
+      </section>
+
+      {/* ── SOLUÇÃO — FEATURES como Benefícios ── */}
       <section id="recursos" className="max-w-6xl mx-auto px-5 py-16">
         <div className="text-center mb-12">
-          <span className="inline-block px-3 py-1 rounded-full text-xs font-bold mb-3" style={{ background: `${c.gold}18`, color: c.goldDeep }}>
+          <span className="inline-block px-3 py-1 rounded-full text-xs font-bold mb-3"
+            style={{ background: `${c.gold}18`, color: c.goldDeep }}>
             {t.solLabel}
           </span>
           <h2 className="text-3xl md:text-4xl font-extrabold" style={{ color: c.ink }}>{t.solTitle}</h2>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {t.feats.map(([title, desc]: string[], i: number) => {
+          {t.feats.map(({ title, desc }: { title: string; desc: string }, i: number) => {
             const Icon = FEAT_ICONS[i]
             return (
               <div key={i} className="p-6 rounded-2xl" style={{ background: c.card, border: `1px solid ${c.border}` }}>
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4" style={{ background: `${featCores[i]}18` }}>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
+                  style={{ background: `${featCores[i]}18` }}>
                   <Icon className="w-5 h-5" style={{ color: featCores[i] }} />
                 </div>
                 <h3 className="font-bold text-lg mb-2" style={{ color: c.ink }}>{title}</h3>
@@ -512,10 +674,55 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* CALCULADORA DE DESCONTO */}
+      {/* ── ROI DO RADAR DE CHURN — destrói objeção de preço ── */}
+      <section className="max-w-4xl mx-auto px-5 pb-16">
+        <div className="rounded-2xl p-8 md:p-10"
+          style={{ background: `${c.gold}0a`, border: `2px solid ${c.gold}50` }}>
+          <div className="flex flex-col md:flex-row gap-8 items-center">
+            <div className="flex-1">
+              <span className="inline-block px-3 py-1 rounded-full text-xs font-bold mb-3"
+                style={{ background: `${c.gold}20`, color: c.goldDeep }}>
+                {t.churnLabel}
+              </span>
+              <h2 className="text-2xl md:text-3xl font-extrabold mb-3" style={{ color: c.ink }}>
+                {t.churnTitle}
+              </h2>
+              <p className="text-base mb-4" style={{ color: c.muted }}>{t.churnDesc}</p>
+              <p className="text-xs italic" style={{ color: c.muted }}>{t.churnNote}</p>
+            </div>
+            <div className="flex-1 w-full">
+              <div className="rounded-xl overflow-hidden" style={{ border: `1px solid ${c.border}` }}>
+                {t.churnCalc.map(([label, value]: string[], i: number) => (
+                  <div key={i} className="flex items-center justify-between px-5 py-4"
+                    style={{
+                      background: i === 2 ? `${c.gold}15` : i % 2 === 0 ? c.card : c.card2,
+                      borderTop: i > 0 ? `1px solid ${c.border}` : undefined,
+                    }}>
+                    <span className="text-sm" style={{ color: c.muted }}>{label}</span>
+                    <span className={`font-bold text-sm`}
+                      style={{ color: i === 2 ? c.gold : c.teal }}>
+                      {value}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <div className="text-center mt-4">
+                <Link href="/comecar"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold"
+                  style={{ background: c.gold, color: c.onAccent }}>
+                  Quero proteger meus contratos <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── CALCULADORA ── */}
       <section id="calculadora" className="max-w-3xl mx-auto px-5 py-16">
         <div className="text-center mb-8">
-          <span className="inline-block px-3 py-1 rounded-full text-xs font-bold mb-3" style={{ background: `${c.gold}18`, color: c.goldDeep }}>
+          <span className="inline-block px-3 py-1 rounded-full text-xs font-bold mb-3"
+            style={{ background: `${c.gold}18`, color: c.goldDeep }}>
             {t.calcLabel}
           </span>
           <h2 className="text-3xl md:text-4xl font-extrabold mb-2" style={{ color: c.ink }}>{t.calcTitle}</h2>
@@ -529,55 +736,44 @@ export default function LandingPage() {
               <label className="text-sm font-semibold" style={{ color: c.muted }}>{t.calcSliderLabel}</label>
               <span className="text-2xl font-extrabold" style={{ color: c.gold }}>{calcN}</span>
             </div>
-            <div className="relative">
-              <input
-                type="range" min={1} max={100} step={1} value={calcN}
-                onChange={e => setCalcN(Number(e.target.value))}
-                className="w-full h-2 rounded-full appearance-none cursor-pointer"
-                style={{
-                  background: `linear-gradient(to right, ${c.gold} ${calcN}%, ${c.card2} ${calcN}%)`,
-                  accentColor: c.gold,
-                }}
-              />
-              <div className="flex justify-between text-xs mt-2" style={{ color: c.muted }}>
-                <span>1</span><span>25</span><span>50</span><span>75</span><span>100</span>
-              </div>
+            <input
+              type="range" min={1} max={100} step={1} value={calcN}
+              onChange={e => setCalcN(Number(e.target.value))}
+              className="w-full h-2 rounded-full appearance-none cursor-pointer"
+              style={{ background: `linear-gradient(to right, ${c.gold} ${calcN}%, ${c.card2} ${calcN}%)`, accentColor: c.gold }}
+            />
+            <div className="flex justify-between text-xs mt-2" style={{ color: c.muted }}>
+              <span>1</span><span>25</span><span>50</span><span>75</span><span>100</span>
             </div>
           </div>
 
-          {/* Resultados */}
+          {/* Métricas */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            {/* Preço por unidade */}
             <div className="text-center p-4 rounded-xl" style={{ background: c.card2, border: `1px solid ${c.border}` }}>
               <p className="text-2xl font-extrabold" style={{ color: c.gold }}>
                 R${calcPrecoUnit(calcN).toFixed(2).replace(".", ",")}
               </p>
               <p className="text-xs mt-1" style={{ color: c.muted }}>{t.calcPerUnit}</p>
             </div>
-            {/* Total mensal */}
             <div className="text-center p-4 rounded-xl" style={{ background: c.card2, border: `1px solid ${c.border}` }}>
               <p className="text-2xl font-extrabold" style={{ color: c.ink }}>
                 R${calcTotal(calcN).toLocaleString("pt-BR")}
               </p>
               <p className="text-xs mt-1" style={{ color: c.muted }}>{t.calcTotal}</p>
             </div>
-            {/* Desconto */}
             <div className="text-center p-4 rounded-xl" style={{ background: `${c.teal}15`, border: `1px solid ${c.teal}40` }}>
-              <p className="text-2xl font-extrabold" style={{ color: c.teal }}>
-                {calcDesconto(calcN)}%
-              </p>
+              <p className="text-2xl font-extrabold" style={{ color: c.teal }}>{calcDesconto(calcN)}%</p>
               <p className="text-xs mt-1" style={{ color: c.muted }}>{t.calcDiscount}</p>
             </div>
-            {/* Economia */}
             <div className="text-center p-4 rounded-xl" style={{ background: `${c.teal}15`, border: `1px solid ${c.teal}40` }}>
               <p className="text-2xl font-extrabold" style={{ color: c.teal }}>
-                R${calcEconomia(calcN).toLocaleString("pt-BR")}
+                R${(calcEconomia(calcN) * 12).toLocaleString("pt-BR")}
               </p>
               <p className="text-xs mt-1" style={{ color: c.muted }}>{t.calcSavings}</p>
             </div>
           </div>
 
-          {/* Barra visual de desconto */}
+          {/* Barra visual */}
           <div className="mb-6">
             <div className="flex justify-between text-xs mb-1" style={{ color: c.muted }}>
               <span>Sem CKlareza — R${(197 * calcN).toLocaleString("pt-BR")}/mês</span>
@@ -593,43 +789,42 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* CTA + nota */}
           <div className="text-center">
-            <Link href="/login" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all hover:-translate-y-0.5"
+            <Link href="/comecar"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all hover:-translate-y-0.5"
               style={{ background: c.gold, color: c.onAccent, boxShadow: `0 8px 24px ${c.gold}40` }}>
-              {t.calcCta} — {calcN} mentorados <ArrowRight className="w-4 h-4" />
+              {t.calcCta} {calcN} mentorados <ArrowRight className="w-4 h-4" />
             </Link>
             <p className="text-xs mt-3" style={{ color: c.muted }}>✦ {t.calcNote}</p>
           </div>
         </div>
       </section>
 
-      {/* PRICING — tabela resumo */}
+      {/* ── PRICING ── */}
       <section id="precos" className="max-w-4xl mx-auto px-5 pb-16">
         <div className="text-center mb-10">
-          <span className="inline-block px-3 py-1 rounded-full text-xs font-bold mb-3" style={{ background: `${c.gold}18`, color: c.goldDeep }}>
+          <span className="inline-block px-3 py-1 rounded-full text-xs font-bold mb-3"
+            style={{ background: `${c.gold}18`, color: c.goldDeep }}>
             {t.priceLabel}
           </span>
           <h2 className="text-3xl md:text-4xl font-extrabold mb-2" style={{ color: c.ink }}>{t.priceTitle}</h2>
           <p style={{ color: c.muted }}>{t.priceDesc}</p>
         </div>
 
-        {/* Tabela de referência rápida */}
+        {/* Tabela referência */}
         <div className="rounded-2xl overflow-hidden mb-8" style={{ border: `1px solid ${c.border}` }}>
           <table className="w-full text-sm">
             <thead>
               <tr style={{ background: c.card2 }}>
                 <th className="text-left px-5 py-3 font-semibold" style={{ color: c.muted }}>Mentorados</th>
-                <th className="text-right px-5 py-3 font-semibold" style={{ color: c.muted }}>R$/mentorado</th>
+                <th className="text-right px-5 py-3 font-semibold" style={{ color: c.muted }}>R$/unidade</th>
                 <th className="text-right px-5 py-3 font-semibold" style={{ color: c.muted }}>Total/mês</th>
                 <th className="text-right px-5 py-3 font-semibold" style={{ color: c.teal }}>Desconto</th>
               </tr>
             </thead>
             <tbody>
-              {[5, 10, 20, 30, 50, 100].map((n, i) => (
-                <tr key={n}
-                  onClick={() => setCalcN(n)}
-                  className="cursor-pointer transition-colors"
+              {[10, 20, 30, 50, 60, 100].map((n, i) => (
+                <tr key={n} onClick={() => setCalcN(n)} className="cursor-pointer transition-colors"
                   style={{ background: calcN === n ? `${c.gold}12` : i % 2 === 0 ? c.card : c.card2, borderTop: `1px solid ${c.border}` }}
                   onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = `${c.gold}10`}
                   onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = calcN === n ? `${c.gold}12` : i % 2 === 0 ? c.card : c.card2}>
@@ -643,20 +838,18 @@ export default function LandingPage() {
           </table>
         </div>
 
-        <p className="text-center text-xs mb-8" style={{ color: c.muted }}>
-          ↑ Clique em qualquer linha para ver na calculadora acima
-        </p>
+        <p className="text-center text-xs mb-8" style={{ color: c.muted }}>↑ Clique em qualquer linha para atualizar a calculadora</p>
 
         <div className="grid md:grid-cols-2 gap-6">
-          {/* Starter */}
+          {/* Solo */}
           <div className="p-7 rounded-2xl" style={{ background: c.card, border: `1px solid ${c.border}` }}>
-            <h3 className="font-bold text-xl mb-1" style={{ color: c.ink }}>Starter</h3>
+            <h3 className="font-bold text-xl mb-1" style={{ color: c.ink }}>Solo</h3>
             <p className="text-sm mb-4" style={{ color: c.muted }}>Até 20 mentorados — perfeito para mentores solo</p>
-            <div className="flex items-end gap-1 mb-1">
-              <span className="text-4xl font-extrabold" style={{ color: c.ink }}>R$98,50</span>
-              <span className="text-sm mb-1" style={{ color: c.muted }}>/mentorado/mês</span>
+            <div className="flex items-end gap-1.5 mb-1">
+              <span className="text-4xl font-extrabold" style={{ color: c.ink }}>50% off</span>
             </div>
-            <p className="text-sm mb-5" style={{ color: c.teal }}>50% de desconto → 10 mentorados = R$985/mês</p>
+            <p className="text-sm mb-1" style={{ color: c.teal }}>R$98,50/mentorado · base era R$197</p>
+            <p className="text-xs mb-5" style={{ color: c.muted }}>10 mentorados = R$985/mês</p>
             <ul className="space-y-2 mb-6">
               {["Dashboard de operação", "Briefing com IA", "Financeiro básico", "Portal do aluno", "Suporte por email"].map(f => (
                 <li key={f} className="flex items-center gap-2 text-sm" style={{ color: c.muted }}>
@@ -664,35 +857,41 @@ export default function LandingPage() {
                 </li>
               ))}
             </ul>
-            <Link href="/login" className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold" style={{ background: c.card2, color: c.ink, border: `1px solid ${c.border}` }}>
-              Começar Grátis <ArrowRight className="w-4 h-4" />
+            <Link href="/comecar"
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold"
+              style={{ background: c.card2, color: c.ink, border: `1px solid ${c.border}` }}>
+              Criar conta gratuita <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
 
-          {/* Professional */}
-          <div className="relative p-7 rounded-2xl" style={{ background: `${c.gold}10`, border: `2px solid ${c.gold}`, boxShadow: `0 20px 60px -15px ${c.gold}30` }}>
-            <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-xs font-bold" style={{ background: c.gold, color: c.onAccent }}>
+          {/* Empresa */}
+          <div className="relative p-7 rounded-2xl"
+            style={{ background: `${c.gold}10`, border: `2px solid ${c.gold}`, boxShadow: `0 20px 60px -15px ${c.gold}30` }}>
+            <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-xs font-bold"
+              style={{ background: c.gold, color: c.onAccent }}>
               MAIS POPULAR
             </span>
-            <h3 className="font-bold text-xl mb-1" style={{ color: c.ink }}>Professional</h3>
-            <p className="text-sm mb-4" style={{ color: c.muted }}>21+ mentorados — escale sem trabalhar mais</p>
-            <div className="flex items-end gap-1 mb-1">
-              <span className="text-4xl font-extrabold" style={{ color: c.gold }}>60–80%</span>
-              <span className="text-sm mb-1" style={{ color: c.muted }}>de desconto</span>
+            <h3 className="font-bold text-xl mb-1" style={{ color: c.ink }}>Empresa</h3>
+            <p className="text-sm mb-4" style={{ color: c.muted }}>21–50 mentorados — escale sem trabalhar mais</p>
+            <div className="flex items-end gap-1.5 mb-1">
+              <span className="text-4xl font-extrabold" style={{ color: c.gold }}>60% off</span>
             </div>
-            <div className="text-sm mb-5 space-y-1" style={{ color: c.muted }}>
+            <p className="text-sm mb-1" style={{ color: c.teal }}>R$78,80/mentorado · base era R$197</p>
+            <div className="text-xs mb-5 space-y-0.5" style={{ color: c.muted }}>
               <p>30 mentorados = <strong style={{ color: c.ink }}>R$2.364/mês</strong></p>
-              <p>100 mentorados = <strong style={{ color: c.ink }}>R$5.910/mês</strong></p>
+              <p>50 mentorados = <strong style={{ color: c.ink }}>R$3.940/mês</strong></p>
             </div>
             <ul className="space-y-2 mb-6">
-              {["Tudo do Starter", "Radar de churn antecipado", "Analytics avançado", "White-label básico", "Suporte prioritário (4h)"].map(f => (
+              {["Tudo do Solo", "Radar de churn antecipado", "Analytics avançado", "White-label completo", "Suporte prioritário (4h)"].map(f => (
                 <li key={f} className="flex items-center gap-2 text-sm" style={{ color: c.muted }}>
                   <Check className="w-4 h-4 shrink-0" style={{ color: c.teal }} /> {f}
                 </li>
               ))}
             </ul>
-            <Link href="/login" className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold" style={{ background: c.gold, color: c.onAccent }}>
-              Começar Grátis <ArrowRight className="w-4 h-4" />
+            <Link href="/comecar"
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold"
+              style={{ background: c.gold, color: c.onAccent }}>
+              Criar conta gratuita <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         </div>
@@ -703,11 +902,13 @@ export default function LandingPage() {
         </p>
       </section>
 
-      {/* WHITE-LABEL */}
+      {/* ── WHITE-LABEL ── */}
       <section className="max-w-6xl mx-auto px-5 py-16">
-        <div className="rounded-2xl p-8 md:p-12 flex flex-col md:flex-row gap-10 items-center" style={{ background: c.card, border: `1px solid ${c.border}` }}>
+        <div className="rounded-2xl p-8 md:p-12 flex flex-col md:flex-row gap-10 items-center"
+          style={{ background: c.card, border: `1px solid ${c.border}` }}>
           <div className="flex-1">
-            <span className="inline-block px-3 py-1 rounded-full text-xs font-bold mb-4" style={{ background: `${c.gold}18`, color: c.goldDeep }}>{t.wlLabel}</span>
+            <span className="inline-block px-3 py-1 rounded-full text-xs font-bold mb-4"
+              style={{ background: `${c.gold}18`, color: c.goldDeep }}>{t.wlLabel}</span>
             <h2 className="text-3xl font-extrabold mb-4" style={{ color: c.ink }}>{t.wlT}</h2>
             <p className="text-lg mb-6" style={{ color: c.muted }}>{t.wlText}</p>
             <ul className="space-y-3">
@@ -725,16 +926,18 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* SEGURANÇA */}
+      {/* ── SEGURANÇA ── */}
       <section className="max-w-4xl mx-auto px-5 py-12">
         <div className="text-center mb-8">
-          <span className="inline-block px-3 py-1 rounded-full text-xs font-bold mb-3" style={{ background: `${c.border}`, color: c.muted }}>{t.segLabel}</span>
+          <span className="inline-block px-3 py-1 rounded-full text-xs font-bold mb-3"
+            style={{ background: c.border, color: c.muted }}>{t.segLabel}</span>
           <h2 className="text-3xl font-extrabold mb-2" style={{ color: c.ink }}>{t.segT}</h2>
           <p style={{ color: c.muted }}>{t.segS}</p>
         </div>
         <div className="grid sm:grid-cols-2 gap-4">
           {t.segItens.map((item: string, i: number) => (
-            <div key={i} className="flex items-center gap-3 p-4 rounded-xl" style={{ background: c.card, border: `1px solid ${c.border}` }}>
+            <div key={i} className="flex items-center gap-3 p-4 rounded-xl"
+              style={{ background: c.card, border: `1px solid ${c.border}` }}>
               <ShieldCheck className="w-5 h-5 shrink-0" style={{ color: c.teal }} />
               <span className="text-sm" style={{ color: c.muted }}>{item}</span>
             </div>
@@ -745,7 +948,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* FAQ */}
+      {/* ── FAQ ── */}
       <section id="faq" className="max-w-3xl mx-auto px-5 py-16">
         <h2 className="text-3xl font-extrabold text-center mb-10" style={{ color: c.ink }}>{t.faqT}</h2>
         <div className="space-y-3">
@@ -755,7 +958,9 @@ export default function LandingPage() {
                 style={{ background: c.card, color: c.ink }}
                 onClick={() => setOpenFaq(openFaq === i ? null : i)}>
                 {q}
-                {openFaq === i ? <ChevronUp className="w-4 h-4 shrink-0" style={{ color: c.muted }} /> : <ChevronDown className="w-4 h-4 shrink-0" style={{ color: c.muted }} />}
+                {openFaq === i
+                  ? <ChevronUp className="w-4 h-4 shrink-0" style={{ color: c.muted }} />
+                  : <ChevronDown className="w-4 h-4 shrink-0" style={{ color: c.muted }} />}
               </button>
               {openFaq === i && (
                 <div className="px-5 pb-5 text-sm leading-relaxed" style={{ background: c.card, color: c.muted }}>{a}</div>
@@ -765,14 +970,19 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* CTA FINAL */}
+      {/* ── CTA FINAL ── */}
       <section className="max-w-3xl mx-auto px-5 py-20 text-center">
         <h2 className="text-3xl md:text-4xl font-extrabold mb-4" style={{ color: c.ink }}>{t.ctaT}</h2>
         <p className="text-lg mb-8" style={{ color: c.muted }}>{t.ctaS}</p>
-        <Link href="/login" className="inline-flex items-center gap-2 px-8 py-4 rounded-xl text-lg font-bold transition-all hover:-translate-y-1"
+        <Link href="/comecar"
+          className="inline-flex items-center gap-2 px-8 py-4 rounded-xl text-lg font-bold transition-all hover:-translate-y-1"
           style={{ background: c.gold, color: c.onAccent, boxShadow: `0 15px 40px ${c.gold}40` }}>
           {t.ctaBtn} <ArrowRight className="w-5 h-5" />
         </Link>
+        <p className="mt-4 text-sm" style={{ color: c.muted }}>
+          {t.ctaSub} —{" "}
+          <a href="#video" className="font-semibold" style={{ color: c.goldDeep }}>ver demo agora →</a>
+        </p>
       </section>
 
       <LifetimeValueCTA c={c} lang={lang} />

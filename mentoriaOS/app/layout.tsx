@@ -57,6 +57,48 @@ export const viewport = {
   themeColor: "#0a1420",
 }
 
+const FAQ_JSONLD = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Quanto tempo leva para configurar o CKlareza?",
+      "acceptedAnswer": { "@type": "Answer", "text": "5 minutos. Você cria conta, importa seus alunos e já está operando. Sem instalação, 100% web." }
+    },
+    {
+      "@type": "Question",
+      "name": "Preciso de cartão de crédito para testar o CKlareza?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Não. Você cria conta gratuitamente, explora o sistema e só entra com cartão quando quiser assinar. Teste de 14 dias sem cartão." }
+    },
+    {
+      "@type": "Question",
+      "name": "O Radar de Churn do CKlareza realmente funciona?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Sim. Ele analisa frequência de check-ins, padrões de resposta e engajamento do aluno — e avisa quando o sinal muda. Mentores que usam o Radar agem antes que o aluno decida cancelar." }
+    },
+    {
+      "@type": "Question",
+      "name": "O CKlareza é white-label?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Sim, nos planos com mais de 20 mentorados. Você usa seu logo, suas cores e seu domínio. Seus alunos veem só a sua marca." }
+    },
+    {
+      "@type": "Question",
+      "name": "Para quem é o CKlareza?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Para mentores e empresas de mentoria high-ticket que querem profissionalizar a operação, reduzir churn e escalar sem trabalhar mais horas." }
+    },
+    {
+      "@type": "Question",
+      "name": "Posso cancelar o CKlareza quando quiser?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Sim. Sem multa, sem burocracia. Cancele com 1 clique a qualquer momento." }
+    },
+    {
+      "@type": "Question",
+      "name": "O briefing com IA do CKlareza substitui o julgamento do mentor?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Não — ele potencializa. A IA organiza o que o aluno trouxe e sugere a pauta. Você decide o que usar. O resultado é entrar na call com 10x mais clareza, em 30 segundos." }
+    },
+  ]
+}
+
 const JSONLD = {
   "@context": "https://schema.org",
   "@graph": [
@@ -170,6 +212,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* PWA — Android Chrome */}
         <meta name="mobile-web-app-capable" content="yes" />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(JSONLD) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_JSONLD) }} />
       </head>
       <body className="antialiased text-white" style={{ background: "#0a1420" }}>
         <BreadcrumbSchema />

@@ -48,7 +48,7 @@ export default function SelecionarPage() {
       if (!me.authenticated) { window.location.href = "/login"; return }
       if (me.role === "mentor") { window.location.href = "/dashboard"; return }
       if (me.role === "super_admin") { setPodeEscolher(true); return }
-      window.location.href = "/login?error=sem_acesso"
+      window.location.href = "/comecar?setup=1"
     }).catch(() => { window.location.href = "/login" })
   }, [])
 

@@ -120,8 +120,8 @@ export default function DashboardPage() {
         if (!sel) { window.location.href = "/selecionar"; return }
         setMentorId(sel); return
       }
-      // Logado mas sem papel
-      window.location.href = "/login?error=sem_acesso"
+      // Logado mas sem papel — redireciona para completar cadastro
+      window.location.href = "/comecar?setup=1"
     }).catch(() => { window.location.href = "/login?next=/dashboard" })
   }, [])
 
