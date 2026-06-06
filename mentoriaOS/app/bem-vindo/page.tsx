@@ -1,11 +1,11 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Sparkles, Check, ArrowRight } from "lucide-react"
 
-export default function BemVindo() {
+function BemVindoContent() {
   const params = useSearchParams()
   const mentorados = params.get("mentorados") || "10"
   const [dots, setDots] = useState(".")
@@ -64,11 +64,23 @@ export default function BemVindo() {
       </Link>
 
       <p className="text-sm mt-6" style={{ color: "#93a8c9" }}>
-        Dúvidas? Responda o email de boas-vindas ou{" "}
+        Dúvidas?{" "}
         <a href="mailto:rodrigo.paes.rj@gmail.com" style={{ color: "#22d3ee" }}>
-          fale direto com a gente
+          Fale direto com a gente
         </a>
       </p>
     </div>
+  )
+}
+
+export default function BemVindo() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#060913" }}>
+        <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "#22d3ee" }} />
+      </div>
+    }>
+      <BemVindoContent />
+    </Suspense>
   )
 }
