@@ -52,7 +52,7 @@ const PLANOS = [
     unidade: "= R$98,50/mentorado",
     exemplo: "10 mentorados = R$985/mês",
     badge: null,
-    feats: ["Dashboard de operação", "Financeiro + cobranças", "Atividades em Kanban", "Portal do aluno", "Briefing com IA", "Suporte por email"],
+    feats: ["Dashboard de operação", "Financeiro + cobranças", "Atividades em Kanban", "Portal do aluno", "Briefing com IA", "Suporte por email", "White-label disponível a partir do plano Empresa (21+)"],
     destaque: false,
     href: "/comecar",
     cta: "Começar Grátis — 14 dias",
@@ -86,7 +86,7 @@ const PLANOS = [
   },
 ]
 
-const TABELA = [10, 20, 30, 50, 60, 100]
+const TABELA = [5, 10, 20, 30, 50, 100]
 
 export default function PricingCalc() {
   const [n, setN] = useState(10)
@@ -171,6 +171,9 @@ export default function PricingCalc() {
               <p className="text-[11px]" style={{ color: "#7ba4e0" }}>
                 sob gestão da IA/mês
               </p>
+              <p className="text-[10px]" style={{ color: "#4a6fa5" }}>
+                (estimativa: R$2.000/aluno · ajuste pelo seu ticket)
+              </p>
             </div>
 
             {/* Bloco 3 — Tempo Recuperado */}
@@ -249,7 +252,7 @@ export default function PricingCalc() {
               style={{ background: SC.gold, color: "#04121a", boxShadow: `0 8px 32px ${SC.gold}50` }}>
               {loading
                 ? <><Loader2 className="w-4 h-4 animate-spin" /> Abrindo checkout…</>
-                : <>Garantir minha ferramenta com desconto de escala <ArrowRight className="w-4 h-4" /></>
+                : <>Começar com {n} mentorado{n > 1 ? "s" : ""} — 14 dias grátis <ArrowRight className="w-4 h-4" /></>
               }
             </button>
             <p className="text-xs mt-3" style={{ color: SC.muted }}>

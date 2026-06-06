@@ -123,20 +123,16 @@ export default function ComecarPage() {
 
         {/* NOVO HERO COPY */}
         <h1 className="text-3xl md:text-5xl font-extrabold leading-[1.08] tracking-tight max-w-3xl mx-auto mb-4">
-          <span style={{ color: "#ef4444" }}>Quanto você pagaria</span>{" "}
-          <span style={{ color: INK }}>para não errar?</span>
+          <span style={{ color: INK }}>Você está a </span>
+          <span style={{ color: GOLD }}>5 minutos</span>
+          <span style={{ color: INK }}> de operar com clareza total.</span>
         </h1>
         <p className="text-base md:text-lg max-w-2xl mx-auto mb-2" style={{ color: MUTED }}>
-          Pare de perder <strong style={{ color: INK }}>7h30 por semana</strong> preparando calls
-          que você poderia simplesmente <em>não preparar</em>.
+          Crie sua conta, importe seus alunos e veja a IA preparar
+          a sua próxima call — <strong style={{ color: INK }}>sem planilha, sem caos</strong>.
         </p>
         <p className="text-sm md:text-base max-w-2xl mx-auto mb-6" style={{ color: MUTED }}>
-          A CKlareza automatiza o seu briefing com{" "}
-          <strong style={{ color: INK }}>Inteligência Artificial</strong>, centraliza a gestão
-          financeira e prevê quem vai cancelar com{" "}
-          <strong style={{ color: INK }}>30 dias de antecedência</strong>.
-          Opere mais, trabalhe menos —{" "}
-          <strong style={{ color: GOLD }}>tudo com a sua marca</strong>.
+          14 dias grátis · sem cartão · cancele quando quiser.
         </p>
       </div>
 
