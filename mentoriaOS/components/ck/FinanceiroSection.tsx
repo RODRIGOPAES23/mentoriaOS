@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { Plus, CheckCircle2, Clock, AlertCircle, Trash2, DollarSign, Pencil, X } from "lucide-react"
+import { C } from "@/utils/theme"
 
 interface Pagamento {
   id: string

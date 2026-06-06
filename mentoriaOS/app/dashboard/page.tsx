@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useState, useCallback, useRef } from "react"
-import { createBrowserClient } from "@supabase/ssr"
 import type { CheckinRow } from "@/lib/supabase"
 import { getRealtimeClient } from "@/lib/supabase-realtime"
 import { useLocalStorage } from "@/hooks/useLocalStorage"
@@ -26,24 +25,6 @@ import CadastroMentoradoModalFull from "@/components/ck/modals/CadastroMentorado
 import EditarCadastroModal from "@/components/ck/modals/EditarCadastroModal"
 import HistoricoModal from "@/components/ck/modals/HistoricoModal"
 
-// ── Helpers de domínio ────────────────────────────────────────────────────────
-function gerarBriefing(m: Mentorado, c: CheckinRow): BriefingIA {
-  const conv = c.vendas_reais / (c.leads_gerados || 1)
-  const roi = ((c.vendas_reais - c.investimento_trafego) / (c.investimento_trafego || 1)) * 100
-  return {
-    diagnostico: `Volume de leads ${c.leads_gerados > 300 ? "positivo" : "abaixo do esperado"} (${c.leads_gerados} leads), conversão em R$${conv.toFixed(0)}/lead. ROI de ${roi.toFixed(0)}%. Foco: ${m.foco_macro}.`,
-    pauta: [
-      `Revisar as ${c.leads_gerados} captações e identificar os 20% com maior potencial de conversão`,
-      `Analisar os R$${c.investimento_trafego.toLocaleString()} de investimento — ROAS atual de ${(c.vendas_reais / (c.investimento_trafego || 1)).toFixed(1)}x`,
-      `${c.videos_postados} vídeos postados — estratégia de conteúdo que está gerando mais leads`,
-    ],
-  }
-}
-
-const sbAuth = createBrowserClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
 
 const MODULE_LABELS: Record<CkView, string> = {
   "visao-geral": "Visão Geral",
@@ -371,7 +352,7 @@ export default function DashboardPage() {
                   style={{ background: `${accent}18`, border: `1px solid ${accent}33` }}>
                   <span className="text-3xl">✦</span>
                 </div>
-                <h2 className="text-2xl font-bold mb-2" style={{ color: C.ink }}>
+                <h2 className="text-2xl font-bold mb-2" style={{ color: C.text }}>
                   Bem-vindo ao CKlareza!
                 </h2>
                 <p className="text-sm mb-8" style={{ color: C.muted }}>
@@ -388,7 +369,7 @@ export default function DashboardPage() {
                       <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-bold text-sm"
                         style={{ background: `${accent}22`, color: accent }}>{s.n}</div>
                       <div>
-                        <p className="font-semibold text-sm" style={{ color: C.ink }}>{s.t}</p>
+                        <p className="font-semibold text-sm" style={{ color: C.text }}>{s.t}</p>
                         <p className="text-xs mt-0.5" style={{ color: C.muted }}>{s.sub}</p>
                       </div>
                     </div>
