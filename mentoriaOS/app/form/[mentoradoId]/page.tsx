@@ -98,22 +98,27 @@ export default function FormPage({ params }: { params: { mentoradoId: string } }
           style={{ background: "#f8f9fa", border: "1px solid #e5e7eb" }}
         >
           <div>
-            <h2 className="text-xl font-semibold mb-6" style={{ color: "#00d68f" }}>📊 Métricas da Semana</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold" style={{ color: "#00d68f" }}>📊 Métricas da Semana</h2>
+              <span className="text-xs px-2 py-1 rounded-full" style={{ background: "#f0fdf4", color: "#15803d", border: "1px solid #86efac" }}>
+                opcional — preencha o que se aplica ao seu nicho
+              </span>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-2">💰 Vendas Reais (R$)</label>
+                <label className="block text-sm font-medium text-gray-600 mb-2">💰 Resultado Principal (R$)</label>
                 <input
-                  type="number" step="0.01" required
+                  type="number" step="0.01"
                   value={formData.vendas_reais}
                   onChange={(e) => setFormData({ ...formData, vendas_reais: e.target.value })}
                   className="w-full px-4 py-3 bg-ck-input border border-ck-border rounded-lg focus:outline-none focus:border-ck-green text-gray-800"
-                  placeholder="0.00"
+                  placeholder="Ex: vendas, receita, contratos fechados..."
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-2">📊 Leads Gerados</label>
+                <label className="block text-sm font-medium text-gray-600 mb-2">📊 Leads / Clientes Novos</label>
                 <input
-                  type="number" required
+                  type="number"
                   value={formData.leads_gerados}
                   onChange={(e) => setFormData({ ...formData, leads_gerados: e.target.value })}
                   className="w-full px-4 py-3 bg-ck-input border border-ck-border rounded-lg focus:outline-none focus:border-ck-green text-gray-800"
@@ -121,26 +126,29 @@ export default function FormPage({ params }: { params: { mentoradoId: string } }
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-2">💵 Investimento em Tráfego (R$)</label>
+                <label className="block text-sm font-medium text-gray-600 mb-2">💵 Investimento (R$)</label>
                 <input
-                  type="number" step="0.01" required
+                  type="number" step="0.01"
                   value={formData.investimento_trafego}
                   onChange={(e) => setFormData({ ...formData, investimento_trafego: e.target.value })}
                   className="w-full px-4 py-3 bg-ck-input border border-ck-border rounded-lg focus:outline-none focus:border-ck-green text-gray-800"
-                  placeholder="0.00"
+                  placeholder="Ex: tráfego, ferramentas, anúncios..."
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-600 mb-2">🎬 Vídeos Postados</label>
+                <label className="block text-sm font-medium text-gray-600 mb-2">🎬 Conteúdo Produzido</label>
                 <input
                   type="number"
                   value={formData.videos_postados}
                   onChange={(e) => setFormData({ ...formData, videos_postados: e.target.value })}
                   className="w-full px-4 py-3 bg-ck-input border border-ck-border rounded-lg focus:outline-none focus:border-ck-green text-gray-800"
-                  placeholder="0"
+                  placeholder="Ex: vídeos, posts, emails..."
                 />
               </div>
             </div>
+            <p className="text-xs mt-3" style={{ color: "#9ca3af" }}>
+              💡 Seu mentor pode adicionar perguntas específicas para o seu nicho nas seções abaixo.
+            </p>
           </div>
 
           <div>

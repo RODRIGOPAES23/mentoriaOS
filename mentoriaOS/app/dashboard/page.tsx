@@ -149,43 +149,16 @@ export default function DashboardPage() {
 
   // ── SCORE DE URGÊNCIA ─────────────────────────────────────────────────────────
   // Fórmula: vencidas*10 + pagaLogo*8 + (progresso<40)*5 + ultimoMes*6
+  // Uma única chamada ao servidor substitui N×2 requests paralelas
   const calcularScores = useCallback(async () => {
     if (!mentorId || mentorados.length === 0) { setScoreMap({}); setTarefasVencidas(0); return }
-    const hoje = new Date(); hoje.setHours(0, 0, 0, 0)
-    const venceuAntes = (d?: string | null) => {
-      if (!d) return false
-      const [y, mo, dd] = d.split("T")[0].split("-").map(Number)
-      return new Date(y, mo - 1, dd) < hoje
-    }
-    const diasAte = (d?: string | null) => {
-      if (!d) return null
-      const [y, mo, dd] = d.split("T")[0].split("-").map(Number)
-      return Math.ceil((new Date(y, mo - 1, dd).getTime() - hoje.getTime()) / 86400000)
-    }
-
-    const resultados = await Promise.all(mentorados.map(async m => {
-      const [tRes, pRes] = await Promise.all([
-        fetch(`/api/dashboard/tarefas?mentoradoId=${m.id}&status=all&t=${Date.now()}`).then(r => r.json()).catch(() => ({ tarefas: [] })),
-        fetch(`/api/dashboard/pagamentos?mentoradoId=${m.id}&t=${Date.now()}`).then(r => r.json()).catch(() => ({ pagamentos: [] })),
-      ])
-      const tarefas: any[] = tRes.tarefas || []
-      const pendentes = tarefas.filter(t => t.status === "pending")
-      const vencidas = pendentes.filter(t => venceuAntes(t.data_vencimento)).length
-      const total = tarefas.length
-      const concluidas = total - pendentes.length
-      const progresso = total > 0 ? (concluidas / total) * 100 : 100
-      const pagaLogo = (pRes.pagamentos || []).some((p: any) =>
-        p.status !== "pago" && (diasAte(p.data_vencimento) ?? 99) <= 3) ? 1 : 0
-      const ultimoMes = (() => { const d = diasAte(m.data_fim); return d !== null && d <= 30 && d > 0 ? 1 : 0 })()
-      const score = vencidas * 10 + pagaLogo * 8 + (progresso < 40 ? 1 : 0) * 5 + ultimoMes * 6
-      return { id: m.id, score, vencidas }
-    }))
-
-    const map: Record<string, number> = {}
-    let totalVencidas = 0
-    for (const r of resultados) { map[r.id] = r.score; totalVencidas += r.vencidas }
-    setScoreMap(map)
-    setTarefasVencidas(totalVencidas)
+    try {
+      const res = await fetch(`/api/dashboard/scores?mentor_id=${mentorId}&t=${Date.now()}`)
+      if (!res.ok) return
+      const json = await res.json()
+      setScoreMap(json.scores || {})
+      setTarefasVencidas(json.tarefasVencidas || 0)
+    } catch { /* silencioso — scores são auxiliares */ }
   }, [mentorId, mentorados])
 
   useEffect(() => { calcularScores() }, [calcularScores])
@@ -247,7 +220,8 @@ export default function DashboardPage() {
         setCheckin(json.checkin)
         setHistorico(json.historico || [])
         const sel = mentorados.find(m => m.id === selectedId)
-        if (sel) setBriefing(json.checkin.briefing_ia ?? gerarBriefing(sel, json.checkin))
+        // Usa apenas briefing real da IA — null mostra CTA "Gerar Briefing"
+        if (sel) setBriefing(json.checkin.briefing_ia ?? null)
       } else { setCheckin(null); setBriefing(null) }
     } finally { setAtualizando(false) }
   }, [selectedId, mentorados])
@@ -390,7 +364,47 @@ export default function DashboardPage() {
         />
 
         <main className="flex-1 overflow-y-auto">
-          {ckView === "visao-geral" && mentorId && (
+          {ckView === "visao-geral" && mentorId && mentorados.length === 0 && (
+            <div className="flex items-center justify-center min-h-[80vh] p-6">
+              <div className="max-w-md w-full text-center">
+                <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6"
+                  style={{ background: `${accent}18`, border: `1px solid ${accent}33` }}>
+                  <span className="text-3xl">✦</span>
+                </div>
+                <h2 className="text-2xl font-bold mb-2" style={{ color: C.ink }}>
+                  Bem-vindo ao CKlareza!
+                </h2>
+                <p className="text-sm mb-8" style={{ color: C.muted }}>
+                  Você está a 3 passos de operar com clareza total.
+                </p>
+                <div className="space-y-3 text-left mb-8">
+                  {[
+                    { n: "1", t: "Adicione seu primeiro aluno", sub: "Clique em 'Novo Mentorado' na barra lateral ou no botão abaixo.", done: false },
+                    { n: "2", t: "Envie o link de check-in", sub: "Cada aluno recebe um link único. Ele preenche semanalmente — você recebe os dados prontos.", done: false },
+                    { n: "3", t: "Gere o primeiro briefing com IA", sub: "Com o check-in preenchido, a IA entrega a pauta completa da call em 30 segundos.", done: false },
+                  ].map(s => (
+                    <div key={s.n} className="flex items-start gap-4 p-4 rounded-xl"
+                      style={{ background: C.card, border: `1px solid ${C.border}` }}>
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-bold text-sm"
+                        style={{ background: `${accent}22`, color: accent }}>{s.n}</div>
+                      <div>
+                        <p className="font-semibold text-sm" style={{ color: C.ink }}>{s.t}</p>
+                        <p className="text-xs mt-0.5" style={{ color: C.muted }}>{s.sub}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setShowCadastro(true)}
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm"
+                  style={{ background: accent, color: "#04121a", boxShadow: `0 8px 24px ${accent}40` }}>
+                  + Adicionar primeiro aluno
+                </button>
+              </div>
+            </div>
+          )}
+
+          {ckView === "visao-geral" && mentorId && mentorados.length > 0 && (
             <div className="p-4">
               <DashboardMentor mentorId={mentorId} accent={accent}
                 onAbrirMentorado={(id) => { setSelectedId(id); setCkView("mentorados") }}
