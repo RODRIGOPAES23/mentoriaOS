@@ -132,6 +132,16 @@ const T: Record<Lang, any> = {
       ["Posso cancelar quando quiser?", "Sim. Sem multa, sem burocracia. Cancele com 1 clique."],
       ["Preciso instalar algo?", "Não. É 100% web, sem instalação. Acesse pelo navegador e teste sem cartão."],
     ],
+    calcLabel: "CALCULADORA DE DESCONTO",
+    calcTitle: "Calcule seu desconto real",
+    calcSub: "Mova o slider e veja quanto você paga por mês",
+    calcSliderLabel: "Número de mentorados",
+    calcPerUnit: "por mentorado/mês",
+    calcTotal: "Total mensal",
+    calcSavings: "Você economiza vs. contratar gestor",
+    calcDiscount: "de desconto",
+    calcCta: "Começar com este plano",
+    calcNote: "50% de desconto para novos clientes no primeiro mês",
   },
   en: {
     nav: ["Features", "White-label", "Purpose", "Plans"], entrar: "Sign in",
@@ -196,6 +206,16 @@ const T: Record<Lang, any> = {
       ["Can I cancel anytime?", "Yes. No penalty, no hassle. Cancel with 1 click."],
       ["Do I need to install anything?", "No. 100% web. Access from the browser and try without a card."],
     ],
+    calcLabel: "DISCOUNT CALCULATOR",
+    calcTitle: "Calculate your real discount",
+    calcSub: "Move the slider and see how much you pay per month",
+    calcSliderLabel: "Number of mentees",
+    calcPerUnit: "per mentee/month",
+    calcTotal: "Monthly total",
+    calcSavings: "You save vs. hiring a manager",
+    calcDiscount: "discount",
+    calcCta: "Start with this plan",
+    calcNote: "50% off for new customers in the first month",
   },
   es: {
     nav: ["Recursos", "White-label", "Propósito", "Planes"], entrar: "Entrar",
@@ -260,8 +280,39 @@ const T: Record<Lang, any> = {
       ["¿Puedo cancelar cuando quiera?", "Sí. Sin multa, sin burocracia. Cancela con 1 clic."],
       ["¿Necesito instalar algo?", "No. 100% web. Accede desde el navegador y pruébalo sin tarjeta."],
     ],
+    calcLabel: "CALCULADORA DE DESCUENTO",
+    calcTitle: "Calcula tu descuento real",
+    calcSub: "Mueve el slider y ve cuánto pagas por mes",
+    calcSliderLabel: "Número de mentoreados",
+    calcPerUnit: "por mentoreado/mes",
+    calcTotal: "Total mensual",
+    calcSavings: "Ahorras vs. contratar gestor",
+    calcDiscount: "de descuento",
+    calcCta: "Empezar con este plan",
+    calcNote: "50% de descuento para nuevos clientes el primer mes",
   },
 }
+
+// ─── Lógica de preço por mentorado ────────────────────────────────────────────
+// Pontos âncora: 10→R$98,50  |  30→R$78,80  |  100→R$59,10
+// Base (sem CKlareza, gestor manual): R$197/mentorado
+function calcPrecoUnit(n: number): number {
+  if (n <= 20) return 98.50
+  if (n <= 30) {
+    // interpolação linear 20→98,50  30→78,80
+    const t = (n - 20) / 10
+    return 98.50 + t * (78.80 - 98.50)
+  }
+  // interpolação linear 30→78,80  100→59,10
+  const t = Math.min((n - 30) / 70, 1)
+  return 78.80 + t * (59.10 - 78.80)
+}
+function calcTotal(n: number): number { return Math.round(calcPrecoUnit(n) * n) }
+function calcDesconto(n: number): number {
+  const semCK = 197 * n
+  return Math.round((1 - calcTotal(n) / semCK) * 100)
+}
+function calcEconomia(n: number): number { return Math.round(197 * n - calcTotal(n) ) }
 
 function Logo({ size = "md", c }: { size?: "md" | "sm"; c: any }) {
   return (
@@ -282,6 +333,7 @@ export default function LandingPage() {
   const [openLang, setOpenLang] = useState(false)
   const [theme, setTheme] = useState<Theme>("dark")
   const [openFaq, setOpenFaq] = useState<number | null>(null)
+  const [calcN, setCalcN] = useState(10)
 
   useEffect(() => {
     const saved = localStorage.getItem("ck_lang") as Lang | null
@@ -460,52 +512,195 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* PRICING */}
-      <section id="precos" className="max-w-6xl mx-auto px-5 py-16">
-        <div className="text-center mb-12">
+      {/* CALCULADORA DE DESCONTO */}
+      <section id="calculadora" className="max-w-3xl mx-auto px-5 py-16">
+        <div className="text-center mb-8">
+          <span className="inline-block px-3 py-1 rounded-full text-xs font-bold mb-3" style={{ background: `${c.gold}18`, color: c.goldDeep }}>
+            {t.calcLabel}
+          </span>
+          <h2 className="text-3xl md:text-4xl font-extrabold mb-2" style={{ color: c.ink }}>{t.calcTitle}</h2>
+          <p style={{ color: c.muted }}>{t.calcSub}</p>
+        </div>
+
+        <div className="rounded-2xl p-8 md:p-10" style={{ background: c.card, border: `2px solid ${c.gold}40` }}>
+          {/* Slider */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-3">
+              <label className="text-sm font-semibold" style={{ color: c.muted }}>{t.calcSliderLabel}</label>
+              <span className="text-2xl font-extrabold" style={{ color: c.gold }}>{calcN}</span>
+            </div>
+            <div className="relative">
+              <input
+                type="range" min={1} max={100} step={1} value={calcN}
+                onChange={e => setCalcN(Number(e.target.value))}
+                className="w-full h-2 rounded-full appearance-none cursor-pointer"
+                style={{
+                  background: `linear-gradient(to right, ${c.gold} ${calcN}%, ${c.card2} ${calcN}%)`,
+                  accentColor: c.gold,
+                }}
+              />
+              <div className="flex justify-between text-xs mt-2" style={{ color: c.muted }}>
+                <span>1</span><span>25</span><span>50</span><span>75</span><span>100</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Resultados */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            {/* Preço por unidade */}
+            <div className="text-center p-4 rounded-xl" style={{ background: c.card2, border: `1px solid ${c.border}` }}>
+              <p className="text-2xl font-extrabold" style={{ color: c.gold }}>
+                R${calcPrecoUnit(calcN).toFixed(2).replace(".", ",")}
+              </p>
+              <p className="text-xs mt-1" style={{ color: c.muted }}>{t.calcPerUnit}</p>
+            </div>
+            {/* Total mensal */}
+            <div className="text-center p-4 rounded-xl" style={{ background: c.card2, border: `1px solid ${c.border}` }}>
+              <p className="text-2xl font-extrabold" style={{ color: c.ink }}>
+                R${calcTotal(calcN).toLocaleString("pt-BR")}
+              </p>
+              <p className="text-xs mt-1" style={{ color: c.muted }}>{t.calcTotal}</p>
+            </div>
+            {/* Desconto */}
+            <div className="text-center p-4 rounded-xl" style={{ background: `${c.teal}15`, border: `1px solid ${c.teal}40` }}>
+              <p className="text-2xl font-extrabold" style={{ color: c.teal }}>
+                {calcDesconto(calcN)}%
+              </p>
+              <p className="text-xs mt-1" style={{ color: c.muted }}>{t.calcDiscount}</p>
+            </div>
+            {/* Economia */}
+            <div className="text-center p-4 rounded-xl" style={{ background: `${c.teal}15`, border: `1px solid ${c.teal}40` }}>
+              <p className="text-2xl font-extrabold" style={{ color: c.teal }}>
+                R${calcEconomia(calcN).toLocaleString("pt-BR")}
+              </p>
+              <p className="text-xs mt-1" style={{ color: c.muted }}>{t.calcSavings}</p>
+            </div>
+          </div>
+
+          {/* Barra visual de desconto */}
+          <div className="mb-6">
+            <div className="flex justify-between text-xs mb-1" style={{ color: c.muted }}>
+              <span>Sem CKlareza — R${(197 * calcN).toLocaleString("pt-BR")}/mês</span>
+              <span style={{ color: c.teal }}>{calcDesconto(calcN)}% off</span>
+            </div>
+            <div className="h-3 rounded-full overflow-hidden" style={{ background: c.card2 }}>
+              <div className="h-full rounded-full transition-all duration-300"
+                style={{ width: `${100 - calcDesconto(calcN)}%`, background: `linear-gradient(to right, ${c.gold}, ${c.teal})` }} />
+            </div>
+            <div className="flex justify-between text-xs mt-1">
+              <span style={{ color: c.gold }}>Com CKlareza — R${calcTotal(calcN).toLocaleString("pt-BR")}/mês</span>
+              <span style={{ color: c.muted }}>Base: R$197/mentorado</span>
+            </div>
+          </div>
+
+          {/* CTA + nota */}
+          <div className="text-center">
+            <Link href="/login" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all hover:-translate-y-0.5"
+              style={{ background: c.gold, color: c.onAccent, boxShadow: `0 8px 24px ${c.gold}40` }}>
+              {t.calcCta} — {calcN} mentorados <ArrowRight className="w-4 h-4" />
+            </Link>
+            <p className="text-xs mt-3" style={{ color: c.muted }}>✦ {t.calcNote}</p>
+          </div>
+        </div>
+      </section>
+
+      {/* PRICING — tabela resumo */}
+      <section id="precos" className="max-w-4xl mx-auto px-5 pb-16">
+        <div className="text-center mb-10">
           <span className="inline-block px-3 py-1 rounded-full text-xs font-bold mb-3" style={{ background: `${c.gold}18`, color: c.goldDeep }}>
             {t.priceLabel}
           </span>
           <h2 className="text-3xl md:text-4xl font-extrabold mb-2" style={{ color: c.ink }}>{t.priceTitle}</h2>
           <p style={{ color: c.muted }}>{t.priceDesc}</p>
         </div>
-        <div className="grid md:grid-cols-3 gap-6">
-          {t.plans.map((plan: any, i: number) => (
-            <div key={i} className="relative p-7 rounded-2xl flex flex-col" style={{
-              background: plan.highlight ? `${c.gold}10` : c.card,
-              border: `2px solid ${plan.highlight ? c.gold : c.border}`,
-              boxShadow: plan.highlight ? `0 20px 60px -15px ${c.gold}30` : "none"
-            }}>
-              {plan.badge && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-xs font-bold" style={{ background: c.gold, color: c.onAccent }}>
-                  {plan.badge}
-                </span>
-              )}
-              <div className="mb-6">
-                <h3 className="font-bold text-xl mb-1" style={{ color: c.ink }}>{plan.name}</h3>
-                <p className="text-sm mb-4" style={{ color: c.muted }}>{plan.desc}</p>
-                <div className="flex items-end gap-1">
-                  <span className="text-4xl font-extrabold" style={{ color: plan.highlight ? c.gold : c.ink }}>{plan.price}</span>
-                  <span className="text-sm mb-1" style={{ color: c.muted }}>{plan.period}</span>
-                </div>
-              </div>
-              <ul className="space-y-3 mb-8 flex-1">
-                {plan.features.map((f: string, j: number) => (
-                  <li key={j} className="flex items-center gap-2 text-sm" style={{ color: c.muted }}>
-                    <Check className="w-4 h-4 shrink-0" style={{ color: c.teal }} /> {f}
-                  </li>
-                ))}
-              </ul>
-              <Link href={plan.name === "Enterprise" ? "/contato" : "/login"} className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold transition-all" style={{
-                background: plan.highlight ? c.gold : c.card2,
-                color: plan.highlight ? c.onAccent : c.ink,
-                border: plan.highlight ? "none" : `1px solid ${c.border}`
-              }}>
-                {plan.cta} <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-          ))}
+
+        {/* Tabela de referência rápida */}
+        <div className="rounded-2xl overflow-hidden mb-8" style={{ border: `1px solid ${c.border}` }}>
+          <table className="w-full text-sm">
+            <thead>
+              <tr style={{ background: c.card2 }}>
+                <th className="text-left px-5 py-3 font-semibold" style={{ color: c.muted }}>Mentorados</th>
+                <th className="text-right px-5 py-3 font-semibold" style={{ color: c.muted }}>R$/mentorado</th>
+                <th className="text-right px-5 py-3 font-semibold" style={{ color: c.muted }}>Total/mês</th>
+                <th className="text-right px-5 py-3 font-semibold" style={{ color: c.teal }}>Desconto</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[5, 10, 20, 30, 50, 100].map((n, i) => (
+                <tr key={n}
+                  onClick={() => setCalcN(n)}
+                  className="cursor-pointer transition-colors"
+                  style={{ background: calcN === n ? `${c.gold}12` : i % 2 === 0 ? c.card : c.card2, borderTop: `1px solid ${c.border}` }}
+                  onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = `${c.gold}10`}
+                  onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = calcN === n ? `${c.gold}12` : i % 2 === 0 ? c.card : c.card2}>
+                  <td className="px-5 py-3.5 font-semibold" style={{ color: calcN === n ? c.gold : c.ink }}>{n} mentorados</td>
+                  <td className="px-5 py-3.5 text-right" style={{ color: c.muted }}>R${calcPrecoUnit(n).toFixed(2).replace(".", ",")}</td>
+                  <td className="px-5 py-3.5 text-right font-bold" style={{ color: calcN === n ? c.gold : c.ink }}>R${calcTotal(n).toLocaleString("pt-BR")}</td>
+                  <td className="px-5 py-3.5 text-right font-bold" style={{ color: c.teal }}>{calcDesconto(n)}% off</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
+
+        <p className="text-center text-xs mb-8" style={{ color: c.muted }}>
+          ↑ Clique em qualquer linha para ver na calculadora acima
+        </p>
+
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Starter */}
+          <div className="p-7 rounded-2xl" style={{ background: c.card, border: `1px solid ${c.border}` }}>
+            <h3 className="font-bold text-xl mb-1" style={{ color: c.ink }}>Starter</h3>
+            <p className="text-sm mb-4" style={{ color: c.muted }}>Até 20 mentorados — perfeito para mentores solo</p>
+            <div className="flex items-end gap-1 mb-1">
+              <span className="text-4xl font-extrabold" style={{ color: c.ink }}>R$98,50</span>
+              <span className="text-sm mb-1" style={{ color: c.muted }}>/mentorado/mês</span>
+            </div>
+            <p className="text-sm mb-5" style={{ color: c.teal }}>50% de desconto → 10 mentorados = R$985/mês</p>
+            <ul className="space-y-2 mb-6">
+              {["Dashboard de operação", "Briefing com IA", "Financeiro básico", "Portal do aluno", "Suporte por email"].map(f => (
+                <li key={f} className="flex items-center gap-2 text-sm" style={{ color: c.muted }}>
+                  <Check className="w-4 h-4 shrink-0" style={{ color: c.teal }} /> {f}
+                </li>
+              ))}
+            </ul>
+            <Link href="/login" className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold" style={{ background: c.card2, color: c.ink, border: `1px solid ${c.border}` }}>
+              Começar Grátis <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+
+          {/* Professional */}
+          <div className="relative p-7 rounded-2xl" style={{ background: `${c.gold}10`, border: `2px solid ${c.gold}`, boxShadow: `0 20px 60px -15px ${c.gold}30` }}>
+            <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-xs font-bold" style={{ background: c.gold, color: c.onAccent }}>
+              MAIS POPULAR
+            </span>
+            <h3 className="font-bold text-xl mb-1" style={{ color: c.ink }}>Professional</h3>
+            <p className="text-sm mb-4" style={{ color: c.muted }}>21+ mentorados — escale sem trabalhar mais</p>
+            <div className="flex items-end gap-1 mb-1">
+              <span className="text-4xl font-extrabold" style={{ color: c.gold }}>60–80%</span>
+              <span className="text-sm mb-1" style={{ color: c.muted }}>de desconto</span>
+            </div>
+            <div className="text-sm mb-5 space-y-1" style={{ color: c.muted }}>
+              <p>30 mentorados = <strong style={{ color: c.ink }}>R$2.364/mês</strong></p>
+              <p>100 mentorados = <strong style={{ color: c.ink }}>R$5.910/mês</strong></p>
+            </div>
+            <ul className="space-y-2 mb-6">
+              {["Tudo do Starter", "Radar de churn antecipado", "Analytics avançado", "White-label básico", "Suporte prioritário (4h)"].map(f => (
+                <li key={f} className="flex items-center gap-2 text-sm" style={{ color: c.muted }}>
+                  <Check className="w-4 h-4 shrink-0" style={{ color: c.teal }} /> {f}
+                </li>
+              ))}
+            </ul>
+            <Link href="/login" className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold" style={{ background: c.gold, color: c.onAccent }}>
+              Começar Grátis <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </div>
+
+        <p className="text-center text-sm mt-6" style={{ color: c.muted }}>
+          Agências e múltiplos mentores?{" "}
+          <Link href="/contato" className="font-semibold" style={{ color: c.goldDeep }}>Fale sobre Enterprise →</Link>
+        </p>
       </section>
 
       {/* WHITE-LABEL */}
