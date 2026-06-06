@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: "Contato — Agende uma demonstração da CKlareza",
   description: "Fale com a CKlareza: agende uma demonstração e veja a plataforma de mentoria white-label funcionando com a sua marca.",
   alternates: { canonical: "/contato" },
+  openGraph: { url: "https://cklareza.com/contato" },
 }
 
 const EMAIL = "contactus@cklareza.com"

@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: "Segurança & Conformidade — CKlareza",
   description: "LGPD, criptografia, isolamento de dados, backup. A CKlareza foi construída para empresas que tratam privacidade e proteção de dados com responsabilidade.",
   alternates: { canonical: "/seguranca" },
+  openGraph: { url: "https://cklareza.com/seguranca" },
 }
 
 const PILARES = [

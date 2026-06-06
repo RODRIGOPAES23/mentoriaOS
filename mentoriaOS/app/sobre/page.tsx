@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: "Sobre — Nosso propósito é transformar vidas",
   description: "A CKlareza existe para dar ao mentor o tempo e a clareza de transformar a vida de quem confia nele. Conheça nosso propósito e nossos valores.",
   alternates: { canonical: "/sobre" },
+  openGraph: { url: "https://cklareza.com/sobre" },
 }
 
 const VALORES = [

@@ -4,6 +4,8 @@ import { SiteHeader, SiteFooter, LifetimeValueCTA } from "@/components/site/Site
 export const metadata = {
   title: "Política de Privacidade — CKlareza",
   description: "Como coletamos, usamos e protegemos seus dados pessoais na plataforma CKlareza, em conformidade com a LGPD.",
+  alternates: { canonical: "/privacidade" },
+  openGraph: { url: "https://cklareza.com/privacidade" },
 }
 
 const UPDATED = "04 de junho de 2026"
