@@ -7,7 +7,7 @@ const C = { bg: "#ffffff", card: "#f8f9fa", border: "#e5e7eb", muted: "#6b7280",
 export const metadata: Metadata = {
   title: "Blog — Gestão e Retenção em Mentoria",
   description: "Estratégias de acompanhamento, retenção e Lifetime Value para mentores e empresas de mentoria. Conteúdo prático da CKlareza.",
-  alternates: { canonical: "/blog" },
+  alternates: { canonical: "/blog", languages: { "pt-BR": "/blog", "en-US": "/blog", "es-ES": "/blog", "x-default": "/blog" } },
 }
 
 const POSTS = [

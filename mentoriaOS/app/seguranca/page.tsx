@@ -7,7 +7,7 @@ import { SC_LIGHT as SC } from "@/lib/colors-light"
 export const metadata: Metadata = {
   title: "Segurança & Conformidade — CKlareza",
   description: "LGPD, criptografia, isolamento de dados, backup. A CKlareza foi construída para empresas que tratam privacidade e proteção de dados com responsabilidade.",
-  alternates: { canonical: "/seguranca" },
+  alternates: { canonical: "/seguranca", languages: { "pt-BR": "/seguranca", "en-US": "/seguranca", "es-ES": "/seguranca", "x-default": "/seguranca" } },
   openGraph: { url: "https://cklareza.com/seguranca" },
 }
 

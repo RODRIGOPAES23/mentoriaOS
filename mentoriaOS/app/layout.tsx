@@ -26,7 +26,15 @@ export const metadata: Metadata = {
   authors: [{ name: "CKlareza" }],
   creator: "CKlareza",
   applicationName: "CKlareza",
-  alternates: { canonical: "/" },
+  alternates: {
+    canonical: "/",
+    languages: {
+      "pt-BR": "/",
+      "en-US": "/",
+      "es-ES": "/",
+      "x-default": "/",
+    },
+  },
   openGraph: {
     type: "website",
     locale: "pt_BR",
@@ -49,6 +57,9 @@ export const metadata: Metadata = {
   },
   verification: { google: "I1MFavBSn25MdEPJkXDWWYi3URoBX1THuwlbSkhBuT0" },
 }
+
+// Alternates por página — injeta hreflang nas sub-páginas
+export const SITE_URL = SITE
 
 export const viewport = {
   width: "device-width",

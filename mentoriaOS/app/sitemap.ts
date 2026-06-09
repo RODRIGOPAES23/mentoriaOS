@@ -18,19 +18,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE}/blog`,          lastModified: now, changeFrequency: "weekly",  priority: 0.8 },
     {
       url: `${SITE}/blog/software-para-mentores-guia-completo`,
-      lastModified: new Date("2026-06-04"), changeFrequency: "monthly", priority: 0.8,
+      lastModified: now, changeFrequency: "monthly", priority: 0.8,
     },
     {
       url: `${SITE}/blog/como-fazer-checkin-semanal-com-mentorados`,
-      lastModified: new Date("2026-06-04"), changeFrequency: "monthly", priority: 0.7,
+      lastModified: now, changeFrequency: "monthly", priority: 0.7,
     },
     {
       url: `${SITE}/blog/como-aumentar-a-retencao-de-mentorados`,
-      lastModified: new Date("2026-06-03"), changeFrequency: "monthly", priority: 0.7,
+      lastModified: now, changeFrequency: "monthly", priority: 0.7,
     },
     {
       url: `${SITE}/blog/mentorship-software-guide`,
-      lastModified: new Date("2026-06-04"), changeFrequency: "monthly", priority: 0.7,
+      lastModified: now, changeFrequency: "monthly", priority: 0.7,
     },
   ]
 }

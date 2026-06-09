@@ -6,7 +6,7 @@ import { SiteHeader, SiteFooter, SC } from "@/components/site/SiteChrome"
 export const metadata: Metadata = {
   title: "Sobre — Nosso propósito é transformar vidas",
   description: "A CKlareza existe para dar ao mentor o tempo e a clareza de transformar a vida de quem confia nele. Conheça nosso propósito e nossos valores.",
-  alternates: { canonical: "/sobre" },
+  alternates: { canonical: "/sobre", languages: { "pt-BR": "/sobre", "en-US": "/sobre", "es-ES": "/sobre", "x-default": "/sobre" } },
   openGraph: { url: "https://cklareza.com/sobre" },
 }
 

@@ -5,7 +5,7 @@ import PricingCalc from "./PricingCalc"
 export const metadata: Metadata = {
   title: "Preços — Planos de Mentoria White-Label",
   description: "Calcule seu desconto real. Preço por mentorado com até 80% de desconto. Planos sob medida para mentores e empresas de mentoria.",
-  alternates: { canonical: "/precos" },
+  alternates: { canonical: "/precos", languages: { "pt-BR": "/precos", "en-US": "/precos", "es-ES": "/precos", "x-default": "/precos" } },
   openGraph: { url: "https://cklareza.com/precos" },
 }
 

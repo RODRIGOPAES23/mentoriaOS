@@ -7,7 +7,7 @@ import { SiteHeader, SiteFooter, LifetimeValueCTA, SC } from "@/components/site/
 export const metadata: Metadata = {
   title: "Recursos — Financeiro, Atividades e IA para Mentoria",
   description: "Dashboard de operação, financeiro inteligente, Kanban de atividades, briefing com IA e portal do aluno. Tudo para operar sua mentoria white-label.",
-  alternates: { canonical: "/recursos" },
+  alternates: { canonical: "/recursos", languages: { "pt-BR": "/recursos", "en-US": "/recursos", "es-ES": "/recursos", "x-default": "/recursos" } },
   openGraph: { url: "https://cklareza.com/recursos" },
 }
 
