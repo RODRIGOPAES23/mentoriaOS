@@ -169,7 +169,15 @@ export default function DoitPage() {
       </div>
 
       {/* Main Content */}
-      {!projectId ? (
+      {loading && !projectId ? (
+        <div className="max-w-2xl mx-auto px-6 py-20 text-center">
+          <div className="inline-block w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-6"></div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Gerando seu plano com IA…</h2>
+          <p className="text-gray-600">
+            A IA está quebrando seu objetivo em fases e passos. Isso costuma levar de 15 a 40 segundos — não feche a página.
+          </p>
+        </div>
+      ) : !projectId ? (
         <div className="max-w-7xl mx-auto px-6 py-12">
           <div className="text-center">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">

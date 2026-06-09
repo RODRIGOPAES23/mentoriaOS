@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { createServerClient, adminClient } from "@/lib/supabase-server"
 
 export const dynamic = "force-dynamic"
+export const maxDuration = 60 // geração LLM + inserts pode levar dezenas de segundos
 
 const OPENROUTER_API_KEY = process.env.ANTHROPIC_API_KEY!
 
@@ -126,26 +127,31 @@ REGRAS:
       )
     }
 
-    // Inserir passos no banco
-    let totalPassos = 0
-    for (const fase of rotas.fases) {
-      for (const passo of fase.passos) {
-        totalPassos++
-        await sbAdmin.from("doit_passos").insert({
-          project_id: project.id,
-          fase_numero: fase.numero,
-          fase_nome: fase.nome,
-          passo_numero: passo.numero,
-          descricao: passo.descricao,
-          responsabilidade_humana: passo.responsabilidade_humana,
-          processamento_automatizado: passo.processamento_automatizado,
-          llm_principal: passo.llm_recomendado,
-          conectores: passo.conectores,
-          skills: passo.skills,
-          tempo_estimado_horas: passo.tempo_estimado_horas || 1,
-          status: "backlog",
-        })
-      }
+    // Montar todos os passos e inserir em LOTE (1 query em vez de N) — muito mais rápido
+    const passosParaInserir = rotas.fases.flatMap((fase: any) =>
+      fase.passos.map((passo: any) => ({
+        project_id: project.id,
+        fase_numero: fase.numero,
+        fase_nome: fase.nome,
+        passo_numero: passo.numero,
+        descricao: passo.descricao,
+        responsabilidade_humana: passo.responsabilidade_humana,
+        processamento_automatizado: passo.processamento_automatizado,
+        llm_principal: passo.llm_recomendado,
+        conectores: passo.conectores,
+        skills: passo.skills,
+        tempo_estimado_horas: passo.tempo_estimado_horas || 1,
+        status: "backlog",
+      }))
+    )
+    const totalPassos = passosParaInserir.length
+
+    const { error: passosError } = await sbAdmin.from("doit_passos").insert(passosParaInserir)
+    if (passosError) {
+      return NextResponse.json(
+        { error: `Erro ao inserir passos: ${passosError.message}` },
+        { status: 500 }
+      )
     }
 
     // Atualizar contadores no projeto
