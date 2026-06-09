@@ -1,6 +1,6 @@
 "use client"
 
-import { LayoutDashboard, Users, Calendar, Sparkles, LogOut, ChevronLeft, ChevronRight, DollarSign, KanbanSquare } from "lucide-react"
+import { LayoutDashboard, Users, Calendar, Sparkles, LogOut, ChevronLeft, ChevronRight, DollarSign, KanbanSquare, Zap } from "lucide-react"
 import { C } from "@/utils/theme"
 import PoweredBy from "./PoweredBy"
 
@@ -93,6 +93,24 @@ export default function Sidebar({ active, onChange, onLogout, logoutLabel = "Tro
             </button>
           )
         })}
+
+        {/* DOIT — página separada (link real, não é uma view interna) */}
+        <a
+          href="/doit"
+          title={collapsed ? "DOIT" : undefined}
+          className={`group relative w-full flex items-center transition-all duration-200 rounded-xl ${collapsed ? "justify-center p-2.5" : "gap-3 px-3.5 py-2.5"}`}
+          style={{ color: C.muted }}
+          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = C.card2; (e.currentTarget as HTMLElement).style.color = "#fff" }}
+          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; (e.currentTarget as HTMLElement).style.color = C.muted }}
+        >
+          <Zap className="w-[18px] h-[18px] shrink-0" />
+          {!collapsed && (
+            <span className="text-sm font-semibold flex items-center gap-1.5">
+              DOIT
+              <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: `${accent}22`, color: accent }}>IA</span>
+            </span>
+          )}
+        </a>
       </nav>
 
       {/* Rodapé */}
