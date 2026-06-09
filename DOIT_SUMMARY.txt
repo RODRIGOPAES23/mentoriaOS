@@ -1,0 +1,171 @@
+════════════════════════════════════════════════════════════════════════════════
+                        ✅ DOIT — MVP PRONTO
+════════════════════════════════════════════════════════════════════════════════
+
+STATUS: 🟢 Implementação 100% Completa | Falta apenas setup (5 min)
+
+CRIADO EM: 2026-06-08 (Claude Code)
+OBSERVER: GRATIDÃO (rastreando 0→1)
+LINGUAGEM: Português (PT-BR)
+
+════════════════════════════════════════════════════════════════════════════════
+
+📋 ARQUIVOS CRIADOS (8 arquivos)
+
+┌─ SCHEMA SQL
+│  └─ mentoriaOS/migrations/doit_schema.sql
+│     ├─ doit_projects (id, user_id, objetivo, status, stats)
+│     ├─ doit_passos (fase, passo, responsabilidade, processamento, LLM, status)
+│     └─ doit_gratidao_eventos (rastreamento 0→1)
+│
+├─ API ENDPOINTS (3 endpoints, 4 rotas)
+│  ├─ POST /api/doit/generate/route.ts
+│  │  └─ OpenRouter Claude 3.5 Sonnet → quebra objetivo em fases/passos
+│  ├─ GET|PATCH /api/doit/[projectId]/route.ts
+│  │  └─ Retorna projeto + passos | Atualiza status
+│  └─ PATCH /api/doit/[projectId]/steps/[stepId]/route.ts
+│     └─ Marca passo finalizado + registra evento GRATIDÃO
+│
+├─ FRONTEND
+│  └─ mentoriaOS/app/doit/page.tsx
+│     ├─ Form: input objetivo + sugestões
+│     ├─ Kanban: Backlog → Processando → Finalizado
+│     ├─ Modal: detalhes passo (humano/máquina/LLM/conectores)
+│     └─ Progress bar em tempo real
+│
+├─ DOCUMENTAÇÃO (3 arquivos)
+│  ├─ mentoriaOS/app/doit/README.md (uso + exemplos)
+│  ├─ DOIT_GRATIDAO_INTEGRATION.md (como GRATIDÃO rastreia)
+│  └─ DOIT_SETUP_INSTRUCTIONS.md (guia step-by-step)
+│
+└─ MEMÓRIA
+   └─ memory/DOIT_NOVO_PROJETO_2026_06_08.md (persistido)
+
+════════════════════════════════════════════════════════════════════════════════
+
+🎯 O QUE É?
+
+DOIT quebra objetivos complexos em roadmaps operativos:
+
+    Objetivo: "Vender meu produto para 100 pessoas"
+
+    ↓ OpenRouter (Claude) quebra em:
+
+    FASE 1: Setup (3 passos)
+    ├─ Passo 1: [HUMANO] Validar 10 ICPs
+    │           [MÁQUINA] Extrair via Phantombuster
+    ├─ Passo 2: [HUMANO] Revisar email
+    │           [MÁQUINA] Enriquecer com Hunter.io
+    └─ Passo 3: [HUMANO] Aprovar sequência
+                [MÁQUINA] Agendar via Instantly.ai
+
+    ↓ Kanban interativo
+
+    User marca passos como "Finalizado (Humano)" ou "Finalizado (Máquina)"
+
+    ↓ GRATIDÃO registra tudo
+
+    Evento: passo_humano ✓
+    Evento: passo_maquina ✓
+    Quando completo → Evento: validacao_completa (projeto vira "1")
+
+════════════════════════════════════════════════════════════════════════════════
+
+⚙️ STACK TÉCNICO
+
+Frontend:    Next.js 15 + React 19 + Tailwind CSS
+Backend:     Next.js API Routes
+Database:    Supabase PostgreSQL (3 tabelas novas)
+Auth:        Supabase Auth (reutiliza CKlareza)
+LLM:         OpenRouter + Claude 3.5 Sonnet
+Observer:    GRATIDÃO (tabela doit_gratidao_eventos)
+Deployment:  Vercel
+
+════════════════════════════════════════════════════════════════════════════════
+
+📊 INTEGRAÇÃO GRATIDÃO
+
+Cada projeto DOIT = Lei da Fábrica (0 → 1 Validação):
+
+    CRIAÇÃO
+    ├─ evento_tipo: "criacao"
+    └─ status: "ideacao" (0)
+
+    CADA PASSO
+    ├─ evento_tipo: "passo_humano" | "passo_maquina"
+    └─ metadata: { descricao, quem_resolveu }
+
+    CONCLUSÃO
+    ├─ evento_tipo: "validacao_completa"
+    └─ status: "validado" (1)
+    ├─ metadata: { passos_totais, humano, maquina }
+
+TABELA: doit_gratidao_eventos
+└─ Permite queries:
+   ├─ Taxa conversão (0→1)
+   ├─ Ratio humano/máquina
+   ├─ LLM mais eficaz
+   └─ Tempo médio projeto
+
+════════════════════════════════════════════════════════════════════════════════
+
+🚀 PRÓXIMOS PASSOS (DO SEU LADO)
+
+1. Executar migrations no Supabase (5 min)
+   └─ Copiar: mentoriaOS/migrations/doit_schema.sql
+   └─ Colar em: https://pywjcpsklvgpadxgotpn.supabase.co → SQL Editor
+
+2. Testar localmente (10 min)
+   └─ cd mentoriaOS && npm run dev
+   └─ Acessar http://localhost:3000/doit
+   └─ Criar projeto: "Quero correr uma maratona de 42km"
+
+3. Verificar GRATIDÃO (2 min)
+   └─ Query: select * from doit_gratidao_eventos order by criado_em desc;
+
+4. Deploy Vercel (1 min)
+   └─ git push origin main
+   └─ Auto-deploy em https://mentioriaos.vercel.app/doit
+
+════════════════════════════════════════════════════════════════════════════════
+
+✨ EXEMPLOS DE OBJETIVOS (Use para testar)
+
+✅ "Quero correr uma maratona de 42km"
+   └─ Fases: Setup, Adaptação, Progressão, Recuperação, Corrida
+
+✅ "Quero vender meu curso online do zero"
+   └─ Fases: Lead Scraping, Enriquecimento, Outbound, Onboarding, Retention
+
+✅ "Quero organizar uma viagem para o Japão"
+   └─ Fases: Planejamento, Booking, Roteiro, Packing, Documentação
+
+✅ "Quero preparar SEATZERO para lançamento em 30 dias"
+   └─ Fases: [automaticamente via IA, similar ao seu checklist]
+
+════════════════════════════════════════════════════════════════════════════════
+
+📚 REFERÊNCIAS
+
+Setup:        DOIT_SETUP_INSTRUCTIONS.md
+Uso:          mentoriaOS/app/doit/README.md
+GRATIDÃO:     DOIT_GRATIDAO_INTEGRATION.md
+Memória:      memory/DOIT_NOVO_PROJETO_2026_06_08.md
+Seu check:    _PRODUTOS/seatzero/seatzero_checklist.txt (referência)
+
+════════════════════════════════════════════════════════════════════════════════
+
+🎉 RESUMO
+
+✅ Schema SQL                       → Pronto
+✅ API Endpoints (POST/GET/PATCH)   → Pronto
+✅ Frontend Kanban + Modal          → Pronto
+✅ OpenRouter Integration           → Pronto
+✅ GRATIDÃO Rastreamento (0→1)      → Pronto
+✅ Supabase Auth Integration        → Pronto
+✅ Documentação completa            → Pronto
+⏳ Setup (migrations)               → Falta (5 min)
+
+════════════════════════════════════════════════════════════════════════════════
+
+Rodrigo Rafael | NEXUS Ecosystem | 2026-06-08 | 🚀 MVP Pronto
