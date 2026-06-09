@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
+type ViewType = 'list' | 'kanban' | 'dashboard'
+
 export default function DoitPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(true)
@@ -13,15 +15,16 @@ export default function DoitPage() {
   const [projectId, setProjectId] = useState<string | null>(null)
   const [project, setProject] = useState<any>(null)
   const [fases, setFases] = useState<any[]>([])
+  const [expandedPhases, setExpandedPhases] = useState<Set<number>>(new Set([1]))
+  const [completedTasks, setCompletedTasks] = useState<Set<string>>(new Set())
+  const [currentView, setCurrentView] = useState<ViewType>('list')
   const [selectedPasso, setSelectedPasso] = useState<any>(null)
   const [showModal, setShowModal] = useState(false)
 
   useEffect(() => {
-    // Verificar autenticação fazendo um request à API
     fetch('/api/doit/generate', { method: 'POST' })
       .then(res => {
         if (res.status === 401) {
-          // Redirecionar para login (ajuste o path conforme seu auth)
           router.push('/auth/login')
         } else {
           setIsAuthed(true)
@@ -30,6 +33,26 @@ export default function DoitPage() {
       .catch(() => setIsAuthed(true))
       .finally(() => setIsLoading(false))
   }, [router])
+
+  const togglePhase = (faseNum: number) => {
+    const newExpanded = new Set(expandedPhases)
+    if (newExpanded.has(faseNum)) {
+      newExpanded.delete(faseNum)
+    } else {
+      newExpanded.add(faseNum)
+    }
+    setExpandedPhases(newExpanded)
+  }
+
+  const toggleTask = (taskId: string) => {
+    const newCompleted = new Set(completedTasks)
+    if (newCompleted.has(taskId)) {
+      newCompleted.delete(taskId)
+    } else {
+      newCompleted.add(taskId)
+    }
+    setCompletedTasks(newCompleted)
+  }
 
   const handleGenerateRoadmap = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -52,6 +75,8 @@ export default function DoitPage() {
       const data = await res.json()
       setProjectId(data.projectId)
       await loadProject(data.projectId)
+      setCompletedTasks(new Set())
+      setExpandedPhases(new Set([1]))
     } catch (error) {
       alert(`Erro: ${error}`)
     } finally {
@@ -85,8 +110,6 @@ export default function DoitPage() {
         return
       }
 
-      const data = await res.json()
-      // Recarregar projeto
       await loadProject(projectId!)
     } catch (error) {
       console.error('Erro:', error)
@@ -101,274 +124,300 @@ export default function DoitPage() {
     return <div className="p-8 text-center text-white">Redirecionando...</div>
   }
 
-  if (!projectId) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white p-6">
-        <nav className="sticky top-0 z-50 backdrop-blur-md border-b border-white/5 px-8 py-4 flex justify-between items-center mb-16">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center">
-              <span className="font-black text-xl">DI</span>
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-600 to-teal-500 text-white">
+        <div className="max-w-7xl mx-auto px-6 py-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+              <span className="text-lg font-bold">⚡</span>
             </div>
-            <h1 className="text-xl font-extrabold">
-              DO<span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">IT</span>
-            </h1>
-          </div>
-        </nav>
-
-        <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-5xl font-black mb-6 tracking-tight">
-              Transforme ideias em <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">Execução.</span>
-            </h2>
-            <p className="text-slate-400 text-lg mb-10">
-              O DOIT quebra qualquer objetivo complexo em um roadmap operativo, separando o que você faz do que a máquina automatiza.
-            </p>
+            <h1 className="text-2xl font-bold">DOIT</h1>
+            <span className="text-sm text-white/70 ml-2">Your AI Execution Plan</span>
           </div>
 
-          <form onSubmit={handleGenerateRoadmap} className="mb-8">
-            <div className="relative group mb-8">
-              <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition"></div>
-              <div className="relative flex items-center bg-slate-900 border border-white/10 p-2 rounded-2xl">
-                <div className="pl-4 text-indigo-400">
-                  <i className="fa-solid fa-wand-magic-sparkles text-xl"></i>
-                </div>
-                <input
-                  type="text"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Ex: Como faço para vender meu produto para 100 pessoas?"
-                  className="w-full bg-transparent border-none focus:ring-0 px-4 py-4 text-white text-lg placeholder-slate-600 font-medium"
-                />
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white px-8 py-4 rounded-xl font-bold text-sm tracking-widest flex items-center gap-2 transition-all"
-                >
-                  {loading ? 'Gerando...' : 'EXECUTAR'} <i className="fa-solid fa-bolt-lightning"></i>
-                </button>
-              </div>
-            </div>
+          {/* Search Bar */}
+          <form onSubmit={handleGenerateRoadmap} className="flex gap-2">
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="How do I... [I want to run a 42 km marathon] [Generate Plan]"
+              className="flex-1 px-4 py-3 rounded-lg text-gray-900 text-sm"
+            />
+            <button
+              type="submit"
+              disabled={loading}
+              className="bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2"
+            >
+              {loading ? 'Generating...' : 'Generate'}
+            </button>
           </form>
-
-          <div className="flex flex-wrap justify-center gap-3">
-            <span className="text-xs text-slate-500 font-mono uppercase mt-2">Sugestões:</span>
-            <button
-              onClick={() => setQuery('Quero correr uma maratona de 42km')}
-              className="text-xs px-4 py-2 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 hover:border-white/20 transition-all text-slate-400"
-            >
-              🏃‍♂️ Maratona 42k
-            </button>
-            <button
-              onClick={() => setQuery('Quero vender meu curso online do zero')}
-              className="text-xs px-4 py-2 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 hover:border-white/20 transition-all text-slate-400"
-            >
-              💰 Venda de Infoproduto
-            </button>
-            <button
-              onClick={() => setQuery('Quero organizar uma viagem para o Japão')}
-              className="text-xs px-4 py-2 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 hover:border-white/20 transition-all text-slate-400"
-            >
-              ✈️ Viagem Japão
-            </button>
-          </div>
         </div>
       </div>
-    )
-  }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white p-6">
-      <nav className="sticky top-0 z-50 backdrop-blur-md border-b border-white/5 px-8 py-4 flex justify-between items-center mb-8">
-        <div className="flex items-center gap-4">
-          <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center">
-            <span className="font-black text-xl">DI</span>
+      {/* Main Content */}
+      {!projectId ? (
+        <div className="max-w-7xl mx-auto px-6 py-12">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Transform Your Objectives Into Action Plans
+            </h2>
+            <p className="text-gray-600 mb-8">
+              DOIT breaks down any complex goal into clear, executable steps showing what you do (human) and what AI does.
+            </p>
+
+            <div className="grid grid-cols-3 gap-4 max-w-2xl mx-auto">
+              <button
+                onClick={() => setQuery('I want to run a 42 km marathon')}
+                className="p-4 bg-white border border-gray-200 rounded-lg hover:border-blue-400 transition text-left"
+              >
+                <div className="text-2xl mb-2">🏃</div>
+                <div className="font-semibold text-sm text-gray-900">42k Marathon</div>
+              </button>
+              <button
+                onClick={() => setQuery('I want to sell my online course to 100 people')}
+                className="p-4 bg-white border border-gray-200 rounded-lg hover:border-blue-400 transition text-left"
+              >
+                <div className="text-2xl mb-2">💰</div>
+                <div className="font-semibold text-sm text-gray-900">Course Launch</div>
+              </button>
+              <button
+                onClick={() => setQuery('I want to plan a trip to Japan')}
+                className="p-4 bg-white border border-gray-200 rounded-lg hover:border-blue-400 transition text-left"
+              >
+                <div className="text-2xl mb-2">✈️</div>
+                <div className="font-semibold text-sm text-gray-900">Travel Planning</div>
+              </button>
+            </div>
           </div>
-          <h1 className="text-xl font-extrabold">
-            DO<span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">IT</span>
-          </h1>
         </div>
-        <button
-          onClick={() => {
-            setProjectId(null)
-            setProject(null)
-            setFases([])
-            setQuery('')
-          }}
-          className="bg-rose-500/10 border border-rose-500/20 p-2.5 rounded-xl text-rose-400 hover:bg-rose-500 hover:text-white transition-all"
-        >
-          <i className="fa-solid fa-trash-can"></i>
-        </button>
-      </nav>
-
-      {project && (
-        <div className="max-w-7xl mx-auto">
+      ) : (
+        <div className="max-w-6xl mx-auto px-6 py-8">
+          {/* Project Header */}
           <div className="mb-8">
-            <h2 className="text-3xl font-extrabold mb-4">{project.objetivo}</h2>
-            <div className="flex gap-6 text-sm">
+            <div className="flex justify-between items-start mb-4">
               <div>
-                <span className="text-slate-400">Status:</span>
-                <span className="ml-2 font-bold text-indigo-400 capitalize">{project.status}</span>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  Project: {query}
+                </h2>
+                <p className="text-sm text-gray-600 mt-1">
+                  {project?.stats?.percentualCompleto || 0}% Complete ({project?.stats?.passosCompletos || 0} Steps)
+                </p>
               </div>
-              <div>
-                <span className="text-slate-400">Progresso:</span>
-                <span className="ml-2 font-bold text-emerald-400">{project.stats.percentualCompleto}%</span>
-              </div>
-              <div>
-                <span className="text-slate-400">Passos:</span>
-                <span className="ml-2 font-bold">{project.stats.passosCompletos}/{project.stats.totalPassos}</span>
-              </div>
-              <div>
-                <span className="text-slate-400">Humano/Máquina:</span>
-                <span className="ml-2 font-bold">{project.stats.passosHumano}/{project.stats.passosMaquina}</span>
-              </div>
+              <button
+                onClick={() => {
+                  setProjectId(null)
+                  setProject(null)
+                  setFases([])
+                  setQuery('')
+                }}
+                className="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition"
+              >
+                Reset
+              </button>
             </div>
 
             {/* Progress Bar */}
-            <div className="mt-6 bg-slate-800 rounded-full h-3 overflow-hidden">
+            <div className="w-full bg-gray-200 rounded-full h-2">
               <div
-                className="bg-gradient-to-r from-indigo-500 to-purple-500 h-full transition-all duration-500"
-                style={{ width: `${project.stats.percentualCompleto}%` }}
+                className="bg-gradient-to-r from-green-400 to-teal-500 h-2 rounded-full transition-all"
+                style={{ width: `${project?.stats?.percentualCompleto || 0}%` }}
               ></div>
             </div>
           </div>
 
-          {/* Kanban Board */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {['backlog', 'processando', 'finalizado'].map((colStatus) => (
-              <div key={colStatus} className="flex flex-col gap-6">
-                <div className="flex justify-between items-center px-2">
-                  <h4 className="text-xs font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
-                    <i className={`fa-solid ${
-                      colStatus === 'backlog' ? 'fa-layer-group' :
-                      colStatus === 'processando' ? 'fa-spinner animate-spin' :
-                      'fa-circle-check'
-                    }`}></i>
-                    {colStatus === 'backlog' ? 'Backlog' : colStatus === 'processando' ? 'Processando' : 'Finalizado'}
-                  </h4>
-                  <span className="bg-slate-800 text-slate-400 text-[10px] font-mono px-2 py-0.5 rounded">
-                    {fases.flatMap(f => f.passos).filter((p: any) => p.status === colStatus).length}
-                  </span>
-                </div>
-                <div className="flex flex-col gap-4 min-h-[600px]">
-                  {fases.flatMap((f) =>
-                    f.passos
-                      .filter((p: any) => p.status === colStatus)
-                      .map((passo: any) => (
-                        <div
-                          key={passo.id}
-                          onClick={() => {
-                            setSelectedPasso(passo)
-                            setShowModal(true)
-                          }}
-                          className="bg-slate-800/50 border border-white/5 p-5 rounded-2xl cursor-pointer hover:border-indigo-400 hover:bg-slate-800 transition-all hover:-translate-y-1"
-                        >
-                          <div className="flex justify-between items-start mb-3">
-                            <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">
-                              {f.nome} - Passo {passo.passo_numero}
-                            </span>
+          {/* View Selector */}
+          <div className="flex gap-2 mb-6 border-b border-gray-200 pb-4">
+            <button
+              onClick={() => setCurrentView('list')}
+              className={`px-4 py-2 rounded-lg font-medium text-sm transition ${
+                currentView === 'list'
+                  ? 'bg-blue-100 text-blue-700'
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              📋 List View (Active)
+            </button>
+            <button
+              onClick={() => setCurrentView('kanban')}
+              className={`px-4 py-2 rounded-lg font-medium text-sm transition ${
+                currentView === 'kanban'
+                  ? 'bg-blue-100 text-blue-700'
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              📊 Kanban View
+            </button>
+            <button
+              onClick={() => setCurrentView('dashboard')}
+              className={`px-4 py-2 rounded-lg font-medium text-sm transition ${
+                currentView === 'dashboard'
+                  ? 'bg-blue-100 text-blue-700'
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              📈 Dashboard
+            </button>
+          </div>
+
+          {/* List View */}
+          {currentView === 'list' && (
+            <div className="space-y-4">
+              {fases.map((fase) => (
+                <div key={fase.numero} className="bg-white rounded-lg border border-gray-200">
+                  {/* Phase Header */}
+                  <button
+                    onClick={() => togglePhase(fase.numero)}
+                    className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className={`text-xl ${expandedPhases.has(fase.numero) ? '▼' : '▶'}`}></span>
+                      <div className="text-left">
+                        <h3 className="font-semibold text-gray-900">
+                          {fase.numero}-{fase.passos.length} Steps (11 Steps)
+                        </h3>
+                      </div>
+                    </div>
+                  </button>
+
+                  {/* Phase Content */}
+                  {expandedPhases.has(fase.numero) && (
+                    <div className="border-t border-gray-100 p-6 space-y-4">
+                      {fase.passos.map((passo: any) => (
+                        <div key={passo.id} className="bg-orange-50 rounded-lg p-4 border-l-4 border-orange-400">
+                          <div className="flex items-start justify-between mb-4">
+                            <h4 className="font-bold text-gray-900">
+                              Day {passo.passo_numero}: {passo.descricao} (Status: In Progress)
+                            </h4>
                           </div>
-                          <p className="text-xs text-slate-300 mb-3 line-clamp-2">{passo.descricao}</p>
-                          <div className="flex gap-2">
-                            {passo.conectores?.slice(0, 2).map((c: string, i: number) => (
-                              <span key={i} className="text-[10px] px-2 py-0.5 bg-slate-700 rounded text-slate-300">
-                                {c}
-                              </span>
-                            ))}
+
+                          <div className="grid grid-cols-2 gap-4 mb-4">
+                            {/* Human Tasks */}
+                            <div className="bg-green-50 p-3 rounded-lg">
+                              <h5 className="font-semibold text-green-900 text-sm mb-2">What You Do (Human)</h5>
+                              <div className="space-y-2">
+                                {passo.responsabilidade_humana.split('•').slice(0, 3).map((task: string, idx: number) => (
+                                  <label key={idx} className="flex items-start gap-2 cursor-pointer">
+                                    <input
+                                      type="checkbox"
+                                      checked={completedTasks.has(`${passo.id}-${idx}`)}
+                                      onChange={() => toggleTask(`${passo.id}-${idx}`)}
+                                      className="mt-1"
+                                    />
+                                    <span className="text-sm text-gray-700">{task.trim()}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Machine Tasks */}
+                            <div className="bg-blue-50 p-3 rounded-lg">
+                              <h5 className="font-semibold text-blue-900 text-sm mb-2">What The Machine Does (AI/YA)</h5>
+                              <ul className="text-sm text-gray-700 space-y-1">
+                                {passo.processamento_automatizado.split('•').slice(0, 3).map((task: string, idx: number) => (
+                                  <li key={idx} className="flex items-start gap-2">
+                                    <span>🤖</span>
+                                    <span>{task.trim()}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          </div>
+
+                          {/* Infrastructure */}
+                          <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                            <h5 className="font-semibold text-gray-900 text-sm mb-2">Infrastructure & Connections</h5>
+                            <div className="grid grid-cols-3 gap-4 text-sm">
+                              <div>
+                                <span className="text-gray-600">Connectors:</span>
+                                <div className="flex gap-1 mt-1 flex-wrap">
+                                  {passo.conectores?.slice(0, 2).map((c: string) => (
+                                    <span key={c} className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">
+                                      {c}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                              <div>
+                                <span className="text-gray-600">Skills:</span>
+                                <div className="text-xs text-gray-700 mt-1">{passo.skills?.slice(0, 2).join(', ')}</div>
+                              </div>
+                              <div>
+                                <span className="text-gray-600">LLMs/YA:</span>
+                                <div className="text-xs text-gray-700 mt-1">{passo.llm_principal}</div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className="flex gap-2 mt-4">
+                            <button
+                              onClick={() => updateStep(passo.id, 'finalizado', 'humano')}
+                              className="px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600"
+                            >
+                              ✓ Done (Human)
+                            </button>
+                            <button
+                              onClick={() => updateStep(passo.id, 'finalizado', 'maquina')}
+                              className="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
+                            >
+                              🤖 Done (Machine)
+                            </button>
                           </div>
                         </div>
-                      ))
+                      ))}
+                    </div>
                   )}
                 </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Modal Detail */}
-      {showModal && selectedPasso && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-6">
-          <div className="bg-slate-900 border border-white/10 rounded-3xl p-8 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-start mb-8">
-              <div>
-                <h2 className="text-2xl font-black mb-2">{selectedPasso.descricao}</h2>
-                <p className="text-slate-400 text-sm">{selectedPasso.fase_nome} - Passo {selectedPasso.passo_numero}</p>
-              </div>
-              <button
-                onClick={() => setShowModal(false)}
-                className="text-slate-500 hover:text-white transition"
-              >
-                <i className="fa-solid fa-xmark text-2xl"></i>
-              </button>
+              ))}
             </div>
+          )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-              <div className="bg-slate-800/50 p-6 rounded-2xl border border-white/5">
-                <h4 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
-                  <i className="fa-solid fa-user-check"></i> Responsabilidade Humana
-                </h4>
-                <p className="text-slate-200 leading-relaxed text-sm">{selectedPasso.responsabilidade_humana}</p>
+          {/* Kanban View */}
+          {currentView === 'kanban' && (
+            <div className="grid grid-cols-3 gap-4">
+              {['Backlog', 'In Progress', 'Done'].map((col, idx) => (
+                <div key={col} className="bg-white rounded-lg p-4 border border-gray-200">
+                  <h3 className="font-bold text-gray-900 mb-4">{col}</h3>
+                  <div className="space-y-2">
+                    {fases.flatMap(f => f.passos).filter((p: any) => {
+                      if (col === 'Backlog') return p.status === 'backlog'
+                      if (col === 'In Progress') return p.status === 'processando'
+                      return p.status === 'finalizado'
+                    }).map((passo: any) => (
+                      <div key={passo.id} className="bg-gray-50 p-3 rounded border border-gray-200 text-sm">
+                        {passo.descricao}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Dashboard View */}
+          {currentView === 'dashboard' && (
+            <div className="grid grid-cols-4 gap-4">
+              <div className="bg-white p-6 rounded-lg border border-gray-200">
+                <div className="text-gray-600 text-sm font-medium">Total Steps</div>
+                <div className="text-3xl font-bold text-gray-900 mt-2">{project?.stats?.totalPassos}</div>
               </div>
-
-              <div className="bg-indigo-500/5 p-6 rounded-2xl border border-indigo-500/10">
-                <h4 className="text-xs font-black uppercase tracking-widest text-indigo-400 mb-3 flex items-center gap-2">
-                  <i className="fa-solid fa-gears"></i> Processamento Automatizado
-                </h4>
-                <p className="text-slate-300 italic leading-relaxed text-sm">{selectedPasso.processamento_automatizado}</p>
+              <div className="bg-white p-6 rounded-lg border border-gray-200">
+                <div className="text-gray-600 text-sm font-medium">Completed</div>
+                <div className="text-3xl font-bold text-green-600 mt-2">{project?.stats?.passosCompletos}</div>
+              </div>
+              <div className="bg-white p-6 rounded-lg border border-gray-200">
+                <div className="text-gray-600 text-sm font-medium">Human Resolved</div>
+                <div className="text-3xl font-bold text-blue-600 mt-2">{project?.stats?.passosHumano}</div>
+              </div>
+              <div className="bg-white p-6 rounded-lg border border-gray-200">
+                <div className="text-gray-600 text-sm font-medium">Machine Resolved</div>
+                <div className="text-3xl font-bold text-purple-600 mt-2">{project?.stats?.passosMaquina}</div>
               </div>
             </div>
-
-            <div className="bg-slate-800/50 p-6 rounded-2xl border border-white/5 mb-8">
-              <h4 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">Stack Técnico</h4>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between"><span className="text-slate-500">LLM Principal:</span><span className="font-bold text-indigo-400">{selectedPasso.llm_principal}</span></div>
-                <div className="flex justify-between"><span className="text-slate-500">Conectores:</span><span className="text-slate-300">{selectedPasso.conectores?.join(', ')}</span></div>
-                <div className="flex justify-between"><span className="text-slate-500">Skills:</span><span className="text-slate-300">{selectedPasso.skills?.join(', ')}</span></div>
-              </div>
-            </div>
-
-            <div className="flex gap-3">
-              {selectedPasso.status !== 'finalizado' && (
-                <>
-                  <button
-                    onClick={() => {
-                      updateStep(selectedPasso.id, 'processando')
-                      setShowModal(false)
-                    }}
-                    className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded-xl font-bold transition-all"
-                  >
-                    Começar
-                  </button>
-                  <button
-                    onClick={() => {
-                      updateStep(selectedPasso.id, 'finalizado', 'humano')
-                      setShowModal(false)
-                    }}
-                    className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white py-3 rounded-xl font-bold transition-all"
-                  >
-                    Finalizar (Humano)
-                  </button>
-                  <button
-                    onClick={() => {
-                      updateStep(selectedPasso.id, 'finalizado', 'maquina')
-                      setShowModal(false)
-                    }}
-                    className="flex-1 bg-purple-600 hover:bg-purple-500 text-white py-3 rounded-xl font-bold transition-all"
-                  >
-                    Finalizar (Máquina)
-                  </button>
-                </>
-              )}
-              {selectedPasso.status === 'finalizado' && (
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="w-full bg-white text-black py-3 rounded-xl font-bold hover:bg-slate-100 transition-all"
-                >
-                  Fechar
-                </button>
-              )}
-            </div>
-          </div>
+          )}
         </div>
       )}
     </div>
