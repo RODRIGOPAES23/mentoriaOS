@@ -8,12 +8,12 @@ import { BreadcrumbSchema } from "@/components/site/BreadcrumbSchema"
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" })
 
 const SITE = "https://cklareza.com"
-const DESC = "Plataforma de mentoria white-label com IA: organize financeiro, atividades e calls e veja, com clareza, quem precisa de você agora. Sua marca, nosso motor."
+const DESC = "A plataforma inteligente que organiza suas mentorias, centraliza a comunicação e acompanha o progresso dos seus alunos em um só lugar."
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
   title: {
-    default: "CKlareza — Plataforma de Mentoria White-Label com IA",
+    default: "CKlareza — Organize suas mentorias em um só lugar",
     template: "%s | CKlareza",
   },
   description: DESC,
@@ -33,13 +33,13 @@ export const metadata: Metadata = {
     alternateLocale: ["en_US", "es_ES"],
     url: SITE,
     siteName: "CKlareza",
-    title: "CKlareza — Plataforma de Mentoria White-Label com IA",
+    title: "CKlareza — Organize suas mentorias em um só lugar",
     description: DESC,
     images: [{ url: "/logo.jpg", width: 1200, height: 655, alt: "CKlareza — Lifetime Value" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "CKlareza — Mentoria White-Label com IA",
+    title: "CKlareza — Organize suas mentorias em um só lugar",
     description: DESC,
     images: ["/logo.jpg"],
   },
