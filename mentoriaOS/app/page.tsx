@@ -496,20 +496,12 @@ export default function LandingPage() {
             <Star className="w-3.5 h-3.5" style={{ color: c.goldDeep }} /> {t.badge}
           </span>
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.05]" style={{ color: c.ink }}>
-            <span style={{ color: "#ef4444" }}>Quanto você pagaria</span>{" "}
-            <span style={{ color: c.ink }}>para não errar?</span>
+            <span style={{ color: c.teal }}>{t.h1a}</span>{" "}
+            <span style={{ color: c.ink }}>{t.h1b}</span>{" "}
+            <span style={{ color: c.ink }}>{t.h1c}</span>
           </h1>
           <p className="text-lg md:text-xl mt-5 max-w-2xl mx-auto leading-relaxed" style={{ color: c.muted }}>
-            Pare de perder <strong style={{ color: c.ink }}>7h30 por semana</strong> preparando calls
-            que você poderia simplesmente <em>não preparar</em>.
-          </p>
-          <p className="text-base md:text-lg mt-3 max-w-2xl mx-auto leading-relaxed" style={{ color: c.muted }}>
-            A CKlareza automatiza o seu briefing com{" "}
-            <strong style={{ color: c.ink }}>Inteligência Artificial</strong>, centraliza a gestão financeira
-            e prevê quem vai cancelar com{" "}
-            <strong style={{ color: c.ink }}>30 dias de antecedência</strong>.
-            Opere mais, trabalhe menos —{" "}
-            <strong style={{ color: c.gold }}>tudo com a sua marca</strong>.
+            {t.sub}<strong style={{ color: c.teal }}>{t.subStrong}</strong>
           </p>
 
           {/* CTAs — Demo primeiro (Avanço), depois conta */}
