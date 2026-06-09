@@ -22,15 +22,26 @@ export default function DoitPage() {
   const [showModal, setShowModal] = useState(false)
 
   useEffect(() => {
-    fetch('/api/doit/generate', { method: 'POST' })
-      .then(res => {
-        if (res.status === 401) {
-          router.push('/auth/login')
-        } else {
+    fetch('/api/me')
+      .then(res => res.json())
+      .then(async (data) => {
+        if (data?.authenticated) {
           setIsAuthed(true)
+          // Carregar projeto mais recente, se existir (evita tela amnésica no reload)
+          try {
+            const list = await fetch('/api/doit/list').then(r => r.json())
+            if (list?.projects?.length > 0) {
+              const latest = list.projects[0]
+              setQuery(latest.objetivo)
+              setProjectId(latest.id)
+              await loadProject(latest.id)
+            }
+          } catch { /* sem projeto ainda */ }
+        } else {
+          router.push('/login?next=/doit')
         }
       })
-      .catch(() => setIsAuthed(true))
+      .catch(() => router.push('/login?next=/doit'))
       .finally(() => setIsLoading(false))
   }, [router])
 
@@ -200,10 +211,10 @@ export default function DoitPage() {
             <div className="flex justify-between items-start mb-4">
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">
-                  Project: {query}
+                  Projeto: {project?.objetivo || query}
                 </h2>
                 <p className="text-sm text-gray-600 mt-1">
-                  {project?.stats?.percentualCompleto || 0}% Complete ({project?.stats?.passosCompletos || 0} Steps)
+                  {project?.stats?.percentualCompleto || 0}% concluído · {project?.stats?.passosCompletos || 0}/{project?.stats?.totalPassos || 0} passos
                 </p>
               </div>
               <button
@@ -273,10 +284,15 @@ export default function DoitPage() {
                     className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition"
                   >
                     <div className="flex items-center gap-3">
-                      <span className={`text-xl ${expandedPhases.has(fase.numero) ? '▼' : '▶'}`}></span>
+                      <span className="text-xl text-gray-500">
+                        {expandedPhases.has(fase.numero) ? '▼' : '▶'}
+                      </span>
                       <div className="text-left">
                         <h3 className="font-semibold text-gray-900">
-                          {fase.numero}-{fase.passos.length} Steps (11 Steps)
+                          Fase {fase.numero}: {fase.nome}
+                          <span className="ml-2 text-sm font-normal text-gray-500">
+                            ({fase.passos.length} {fase.passos.length === 1 ? 'passo' : 'passos'})
+                          </span>
                         </h3>
                       </div>
                     </div>
@@ -285,11 +301,24 @@ export default function DoitPage() {
                   {/* Phase Content */}
                   {expandedPhases.has(fase.numero) && (
                     <div className="border-t border-gray-100 p-6 space-y-4">
-                      {fase.passos.map((passo: any) => (
-                        <div key={passo.id} className="bg-orange-50 rounded-lg p-4 border-l-4 border-orange-400">
+                      {fase.passos.map((passo: any) => {
+                        const isDone = passo.status === 'finalizado'
+                        const statusLabel = isDone
+                          ? `Concluído (${passo.quem_resolveu === 'maquina' ? 'Máquina' : 'Humano'})`
+                          : 'A fazer'
+                        return (
+                        <div
+                          key={passo.id}
+                          className={`rounded-lg p-4 border-l-4 ${
+                            isDone ? 'bg-green-50 border-green-500' : 'bg-orange-50 border-orange-400'
+                          }`}
+                        >
                           <div className="flex items-start justify-between mb-4">
                             <h4 className="font-bold text-gray-900">
-                              Day {passo.passo_numero}: {passo.descricao} (Status: In Progress)
+                              Passo {passo.passo_numero}: {passo.descricao}
+                              <span className={`ml-2 text-xs font-normal ${isDone ? 'text-green-700' : 'text-orange-600'}`}>
+                                ({statusLabel})
+                              </span>
                             </h4>
                           </div>
 
@@ -352,22 +381,35 @@ export default function DoitPage() {
                           </div>
 
                           {/* Action Buttons */}
-                          <div className="flex gap-2 mt-4">
-                            <button
-                              onClick={() => updateStep(passo.id, 'finalizado', 'humano')}
-                              className="px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600"
-                            >
-                              ✓ Done (Human)
-                            </button>
-                            <button
-                              onClick={() => updateStep(passo.id, 'finalizado', 'maquina')}
-                              className="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
-                            >
-                              🤖 Done (Machine)
-                            </button>
-                          </div>
+                          {isDone ? (
+                            <div className="mt-4 text-sm text-green-700 font-medium">
+                              ✓ Resolvido por {passo.quem_resolveu === 'maquina' ? 'Máquina' : 'Humano'}
+                              <button
+                                onClick={() => updateStep(passo.id, 'backlog')}
+                                className="ml-3 text-xs text-gray-500 underline hover:text-gray-700"
+                              >
+                                desfazer
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="flex gap-2 mt-4">
+                              <button
+                                onClick={() => updateStep(passo.id, 'finalizado', 'humano')}
+                                className="px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600"
+                              >
+                                ✓ Concluir (Humano)
+                              </button>
+                              <button
+                                onClick={() => updateStep(passo.id, 'finalizado', 'maquina')}
+                                className="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
+                              >
+                                🤖 Concluir (Máquina)
+                              </button>
+                            </div>
+                          )}
                         </div>
-                      ))}
+                        )
+                      })}
                     </div>
                   )}
                 </div>

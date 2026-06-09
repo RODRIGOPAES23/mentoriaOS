@@ -86,7 +86,7 @@ REGRAS:
         Authorization: `Bearer ${OPENROUTER_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "anthropic/claude-3.5-sonnet",
+        model: "anthropic/claude-sonnet-4.5",
         messages: [
           {
             role: "user",
@@ -94,7 +94,7 @@ REGRAS:
           },
         ],
         temperature: 0.7,
-        max_tokens: 2000,
+        max_tokens: 4000,
       }),
     })
 
@@ -107,7 +107,13 @@ REGRAS:
     }
 
     const llmData = await response.json()
-    const content = llmData.choices[0].message.content.trim()
+    let content = llmData.choices[0].message.content.trim()
+
+    // Remover cercas markdown (```json ... ```) que o modelo às vezes adiciona
+    content = content
+      .replace(/^```(?:json)?\s*/i, "")
+      .replace(/\s*```$/i, "")
+      .trim()
 
     // Parse JSON da resposta
     let rotas
