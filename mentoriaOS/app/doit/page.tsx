@@ -428,22 +428,45 @@ export default function DoitPage() {
           {/* Kanban View */}
           {currentView === 'kanban' && (
             <div className="grid grid-cols-3 gap-4">
-              {['Backlog', 'In Progress', 'Done'].map((col, idx) => (
-                <div key={col} className="bg-white rounded-lg p-4 border border-gray-200">
-                  <h3 className="font-bold text-gray-900 mb-4">{col}</h3>
-                  <div className="space-y-2">
-                    {fases.flatMap(f => f.passos).filter((p: any) => {
-                      if (col === 'Backlog') return p.status === 'backlog'
-                      if (col === 'In Progress') return p.status === 'processando'
-                      return p.status === 'finalizado'
-                    }).map((passo: any) => (
-                      <div key={passo.id} className="bg-gray-50 p-3 rounded border border-gray-200 text-sm">
-                        {passo.descricao}
-                      </div>
-                    ))}
+              {([
+                { col: 'Backlog', label: 'A fazer', status: 'backlog', accent: 'border-t-gray-400' },
+                { col: 'In Progress', label: 'Em andamento', status: 'processando', accent: 'border-t-orange-400' },
+                { col: 'Done', label: 'Concluído', status: 'finalizado', accent: 'border-t-green-500' },
+              ]).map(({ col, label, status, accent }) => {
+                const items = fases.flatMap(f => f.passos).filter((p: any) => p.status === status)
+                return (
+                  <div key={col} className={`bg-white rounded-lg p-4 border border-gray-200 border-t-4 ${accent}`}>
+                    <h3 className="font-bold text-gray-900 mb-4 flex items-center justify-between">
+                      <span>{label}</span>
+                      <span className="text-xs font-semibold text-gray-500 bg-gray-100 rounded-full px-2 py-0.5">{items.length}</span>
+                    </h3>
+                    <div className="space-y-2">
+                      {items.length === 0 && (
+                        <p className="text-sm text-gray-400 italic py-4 text-center">Nenhum passo aqui</p>
+                      )}
+                      {items.map((passo: any) => {
+                        const done = passo.status === 'finalizado'
+                        return (
+                          <div
+                            key={passo.id}
+                            className={`p-3 rounded border text-sm font-medium ${
+                              done ? 'bg-green-50 border-green-200 text-gray-800' : 'bg-gray-50 border-gray-200 text-gray-800'
+                            }`}
+                          >
+                            <div className="text-[10px] uppercase tracking-wide text-gray-400 mb-1">Fase {passo.fase_numero}</div>
+                            {passo.descricao}
+                            {done && (
+                              <div className="mt-1 text-xs font-semibold text-green-700">
+                                ✓ {passo.quem_resolveu === 'maquina' ? 'Máquina' : 'Humano'}
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
 
