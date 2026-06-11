@@ -2,8 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { Sun, Moon, Globe, Home } from 'lucide-react'
 
 type ViewType = 'list' | 'kanban' | 'dashboard'
+type Lang = 'pt' | 'en' | 'es'
 
 export default function DoitPage() {
   const router = useRouter()
@@ -20,6 +23,33 @@ export default function DoitPage() {
   const [currentView, setCurrentView] = useState<ViewType>('list')
   const [selectedPasso, setSelectedPasso] = useState<any>(null)
   const [showModal, setShowModal] = useState(false)
+
+  // --- tema e idioma ---
+  const [dark, setDark] = useState(true)
+  const [lang, setLang] = useState<Lang>('pt')
+  const [showLangMenu, setShowLangMenu] = useState(false)
+
+  useEffect(() => {
+    setDark(document.documentElement.classList.contains('dark'))
+    const saved = localStorage.getItem('ck_lang') as Lang | null
+    if (saved) setLang(saved)
+  }, [])
+
+  const toggleTheme = () => {
+    const next = !dark
+    setDark(next)
+    document.documentElement.classList.toggle('dark', next)
+    try { localStorage.setItem('ck_theme', next ? 'dark' : 'light') } catch {}
+  }
+
+  const changeLang = (l: Lang) => {
+    setLang(l)
+    try { localStorage.setItem('ck_lang', l) } catch {}
+    setShowLangMenu(false)
+  }
+
+  const t = (pt: string, en: string, es: string) =>
+    lang === 'en' ? en : lang === 'es' ? es : pt
 
   useEffect(() => {
     fetch('/api/me')
@@ -128,24 +158,75 @@ export default function DoitPage() {
   }
 
   if (isLoading) {
-    return <div className="p-8 text-center text-white">Carregando...</div>
+    return <div className="p-8 text-center" style={{ color: 'var(--sc-muted, #6b7280)' }}>Carregando…</div>
   }
 
   if (!isAuthed) {
-    return <div className="p-8 text-center text-white">Redirecionando...</div>
+    return <div className="p-8 text-center" style={{ color: 'var(--sc-muted, #6b7280)' }}>Redirecionando…</div>
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ background: 'var(--sc-bg, #f9fafb)', color: 'var(--sc-text, #111827)' }}>
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-teal-500 text-white">
         <div className="max-w-7xl mx-auto px-6 py-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-              <span className="text-lg font-bold">⚡</span>
+          {/* Título + controles */}
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                <span className="text-lg font-bold">⚡</span>
+              </div>
+              <h1 className="text-2xl font-bold">DOIT</h1>
+              <span className="text-sm text-white/70 ml-2">{t('Seu Plano com IA', 'Your AI Execution Plan', 'Tu Plan con IA')}</span>
             </div>
-            <h1 className="text-2xl font-bold">DOIT</h1>
-            <span className="text-sm text-white/70 ml-2">Your AI Execution Plan</span>
+
+            {/* Idioma + Tema + Home */}
+            <div className="flex items-center gap-2">
+              {/* Seletor de idioma */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowLangMenu(v => !v)}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white/15 hover:bg-white/25 transition text-white text-sm font-medium"
+                  aria-label="Idioma"
+                >
+                  <Globe className="w-4 h-4" />
+                  {lang.toUpperCase()}
+                </button>
+                {showLangMenu && (
+                  <div className="absolute right-0 top-full mt-1 bg-white rounded-lg shadow-xl overflow-hidden z-50 min-w-[80px]">
+                    {(['pt', 'en', 'es'] as Lang[]).map(l => (
+                      <button
+                        key={l}
+                        onClick={() => changeLang(l)}
+                        className={`block w-full px-4 py-2 text-sm text-left hover:bg-gray-100 transition ${lang === l ? 'font-bold text-blue-600' : 'text-gray-700'}`}
+                      >
+                        {l === 'pt' ? '🇧🇷 PT' : l === 'en' ? '🇺🇸 EN' : '🇪🇸 ES'}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Toggle tema claro/escuro */}
+              <button
+                onClick={toggleTheme}
+                className="flex items-center justify-center w-9 h-9 rounded-lg bg-white/15 hover:bg-white/25 transition text-white"
+                aria-label={dark ? 'Ativar tema claro' : 'Ativar tema escuro'}
+                title={dark ? 'Tema claro' : 'Tema escuro'}
+              >
+                {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              </button>
+
+              {/* Voltar ao site */}
+              <Link
+                href="/"
+                className="flex items-center justify-center w-9 h-9 rounded-lg bg-white/15 hover:bg-white/25 transition text-white"
+                aria-label="Voltar ao site"
+                title="CKlareza"
+              >
+                <Home className="w-4 h-4" />
+              </Link>
+            </div>
           </div>
 
           {/* Search Bar */}
@@ -154,7 +235,11 @@ export default function DoitPage() {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="How do I... [I want to run a 42 km marathon] [Generate Plan]"
+              placeholder={t(
+                'Qual é o seu objetivo? [Quero correr uma maratona de 42 km]',
+                'What is your goal? [I want to run a 42 km marathon]',
+                '¿Cuál es tu objetivo? [Quiero correr un maratón de 42 km]'
+              )}
               className="flex-1 px-4 py-3 rounded-lg text-gray-900 text-sm"
             />
             <button
@@ -162,7 +247,7 @@ export default function DoitPage() {
               disabled={loading}
               className="bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2"
             >
-              {loading ? 'Generating...' : 'Generate'}
+              {loading ? t('Gerando...', 'Generating...', 'Generando...') : t('Gerar', 'Generate', 'Generar')}
             </button>
           </form>
         </div>

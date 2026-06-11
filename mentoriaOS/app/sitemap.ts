@@ -32,5 +32,26 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: `${SITE}/blog/mentorship-software-guide`,
       lastModified: now, changeFrequency: "monthly", priority: 0.7,
     },
+    {
+      url: `${SITE}/blog/como-reduzir-churn-mentoria`,
+      lastModified: now, changeFrequency: "monthly", priority: 0.8,
+    },
+    {
+      url: `${SITE}/blog/plataforma-mentoria-white-label`,
+      lastModified: now, changeFrequency: "monthly", priority: 0.8,
+    },
+    {
+      url: `${SITE}/blog/como-cobrar-mentoria`,
+      lastModified: now, changeFrequency: "monthly", priority: 0.8,
+    },
+    {
+      url: `${SITE}/blog/como-escalar-mentoria`,
+      lastModified: now, changeFrequency: "monthly", priority: 0.8,
+    },
+    {
+      url: `${SITE}/blog/o-que-e-check-in-de-mentoria`,
+      lastModified: now, changeFrequency: "monthly", priority: 0.7,
+    },
+    { url: `${SITE}/glossario`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
   ]
 }

@@ -1,8 +1,27 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import Image from "next/image"
-import { LayoutDashboard, DollarSign, KanbanSquare, Brain, Phone, Building2, ArrowRight, Check } from "lucide-react"
+import { LayoutDashboard, DollarSign, KanbanSquare, Brain, Phone, Building2, ArrowRight, Check, ChevronDown } from "lucide-react"
 import { SiteHeader, SiteFooter, LifetimeValueCTA, SC } from "@/components/site/SiteChrome"
+
+const FAQ_RECURSOS = [
+  { q: "O CKlareza funciona no celular?", a: "Sim. O CKlareza é 100% web e responsivo — funciona em qualquer dispositivo (celular, tablet, notebook) sem instalação. O portal do aluno também é otimizado para mobile." },
+  { q: "Como funciona o briefing com IA?", a: "Antes de cada call, a IA do CKlareza lê os últimos check-ins do aluno e gera automaticamente um diagnóstico do gargalo atual e uma pauta sugerida para a sessão. O processo leva menos de 30 segundos. O mentor revisa, ajusta se quiser, e entra na call já preparado." },
+  { q: "Quanto tempo leva para configurar o CKlareza?", a: "5 minutos. Você cria a conta, importa ou cadastra seus alunos, e já está operando. Não há instalação, servidor ou configuração técnica. Tudo é web, tudo é imediato." },
+  { q: "O portal do aluno é realmente white-label?", a: "Sim. O portal onde o aluno faz check-in, acessa materiais e acompanha sua jornada usa o seu logo, suas cores e pode ser acessado pelo seu domínio próprio. O aluno não vê nenhuma menção ao CKlareza." },
+  { q: "O CKlareza tem integração com WhatsApp ou Calendly?", a: "O CKlareza centraliza o que hoje está espalhado em Calendly, Google Drive, planilhas e WhatsApp. A agenda de calls, os materiais e o histórico do aluno ficam dentro da plataforma. A comunicação via WhatsApp permanece com você — não substituímos ela, complementamos com estrutura." },
+  { q: "Os dados dos meus alunos ficam seguros?", a: "Sim. Dados em trânsito são protegidos por HTTPS e em repouso com criptografia de nível enterprise (infraestrutura Supabase). Cada empresa e mentor tem ambiente lógico separado. Você é o controlador dos dados — pode exportar ou deletar a qualquer momento." },
+]
+
+const FAQ_JSONLD = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: FAQ_RECURSOS.map(f => ({
+    "@type": "Question",
+    name: f.q,
+    acceptedAnswer: { "@type": "Answer", text: f.a },
+  })),
+}
 
 export const metadata: Metadata = {
   title: "Recursos — Financeiro, Atividades e IA para Mentoria",
@@ -23,6 +42,7 @@ const FEATURES = [
 export default function Recursos() {
   return (
     <div style={{ background: SC.bg, color: SC.text }} className="min-h-screen">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_JSONLD) }} />
       <SiteHeader />
       <section className="max-w-4xl mx-auto px-5 pt-16 pb-10 text-center">
         <h1 className="text-4xl md:text-5xl font-bold tracking-tight">Tudo para operar sua mentoria</h1>
@@ -74,6 +94,22 @@ export default function Recursos() {
               <span key={x} className="flex items-center gap-1.5"><Check className="w-4 h-4" style={{ color: SC.gold }} /> {x}</span>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* FAQ — rich snippets */}
+      <section className="max-w-3xl mx-auto px-5 py-16">
+        <h2 className="text-2xl font-bold mb-8 text-center">Perguntas frequentes sobre o CKlareza</h2>
+        <div className="space-y-4">
+          {FAQ_RECURSOS.map((f, i) => (
+            <details key={i} className="rounded-2xl group" style={{ background: SC.card, border: `1px solid ${SC.border}` }}>
+              <summary className="flex items-center justify-between p-5 cursor-pointer font-semibold select-none list-none">
+                <span>{f.q}</span>
+                <ChevronDown className="w-4 h-4 shrink-0 ml-3 transition-transform group-open:rotate-180" style={{ color: SC.teal }} />
+              </summary>
+              <p className="px-5 pb-5 text-sm leading-relaxed" style={{ color: SC.muted }}>{f.a}</p>
+            </details>
+          ))}
         </div>
       </section>
 

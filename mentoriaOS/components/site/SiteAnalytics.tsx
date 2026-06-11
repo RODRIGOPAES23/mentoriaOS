@@ -15,6 +15,11 @@ function sessionId(): string | null {
 export default function SiteAnalytics() {
   const pathname = usePathname()
   useEffect(() => {
+    // Não rastrear bots/crawlers — evita erro no Google Search Console
+    if (typeof navigator !== "undefined") {
+      const ua = navigator.userAgent.toLowerCase()
+      if (/bot|crawl|spider|google|bing|baidu|yandex|slurp|duckduck/.test(ua)) return
+    }
     const path = pathname || (typeof location !== "undefined" ? location.pathname : "/")
     const logged = /^\/(dashboard|admin|selecionar|m\/)/.test(path)
     const payload = JSON.stringify({
@@ -29,6 +34,7 @@ export default function SiteAnalytics() {
         navigator.sendBeacon("/api/track", new Blob([payload], { type: "application/json" }))
       } else {
         fetch("/api/track", { method: "POST", body: payload, headers: { "Content-Type": "application/json" }, keepalive: true })
+          .catch(() => {}) // silencia erros de rede
       }
     } catch {}
   }, [pathname])

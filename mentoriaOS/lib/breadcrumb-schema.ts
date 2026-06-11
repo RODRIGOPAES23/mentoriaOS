@@ -2,68 +2,55 @@
 export function generateBreadcrumbSchema(pathname: string) {
   const SITE = "https://cklareza.com"
 
-  // Mapeamento de rotas para labels e hierarquia
-  const routeMap: Record<string, { label: string; parent?: string }> = {
-    "/": { label: "Home" },
-    "/recursos": { label: "Recursos", parent: "/" },
-    "/precos": { label: "Preços", parent: "/" },
-    "/seguranca": { label: "Segurança", parent: "/" },
-    "/privacidade": { label: "Privacidade", parent: "/" },
-    "/contato": { label: "Contato", parent: "/" },
-    "/sobre": { label: "Sobre", parent: "/" },
-    "/blog": { label: "Blog", parent: "/" },
+  // Mapeamento de rotas para labels
+  const routeMap: Record<string, string> = {
+    "/recursos":   "Recursos",
+    "/precos":     "Preços",
+    "/seguranca":  "Segurança",
+    "/privacidade":"Privacidade",
+    "/contato":    "Contato",
+    "/sobre":      "Sobre",
+    "/blog":       "Blog",
+    "/glossario":  "Glossário",
   }
 
-  // Detectar se é rota de blog post
+  // Labels legíveis para posts de blog
+  const blogPostLabels: Record<string, string> = {
+    "software-para-mentores-guia-completo":   "Software para Mentores: Guia Completo",
+    "como-fazer-checkin-semanal-com-mentorados": "Check-in Semanal com Mentorados",
+    "como-aumentar-a-retencao-de-mentorados": "Como Aumentar a Retenção de Mentorados",
+    "mentorship-software-guide":              "Mentorship Software Guide",
+    "como-reduzir-churn-mentoria":            "Como Reduzir o Churn na Sua Mentoria",
+    "plataforma-mentoria-white-label":        "Plataforma de Mentoria White-Label",
+    "como-cobrar-mentoria":                   "Como Cobrar Mentoria: Precificação High-Ticket",
+    "como-escalar-mentoria":                  "Como Escalar sua Mentoria",
+  }
+
+  // Home não gera breadcrumb
+  if (!pathname || pathname === "/") return null
+
   const isBlogPost = pathname.startsWith("/blog/") && pathname !== "/blog"
-  const blogPostTitle = pathname
-    .replace("/blog/", "")
-    .replace(/-/g, " ")
-    .split(" ")
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(" ")
+  const slug = pathname.replace("/blog/", "")
 
-  const items: Array<{
-    position: number
-    name: string
-    item: string
-  }> = []
-
-  // Home sempre primeira
-  items.push({
-    position: 1,
-    name: "Home",
-    item: SITE,
+  // Constrói itens — cada um com @type: "ListItem" (obrigatório pelo Google)
+  const makeItem = (position: number, name: string, item: string) => ({
+    "@type": "ListItem" as const,
+    position,
+    name,
+    item,
   })
 
-  // Página atual
-  if (pathname === "/" || !pathname || pathname === "") {
-    // Não adiciona breadcrumb redundante na home
-    return null
-  }
+  const items = [makeItem(1, "Home", SITE)]
 
-  const route = routeMap[pathname]
-  if (route) {
-    items.push({
-      position: items.length + 1,
-      name: route.label,
-      item: `${SITE}${pathname}`,
-    })
-  } else if (isBlogPost) {
-    // Blog > Post específico
-    items.push({
-      position: 2,
-      name: "Blog",
-      item: `${SITE}/blog`,
-    })
-    items.push({
-      position: 3,
-      name: blogPostTitle,
-      item: `${SITE}${pathname}`,
-    })
+  if (isBlogPost) {
+    items.push(makeItem(2, "Blog", `${SITE}/blog`))
+    const label = blogPostLabels[slug] ?? slug.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase())
+    items.push(makeItem(3, label, `${SITE}${pathname}`))
+  } else {
+    const label = routeMap[pathname]
+    if (!label) return null
+    items.push(makeItem(2, label, `${SITE}${pathname}`))
   }
-
-  if (items.length < 2) return null
 
   return {
     "@context": "https://schema.org",

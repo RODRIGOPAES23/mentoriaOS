@@ -7,7 +7,10 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: "*",
         allow: "/",
         // Áreas privadas / app não devem ser indexadas
-        disallow: ["/admin", "/dashboard", "/selecionar", "/api/", "/m/", "/login"],
+        // /login removido daqui — Next.js App Router tenta prefetch RSC (/login?_rsc=)
+        // que causava warning no Search Console. Bloqueio de indexação feito via
+        // noindex/nofollow no metadata da própria página de login (mais correto).
+        disallow: ["/admin", "/dashboard", "/selecionar", "/api/", "/m/"],
       },
     ],
     sitemap: "https://cklareza.com/sitemap.xml",
