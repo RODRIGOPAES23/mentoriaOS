@@ -34,6 +34,9 @@ const DIAS_ATRASO_RECEBIMENTO = 5 // dias médios que uma nota rejeitada atrasa 
 
 const fmt = (n: number) => Math.round(n).toLocaleString("pt-BR")
 
+// Ferramenta de validação (app separado pre_validador_sefaz na Vercel)
+const URL_FERRAMENTA = "https://prevalidadorsefaz.vercel.app"
+
 // Fora do componente da página: manter a identidade estável evita remontar o
 // <input range> a cada render (o arrasto do slider seria interrompido)
 function Slider({ label, value, setValue, min, max, step, prefix = "", suffix = "", c }: any) {
@@ -236,12 +239,12 @@ export default function PrevalidadorPage() {
           </p>
 
           <div className="text-center">
-            <Link href="/contato"
+            <a href={URL_FERRAMENTA}
               className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-bold transition-all hover:-translate-y-0.5"
               style={{ background: c.gold, color: c.onAccent, boxShadow: `0 8px 24px ${c.gold}40` }}>
               Quero recuperar R${fmt(economiaAno)}/ano <ArrowRight className="w-4 h-4" />
-            </Link>
-            <p className="text-xs mt-3" style={{ color: c.muted }}>Resposta em até 1 dia útil · sem compromisso</p>
+            </a>
+            <p className="text-xs mt-3" style={{ color: c.muted }}>Acesso direto à ferramenta · sem compromisso</p>
           </div>
         </div>
       </section>
@@ -304,11 +307,11 @@ export default function PrevalidadorPage() {
         <p className="text-lg mb-8" style={{ color: c.muted }}>
           A pergunta não é <em>se</em> vai acontecer — é se você vai descobrir antes ou depois de custar dinheiro.
         </p>
-        <Link href="/contato"
+        <a href={URL_FERRAMENTA}
           className="inline-flex items-center gap-2 px-8 py-4 rounded-xl text-lg font-bold transition-all hover:-translate-y-1"
           style={{ background: c.gold, color: c.onAccent, boxShadow: `0 15px 40px ${c.gold}40` }}>
           Quero pré-validar minhas notas <ArrowRight className="w-5 h-5" />
-        </Link>
+        </a>
         <p className="mt-4 text-sm" style={{ color: c.muted }}>
           Ou volte à <a href="#calculadora" className="font-semibold" style={{ color: c.goldDeep }}>calculadora</a> e veja seu número de novo.
         </p>
