@@ -35,18 +35,43 @@ export async function POST(req: NextRequest) {
       const customerId = session.customer
 
       if (email) {
-        // Atualiza ou cria registro na tabela empresas
-        await supabase
+        const dadosStripe = {
+          stripe_customer_id: customerId,
+          stripe_subscription_id: session.subscription,
+          plano,
+          mentorados_contratados: mentorados,
+          status: "trial",
+          trial_start: new Date().toISOString(),
+        }
+
+        const { data: existente } = await supabase
           .from("empresas")
-          .upsert({
-            email_owner: email,
-            stripe_customer_id: customerId,
-            stripe_subscription_id: session.subscription,
-            plano,
-            mentorados_contratados: mentorados,
-            status: "trial",
-            trial_start: new Date().toISOString(),
-          }, { onConflict: "email_owner" })
+          .select("id")
+          .eq("email_owner", email)
+          .maybeSingle()
+
+        if (existente) {
+          // Empresa já existe: atualiza só os campos Stripe (preserva nome/slug)
+          const { error } = await supabase
+            .from("empresas")
+            .update(dadosStripe)
+            .eq("id", existente.id)
+          if (error) console.error("[webhook] update empresa falhou:", error.message)
+        } else {
+          // nome/slug são NOT NULL — deriva do e-mail (mentor renomeia depois no painel)
+          const base = email.split("@")[0].toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "empresa"
+          const { data: slugTomado } = await supabase
+            .from("empresas")
+            .select("id")
+            .eq("slug", base)
+            .maybeSingle()
+          const slug = slugTomado ? `${base}-${Math.random().toString(36).slice(2, 6)}` : base
+
+          const { error } = await supabase
+            .from("empresas")
+            .insert({ email_owner: email, nome: base, slug, ...dadosStripe })
+          if (error) console.error("[webhook] insert empresa falhou:", error.message)
+        }
       }
       break
     }
