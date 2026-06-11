@@ -33,6 +33,7 @@ export async function middleware(request: NextRequest) {
 
   const isPublic =
     pathname === "/login" ||
+    pathname === "/prevalidador" ||
     pathname.startsWith("/auth/") ||
     pathname.startsWith("/form/") ||
     pathname.startsWith("/formulario/") ||
