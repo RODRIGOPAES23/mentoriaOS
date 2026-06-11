@@ -7,7 +7,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import {
   Sparkles, ShieldCheck, AlertCircle, Check, X, ArrowRight, Clock,
-  FileX2, FileCheck2, Calculator, TrendingDown, Sun, Moon, Zap, Target,
+  Calculator, TrendingDown, Sun, Moon, Zap, Target,
 } from "lucide-react"
 
 type Theme = "dark" | "light"
@@ -231,39 +231,30 @@ export default function PrevalidadorPage() {
             <Slider c={c} label="Investimento na ferramenta (R$/mês)" value={investimento} setValue={setInvestimento} min={100} max={5000} step={100} prefix="R$" />
           </div>
 
-          {/* Resultado: SEM vs COM */}
-          <div className="grid md:grid-cols-2 gap-5 mb-7">
-            <div className="p-6 rounded-xl text-center" style={{ background: `${c.red}0a`, border: `1px solid ${c.red}35` }}>
-              <p className="flex items-center justify-center gap-2 text-sm font-bold mb-2" style={{ color: c.red }}>
-                <FileX2 className="w-4 h-4" /> SEM pré-validação
+          {/* Resultado: um número só — a economia */}
+          <div className="p-8 rounded-xl text-center mb-7"
+            style={{ background: `linear-gradient(135deg, ${c.teal}1a, ${c.gold}12)`, border: `2px solid ${c.teal}` }}>
+            <p className="text-sm font-bold uppercase tracking-wider mb-1" style={{ color: c.teal }}>
+              💰 Sua economia com o Pré-Validador
+            </p>
+            <p className="text-5xl md:text-7xl font-extrabold" style={{ color: c.teal }}>
+              R${fmt(economiaAno)}<span className="text-xl md:text-2xl font-bold" style={{ color: c.muted }}>/ano</span>
+            </p>
+            <p className="text-base mt-3" style={{ color: c.ink }}>
+              R${fmt(economiaAno / 12)} de volta no caixa todo mês · {fmt(horasAno)} horas/ano devolvidas à equipe
+            </p>
+            {paybackDias !== null && paybackDias <= 365 && (
+              <p className="text-base font-bold mt-4 px-4 py-2 rounded-xl inline-block"
+                style={{ background: c.teal, color: theme === "dark" ? "#04121a" : "#ffffff" }}>
+                ⚡ Se paga nos primeiros {paybackDias} dias do ano
               </p>
-              <p className="text-3xl md:text-4xl font-extrabold" style={{ color: c.red }}>R${fmt(custoTotalAno)}</p>
-              <p className="text-xs mt-1" style={{ color: c.muted }}>desperdiçados por ano</p>
-              <p className="text-xs mt-3" style={{ color: c.muted }}>
-                {fmt(rejeitadasMes * 12)} notas rejeitadas/ano · {fmt(horasRetrabalhoMes * 12)}h de retrabalho
-              </p>
-              <p className="text-xs mt-2 leading-relaxed" style={{ color: c.muted }}>
-                retrabalho R${fmt(custoRetrabalhoMes * 12)}
-                {logistica ? <> · logística R${fmt(custoLogisticaMes * 12)}</> : null}
-                {" "}· capital parado R${fmt(custoAtrasoMes * 12)} · risco fiscal R${fmt(custoFiscalMes * 12)}
-              </p>
-            </div>
-            <div className="p-6 rounded-xl text-center" style={{ background: `${c.teal}0d`, border: `2px solid ${c.teal}50` }}>
-              <p className="flex items-center justify-center gap-2 text-sm font-bold mb-2" style={{ color: c.teal }}>
-                <FileCheck2 className="w-4 h-4" /> COM pré-validação
-              </p>
-              <p className="text-3xl md:text-4xl font-extrabold" style={{ color: c.teal }}>R${fmt(economiaAno)}</p>
-              <p className="text-xs mt-1" style={{ color: c.muted }}>de volta no seu caixa, por ano</p>
-              <p className="text-xs mt-3" style={{ color: c.muted }}>
-                + {fmt(horasAno)} horas/ano devolvidas à equipe
-              </p>
-              {paybackDias !== null && paybackDias <= 365 && (
-                <p className="text-sm font-bold mt-3 px-3 py-1.5 rounded-lg inline-block"
-                  style={{ background: `${c.teal}18`, color: c.teal }}>
-                  ⚡ Se paga nos primeiros {paybackDias} dias do ano
-                </p>
-              )}
-            </div>
+            )}
+            <p className="text-xs mt-5 leading-relaxed" style={{ color: c.muted }}>
+              Calculada sobre {fmt(rejeitadasMes * 12)} rejeições/ano que custariam R${fmt(custoTotalAno)}:
+              retrabalho R${fmt(custoRetrabalhoMes * 12)}
+              {logistica ? <> · logística R${fmt(custoLogisticaMes * 12)}</> : null}
+              {" "}· capital parado R${fmt(custoAtrasoMes * 12)} · risco fiscal R${fmt(custoFiscalMes * 12)}
+            </p>
           </div>
 
           <p className="text-xs text-center mb-7" style={{ color: c.muted }}>
