@@ -31,6 +31,21 @@ const LANGS: { code: Lang; label: string }[] = [
   { code: "pt", label: "PT" }, { code: "en", label: "EN" }, { code: "es", label: "ES" },
 ]
 
+// ─── FAQ JSON-LD (home only — removido do layout global para evitar conflito) ──
+const HOME_FAQ_JSONLD = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: [
+    { "@type": "Question", name: "Quanto tempo leva para configurar o CKlareza?", acceptedAnswer: { "@type": "Answer", text: "5 minutos. Você cria conta, importa seus alunos e já está operando. Sem instalação, 100% web." } },
+    { "@type": "Question", name: "Preciso de cartão de crédito para testar o CKlareza?", acceptedAnswer: { "@type": "Answer", text: "Não. Você cria conta gratuitamente, explora o sistema e só entra com cartão quando quiser assinar. Teste de 14 dias sem cartão." } },
+    { "@type": "Question", name: "O Radar de Cancelamento do CKlareza realmente funciona?", acceptedAnswer: { "@type": "Answer", text: "Sim. Ele analisa frequência de check-ins, padrões de resposta e engajamento do aluno — e avisa quando o sinal muda. Mentores que usam o Radar agem antes que o aluno decida cancelar." } },
+    { "@type": "Question", name: "O CKlareza é white-label?", acceptedAnswer: { "@type": "Answer", text: "Sim, nos planos com mais de 20 mentorados. Você usa seu logo, suas cores e seu domínio. Seus alunos veem só a sua marca." } },
+    { "@type": "Question", name: "Para quem é o CKlareza?", acceptedAnswer: { "@type": "Answer", text: "Para mentores e empresas de mentoria high-ticket que querem profissionalizar a operação, reter mais alunos e escalar sem trabalhar mais horas." } },
+    { "@type": "Question", name: "Posso cancelar o CKlareza quando quiser?", acceptedAnswer: { "@type": "Answer", text: "Sim. Sem multa, sem burocracia. Cancele com 1 clique a qualquer momento." } },
+    { "@type": "Question", name: "O briefing com IA do CKlareza substitui o julgamento do mentor?", acceptedAnswer: { "@type": "Answer", text: "Não — ele potencializa. A IA organiza o que o aluno trouxe e sugere a pauta. Você decide o que usar. O resultado é entrar na call com 10x mais clareza, em 30 segundos." } },
+  ],
+}
+
 // ─── COPY ─────────────────────────────────────────────────────────────────────
 const T: Record<Lang, any> = {
   pt: {
@@ -40,7 +55,7 @@ const T: Record<Lang, any> = {
     badge: "Organize toda sua mentoria em um só lugar",
     h1a: "Organize.", h1b: "Centralize.",
     h1c: "Acompanhe.",
-    sub: "Tudo da sua mentoria em uma plataforma: financeiro, atividades, calls e o progresso de cada aluno. Sua marca, nosso motor. ",
+    sub: "Tudo da sua mentoria em uma plataforma: financeiro, atividades, calls e o progresso de cada aluno. Mais tempo para seus mentorados. Zero burocracia para você. ",
     subStrong: "Comece grátis, sem cartão.",
     cta1: "Ver Demo — 2 minutos",
     cta2: "Criar conta gratuita →",
@@ -48,10 +63,10 @@ const T: Record<Lang, any> = {
 
     // PROVA SOCIAL
     proofLabel: "RESULTADO REAL",
-    proofTitle: "De 45 min para 2 min por call.",
-    proofDesc: "Termo Laser usou CKlareza para escalar a operação. A equipe parou de perder noites preparando pautas. Churn caiu pela metade. MRR cresceu 40%.",
-    proofName: "— Termo Laser, agência de infoprodutos",
-    proofStats: [["−50%", "Churn"], ["+40%", "MRR"], ["45→2min", "Prep/call"]],
+    proofTitle: "Gastavam 45 minutos preparando cada call. Agora gastam 2.",
+    proofDesc: "ThermoLaser usou CKlareza para escalar a operação. A equipe parou de perder noites montando pauta de reunião: a IA entrega tudo pronto. O faturamento cresceu 40% e o cancelamento de alunos caiu pela metade.",
+    proofName: "— ThermoLaser, agência de infoprodutos",
+    proofStats: [["−50%", "cancelamentos"], ["+40%", "receita"], ["45→2min", "prep por call"]],
 
     // DOR + IMPLICAÇÕES
     painLabel: "VOCÊ RECONHECE ISSO?",
@@ -67,7 +82,7 @@ const T: Record<Lang, any> = {
       },
       {
         dor: "Financeiro espalhado em planilhas, pagamentos perdidos",
-        impl: "Sem visibilidade real do MRR, você não consegue decidir se vale contratar, anunciar ou aumentar o preço. Você opera no escuro em um negócio que deveria ter total previsibilidade.",
+        impl: "Sem saber quanto entra de verdade todo mês, você não consegue decidir se vale contratar, anunciar ou aumentar o preço. Você opera no escuro em um negócio que deveria ter total previsibilidade.",
       },
       {
         dor: "Parece amador usando Calendly genérico, formulários avulsos, Google Drive",
@@ -81,7 +96,7 @@ const T: Record<Lang, any> = {
     imagines: [
       "A pauta da call estivesse pronta 30 segundos após o check-in do aluno — sem você tocar em nada",
       "Você soubesse com 30 dias de antecedência exatamente quem está pensando em cancelar",
-      "Seu MRR estivesse sempre visível e atualizado, sem planilha, sem adivinhação",
+      "Você soubesse exatamente quanto entra todo mês — sem planilha, sem adivinhação",
       "Seus alunos vissem só a sua marca — logo, cores, domínio próprio — do check-in ao portal",
     ],
     imagineCta: "Isso existe. E você pode testar hoje.",
@@ -89,18 +104,19 @@ const T: Record<Lang, any> = {
     // SOLUÇÃO — FEATURES (benefícios, não vantagens)
     solLabel: "A SOLUÇÃO",
     solTitle: "CKlareza resolve tudo isso em uma tela.",
+    solHours: "Só o briefing com IA devolve ~7 horas por semana. São 30 horas por mês — 360 horas por ano de volta no seu calendário.",
     feats: [
       {
         title: "Entre em cada call com autoridade total",
-        desc: "A IA lê o check-in do aluno e entrega a pauta exata — o que discutir, onde ele travou, o que priorizar. De 45 min de preparação para 30 segundos. Isso é o que justifica o seu ticket alto.",
+        desc: "A IA busca as últimas calls do aluno, resume o histórico, junta suas anotações e entrega a pauta exata — o que discutir, onde ele travou, o que priorizar. De 45 min de preparação para 30 segundos. Centenas de horas economizadas ao longo do ano.",
       },
       {
         title: "Salve contratos antes de perdê-los",
-        desc: "O Radar de Churn analisa frequência de check-ins, padrão de respostas e engajamento — e te avisa com 30 dias de antecedência quando o aluno está esfriando. Você age antes de receber o cancelamento.",
+        desc: "E se você tivesse um termômetro que te avisa quem está performando bem — antes do aluno sequer pensar em cancelar? O Radar analisa frequência de check-ins, padrão de respostas e engajamento. Você age antes de receber o cancelamento.",
       },
       {
-        title: "Previsibilidade total do seu caixa",
-        desc: "Cobranças, inadimplência e projeção de MRR num dashboard. Decida sobre investimento, contratação e expansão com dados — não com chute.",
+        title: "Previsão total do seu caixa",
+        desc: "Cobranças, inadimplência e projeção de receita num dashboard. Decida sobre investimento, contratação e expansão com dados — não com chute.",
       },
       {
         title: "Zero planilha, zero caos de tarefas",
@@ -117,13 +133,13 @@ const T: Record<Lang, any> = {
     ],
 
     // ROI CHURN
-    churnLabel: "ROI DO RADAR DE CHURN",
+    churnLabel: "RADAR DE CANCELAMENTO",
     churnTitle: "1 aluno salvo já paga meses de CKlareza.",
     churnDesc: "O Radar analisa 3 sinais: frequência de check-in, qualidade das respostas e engajamento no portal. Quando o padrão muda, você recebe o alerta — com tempo para agir.",
     churnCalc: [
-      ["Ticket médio (ex: R$2.000/aluno/mês)", "R$24.000/ano por aluno"],
-      ["Custo anual do CKlareza (10 alunos)", "R$11.820/ano"],
-      ["Salvar 1 aluno já cobre", "≈ 2x o custo anual"],
+      ["Ticket médio (ex: R$ 2.000/aluno/mês)", "R$ 24.000 por aluno ao ano"],
+      ["Custo CKlareza para 10 alunos", "985 por mês"],
+      ["Salvar 1 aluno já cobre", "mais de 2 anos de sistema"],
     ],
     churnNote: "Calcule com o seu ticket: qualquer aluno retido por 6+ meses paga o sistema inteiro.",
 
@@ -163,10 +179,10 @@ const T: Record<Lang, any> = {
     faq: [
       ["Quanto tempo leva para configurar?", "5 minutos. Você cria conta, importa seus alunos e já está operando. Sem instalação, 100% web."],
       ["Preciso de cartão de crédito para testar?", "Não. Você cria conta gratuitamente, explora o sistema e só entra com cartão quando quiser assinar."],
-      ["O Radar de Churn realmente funciona?", "Sim. Ele analisa frequência de check-ins, padrões de resposta e engajamento do aluno — e te avisa quando o sinal muda. Mentores que usam o Radar agem antes que o aluno decida cancelar."],
+      ["O Radar de Cancelamento realmente funciona?", "Sim. Ele analisa frequência de check-ins, padrões de resposta e engajamento do aluno — e te avisa quando o sinal muda. Mentores que usam o Radar agem antes que o aluno decida cancelar."],
       ["O briefing com IA substitui meu julgamento?", "Não — ele potencializa. A IA organiza o que o aluno trouxe e sugere a pauta. Você decide o que usar. O resultado é entrar na call com 10x mais clareza, em 30 segundos."],
       ["O CKlareza é white-label?", "Sim, nos planos com mais de 20 mentorados. Você usa seu logo, suas cores e seu domínio. Seus alunos veem só a sua marca."],
-      ["Para quem é o CKlareza?", "Para mentores e empresas de mentoria high-ticket que querem profissionalizar a operação, reduzir churn e escalar sem trabalhar mais horas."],
+      ["Para quem é o CKlareza?", "Para mentores e empresas de mentoria high-ticket que querem profissionalizar a operação, reter mais alunos e escalar sem trabalhar mais horas."],
       ["Posso cancelar quando quiser?", "Sim. Sem multa, sem burocracia. Cancele com 1 clique."],
     ],
 
@@ -182,16 +198,16 @@ const T: Record<Lang, any> = {
     badge: "Manage all your mentorships in one place",
     h1a: "Organize.", h1b: "Centralize.",
     h1c: "Track.",
-    sub: "Everything your mentorship needs in one platform: finances, activities, calls and each student's progress. Your brand, our engine. ",
+    sub: "Everything your mentorship needs in one platform: finances, activities, calls and each student's progress. More time for your mentees. Zero admin for you. ",
     subStrong: "Start free, no card required.",
     cta1: "Watch Demo — 2 minutes",
     cta2: "Create free account →",
     trust: ["No card to test", "Protected data (LGPD)", "5-minute setup"],
     proofLabel: "REAL RESULT",
-    proofTitle: "From 45 min to 2 min per call.",
-    proofDesc: "Termo Laser used CKlareza to scale operations. The team stopped losing nights preparing agendas. Churn dropped in half. MRR grew 40%.",
-    proofName: "— Termo Laser, infoproduct agency",
-    proofStats: [["−50%", "Churn"], ["+40%", "MRR"], ["45→2min", "Prep/call"]],
+    proofTitle: "They spent 45 minutes preparing each call. Now it takes 2.",
+    proofDesc: "ThermoLaser used CKlareza to scale operations. The team stopped losing nights building call agendas: AI delivers them ready. Revenue grew 40% and student cancellations dropped in half.",
+    proofName: "— ThermoLaser, infoproduct agency",
+    proofStats: [["−50%", "cancellations"], ["+40%", "revenue"], ["45→2min", "prep/call"]],
     painLabel: "SOUND FAMILIAR?",
     painTitle: "The reality for 90% of mentors:",
     pains: [
@@ -205,7 +221,7 @@ const T: Record<Lang, any> = {
       },
       {
         dor: "Finances scattered across spreadsheets, payments lost",
-        impl: "Without real MRR visibility, you can't decide whether to hire, advertise or raise prices. You're operating blind in a business that should have total predictability.",
+        impl: "Without knowing what truly comes in each month, you can't decide whether to hire, advertise or raise prices. You're operating blind in a business that should have total predictability.",
       },
       {
         dor: "Looks amateur using generic Calendly, random forms, Google Drive",
@@ -217,16 +233,17 @@ const T: Record<Lang, any> = {
     imagines: [
       "The call agenda ready 30 seconds after the student's check-in — without you touching anything",
       "You knew 30 days in advance exactly who is thinking about canceling",
-      "Your MRR always visible and updated — no spreadsheet, no guessing",
+      "You knew exactly how much comes in every month — no spreadsheet, no guessing",
       "Your students only see your brand — logo, colors, custom domain — from check-in to portal",
     ],
     imagineCta: "This exists. And you can try it today.",
     solLabel: "THE SOLUTION",
     solTitle: "CKlareza solves all of this in one screen.",
+    solHours: "The AI briefing alone gives you back ~7 hours a week. That's 30 hours a month — 360 hours a year back on your calendar.",
     feats: [
-      { title: "Enter every call with complete authority", desc: "AI reads the student's check-in and delivers the exact agenda — what to discuss, where they're stuck, what to prioritize. From 45 min of prep to 30 seconds. That's what justifies your high ticket." },
-      { title: "Save contracts before losing them", desc: "The Churn Radar analyzes 3 signals: check-in frequency, response quality and portal engagement. When the pattern changes, you get an alert — with time to act, not just mourn the cancellation." },
-      { title: "Total cash flow predictability", desc: "Charges, overdue and MRR forecast in one dashboard. Decide on investment, hiring and expansion with data — not guesswork." },
+      { title: "Enter every call with complete authority", desc: "AI pulls the student's last calls, summarizes the history, combines your notes and delivers the exact agenda — what to discuss, where they're stuck, what to prioritize. From 45 min of prep to 30 seconds. Hundreds of hours saved every year." },
+      { title: "Save contracts before losing them", desc: "What if you had a thermometer that tells you who's performing well — before the student even thinks about canceling? The Radar analyzes check-in frequency, response quality and engagement. You act before the cancellation arrives." },
+      { title: "Total revenue forecast", desc: "Charges, overdue and recurring revenue forecast in one dashboard. Decide on investment, hiring and expansion with data — not guesswork." },
       { title: "Zero spreadsheet, zero task chaos", desc: "All students' activities in a single Kanban. To do, overdue, done. You know exactly where each student is in 5 seconds." },
       { title: "Premium portal that increases retention", desc: "Your student checks in, tracks their journey and feels part of something serious. A professional portal communicates value — and students who feel value cancel less." },
       { title: "Your brand, not ours", desc: "Own logo, colors and domain. Your students only see you — the engine is CKlareza. You deliver a premium experience without building technology from scratch." },
@@ -235,9 +252,9 @@ const T: Record<Lang, any> = {
     churnTitle: "1 student saved already pays months of CKlareza.",
     churnDesc: "The Radar monitors 3 signals: check-in frequency, response quality, and portal engagement. When the pattern shifts, you receive the alert — with time to act.",
     churnCalc: [
-      ["Average ticket (ex: $400/student/month)", "$4,800/year per student"],
-      ["Annual CKlareza cost (10 students)", "$2,400/year"],
-      ["Saving 1 student already covers", "≈ 2x the annual cost"],
+      ["Average ticket (ex: $400/student/month)", "$4,800 per student/year"],
+      ["CKlareza cost for 10 students", "200/month"],
+      ["Saving 1 student already covers", "over 2 years of the system"],
     ],
     churnNote: "Calculate with your ticket: any student retained 6+ months pays for the entire system.",
     calcLabel: "DISCOUNT CALCULATOR",
@@ -281,16 +298,16 @@ const T: Record<Lang, any> = {
     badge: "Gestiona todas tus mentorias en un solo lugar",
     h1a: "Organiza.", h1b: "Centraliza.",
     h1c: "Acompaña.",
-    sub: "Todo lo que tu mentoría necesita en una plataforma: finanzas, actividades, calls y el progreso de cada alumno. Tu marca, nuestro motor. ",
+    sub: "Todo lo que tu mentoría necesita en una plataforma: finanzas, actividades, calls y el progreso de cada alumno. Más tiempo para tus alumnos. Cero burocracia para ti. ",
     subStrong: "Comienza gratis, sin tarjeta.",
     cta1: "Ver Demo — 2 minutos",
     cta2: "Crear cuenta gratuita →",
     trust: ["Sin tarjeta para probar", "Datos protegidos (LGPD)", "Setup en 5 minutos"],
     proofLabel: "RESULTADO REAL",
-    proofTitle: "De 45 min a 2 min por call.",
-    proofDesc: "Termo Laser usó CKlareza para escalar la operación. El equipo dejó de perder noches preparando agendas. El churn cayó a la mitad. El MRR creció 40%.",
-    proofName: "— Termo Laser, agencia de infoproductos",
-    proofStats: [["−50%", "Churn"], ["+40%", "MRR"], ["45→2min", "Prep/call"]],
+    proofTitle: "Gastaban 45 minutos preparando cada call. Ahora gastan 2.",
+    proofDesc: "ThermoLaser usó CKlareza para escalar la operación. El equipo dejó de perder noches armando agendas de call: la IA las entrega listas. La facturación creció 40% y las cancelaciones cayeron a la mitad.",
+    proofName: "— ThermoLaser, agencia de infoproductos",
+    proofStats: [["−50%", "cancelaciones"], ["+40%", "facturación"], ["45→2min", "prep/call"]],
     painLabel: "¿TE SUENA FAMILIAR?",
     painTitle: "La realidad del 90% de los mentores:",
     pains: [
@@ -304,7 +321,7 @@ const T: Record<Lang, any> = {
       },
       {
         dor: "Finanzas dispersas en planillas, pagos perdidos",
-        impl: "Sin visibilidad real del MRR, no puedes decidir si contratar, anunciar o subir el precio. Operas a ciegas en un negocio que debería tener total previsibilidad.",
+        impl: "Sin saber cuánto entra de verdad cada mes, no puedes decidir si contratar, anunciar o subir el precio. Operas a ciegas en un negocio que debería tener total previsibilidad.",
       },
       {
         dor: "Parece amateur usando Calendly genérico, formularios sueltos, Google Drive",
@@ -316,27 +333,28 @@ const T: Record<Lang, any> = {
     imagines: [
       "La agenda de la call estuviera lista 30 segundos después del check-in del alumno — sin que toques nada",
       "Supieras con 30 días de antelación exactamente quién está pensando en cancelar",
-      "Tu MRR siempre visible y actualizado — sin planilla, sin adivinar",
+      "Supieras exactamente cuánto entra cada mes — sin planilla, sin adivinar",
       "Tus alumnos solo vieran tu marca — logo, colores, dominio propio — del check-in al portal",
     ],
     imagineCta: "Esto existe. Y puedes probarlo hoy.",
     solLabel: "LA SOLUCIÓN",
     solTitle: "CKlareza resuelve todo esto en una pantalla.",
+    solHours: "Solo el briefing con IA te devuelve ~7 horas por semana. Son 30 horas al mes — 360 horas al año de vuelta en tu calendario.",
     feats: [
-      { title: "Entra a cada call con autoridad total", desc: "La IA lee el check-in del alumno y entrega la agenda exacta — qué discutir, dónde se bloqueó, qué priorizar. De 45 min de preparación a 30 segundos. Eso es lo que justifica tu ticket alto." },
-      { title: "Salva contratos antes de perderlos", desc: "El Radar de Churn analiza 3 señales: frecuencia de check-in, calidad de respuestas y engagement en el portal. Cuando el patrón cambia, recibes la alerta — con tiempo para actuar." },
-      { title: "Previsibilidad total de tu caja", desc: "Cobros, morosidad y proyección de MRR en un dashboard. Decide sobre inversión, contratación y expansión con datos — no con intuición." },
+      { title: "Entra a cada call con autoridad total", desc: "La IA busca las últimas calls del alumno, resume el historial, junta tus notas y entrega la agenda exacta — qué discutir, dónde se bloqueó, qué priorizar. De 45 min de preparación a 30 segundos. Cientos de horas ahorradas al año." },
+      { title: "Salva contratos antes de perderlos", desc: "¿Y si tuvieras un termómetro que te avisa quién está rindiendo bien — antes de que el alumno siquiera piense en cancelar? El Radar analiza frecuencia de check-in, calidad de respuestas y engagement. Actúas antes de recibir la cancelación." },
+      { title: "Previsión total de tu caja", desc: "Cobros, morosidad y proyección de facturación en un dashboard. Decide sobre inversión, contratación y expansión con datos — no con intuición." },
       { title: "Cero planilla, cero caos de tareas", desc: "Las actividades de todos los alumnos en un Kanban único. Por hacer, vencidas, completadas. Sabes exactamente dónde está cada alumno en 5 segundos." },
       { title: "Portal premium que aumenta la retención", desc: "Tu alumno hace check-in, sigue su jornada y se siente parte de algo serio. Un portal profesional comunica valor — y los alumnos que sienten el valor cancelan menos." },
       { title: "Tu marca, no la nuestra", desc: "Logo, colores y dominio propios. Tus alumnos solo ven a ti — el motor es CKlareza. Ofreces una experiencia premium sin construir tecnología desde cero." },
     ],
-    churnLabel: "ROI DEL RADAR DE CHURN",
+    churnLabel: "RADAR DE CANCELACIONES",
     churnTitle: "1 alumno salvado ya paga meses de CKlareza.",
     churnDesc: "El Radar monitorea 3 señales: frecuencia de check-in, calidad de respuestas y engagement en el portal. Cuando el patrón cambia, recibes la alerta — con tiempo para actuar.",
     churnCalc: [
-      ["Ticket promedio (ej: $400/alumno/mes)", "$4.800/año por alumno"],
-      ["Costo anual CKlareza (10 alumnos)", "$2.400/año"],
-      ["Salvar 1 alumno ya cubre", "≈ 2x el costo anual"],
+      ["Ticket promedio (ej: $400/alumno/mes)", "$4.800 por alumno al año"],
+      ["Costo CKlareza para 10 alumnos", "200 por mes"],
+      ["Salvar 1 alumno ya cubre", "más de 2 años del sistema"],
     ],
     churnNote: "Calcula con tu ticket: cualquier alumno retenido 6+ meses paga todo el sistema.",
     calcLabel: "CALCULADORA DE DESCUENTO",
@@ -363,10 +381,10 @@ const T: Record<Lang, any> = {
     faq: [
       ["¿Cuánto tiempo lleva la configuración?", "5 minutos. Crea cuenta, importa tus alumnos y ya estás operando. Sin instalación, 100% web."],
       ["¿Necesito tarjeta de crédito para probar?", "No. Creas cuenta gratis, exploras el sistema y solo pones tarjeta cuando quieras suscribirte."],
-      ["¿El Radar de Churn realmente funciona?", "Sí. Analiza frecuencia de check-ins, patrones de respuesta y engagement del alumno — y te avisa cuando la señal cambia. Los mentores que usan el Radar actúan antes de que el alumno decida cancelar."],
+      ["¿El Radar de Cancelaciones realmente funciona?", "Sí. Analiza frecuencia de check-ins, patrones de respuesta y engagement del alumno — y te avisa cuando la señal cambia. Los mentores que usan el Radar actúan antes de que el alumno decida cancelar."],
       ["¿El briefing con IA reemplaza mi criterio?", "No — lo amplifica. La IA organiza lo que el alumno trajo y sugiere la agenda. Tú decides qué usar. El resultado es entrar a la call con 10x más claridad en 30 segundos."],
       ["¿CKlareza es white-label?", "Sí, en planes con más de 20 mentoreados. Usa tu logo, tus colores y tu dominio."],
-      ["¿Para quién es CKlareza?", "Para mentores y empresas de mentoría high-ticket que quieren reducir el churn y escalar sin trabajar más horas."],
+      ["¿Para quién es CKlareza?", "Para mentores y empresas de mentoría high-ticket que quieren retener más alumnos y escalar sin trabajar más horas."],
       ["¿Puedo cancelar cuando quiera?", "Sí. Sin multa, sin burocracia. Cancela con 1 clic."],
     ],
     ctaT: "¿Listo para entrar a tu próxima call con claridad total?",
@@ -442,6 +460,7 @@ export default function LandingPage() {
 
   return (
     <div style={{ background: c.bg, color: c.ink, transition: "background 0.3s, color 0.3s" }} className="min-h-screen">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(HOME_FAQ_JSONLD) }} />
 
       {/* ── NAV ── */}
       <header className="sticky top-0 z-40 backdrop-blur-md" style={{ background: `${c.bg}cc`, borderBottom: `1px solid ${c.border}` }}>
@@ -452,6 +471,8 @@ export default function LandingPage() {
             <NavLink href="#precos">Preços</NavLink>
             <NavLink href="#prova">Cases</NavLink>
             <NavLink href="#faq">FAQ</NavLink>
+            <NavLink href="/sobre">Sobre</NavLink>
+            <NavLink href="/contato">Contato</NavLink>
           </nav>
           <div className="flex items-center gap-2.5">
             <button onClick={toggleTheme} title={theme === "dark" ? "Tema claro" : "Tema escuro"} aria-label="Alternar tema"
@@ -532,9 +553,10 @@ export default function LandingPage() {
 
         {/* VIDEO — Demonstração de Capacidade */}
         <div id="video" className="relative max-w-3xl mx-auto px-5 pb-6">
-          <div className="rounded-2xl overflow-hidden"
+          {/* aspect-video reserva 16:9 antes do vídeo carregar → elimina CLS */}
+          <div className="rounded-2xl overflow-hidden aspect-video"
             style={{ background: "#000", border: `2px solid ${c.gold}55`, boxShadow: `0 30px 90px -25px ${c.gold}55` }}>
-            <video src="/video-cklareza.mp4" autoPlay muted loop playsInline controls className="w-full h-auto block" />
+            <video src="/video-cklareza.mp4" autoPlay muted loop playsInline controls className="w-full h-full block object-cover" />
           </div>
           <p className="text-center text-sm mt-3 font-semibold flex items-center justify-center gap-2" style={{ color: c.muted }}>
             <Sparkles className="w-3.5 h-3.5" style={{ color: c.gold }} /> Conheça a plataforma em 2 minutos
@@ -648,6 +670,9 @@ export default function LandingPage() {
             {t.solLabel}
           </span>
           <h2 className="text-3xl md:text-4xl font-extrabold" style={{ color: c.ink }}>{t.solTitle}</h2>
+          <p className="text-base md:text-lg font-semibold mt-4 max-w-2xl mx-auto" style={{ color: c.teal }}>
+            <Clock className="w-4 h-4 inline-block mr-1.5 -mt-0.5" />{t.solHours}
+          </p>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {t.feats.map(({ title, desc }: { title: string; desc: string }, i: number) => {
@@ -874,7 +899,7 @@ export default function LandingPage() {
               <p>50 mentorados = <strong style={{ color: c.ink }}>R$3.940/mês</strong></p>
             </div>
             <ul className="space-y-2 mb-6">
-              {["Tudo do Solo", "Radar de churn antecipado", "Analytics avançado", "White-label completo", "Suporte prioritário (4h)"].map(f => (
+              {["Tudo do Solo", "Radar de cancelamento antecipado", "Analytics avançado", "White-label completo", "Suporte prioritário (4h)"].map(f => (
                 <li key={f} className="flex items-center gap-2 text-sm" style={{ color: c.muted }}>
                   <Check className="w-4 h-4 shrink-0" style={{ color: c.teal }} /> {f}
                 </li>
@@ -888,6 +913,14 @@ export default function LandingPage() {
           </div>
         </div>
 
+        {/* Regra única dos planos — teste do idiota */}
+        <div className="mt-6 p-5 rounded-xl text-center" style={{ background: c.card, border: `1px solid ${c.border}` }}>
+          <p className="text-sm leading-relaxed" style={{ color: c.muted }}>
+            <strong style={{ color: c.ink }}>Como funciona, sem letra miúda:</strong> você paga só pelos mentorados ativos.
+            Passou de 20 alunos? O desconto <strong style={{ color: c.teal }}>aumenta sozinho</strong> (60% → 70% acima de 50 → 80% acima de 100).
+            Sem taxa de setup, sem fidelidade, e o teste de 14 dias inclui tudo dos dois planos.
+          </p>
+        </div>
         <p className="text-center text-sm mt-6" style={{ color: c.muted }}>
           Agências e múltiplos mentores?{" "}
           <Link href="/contato" className="font-semibold" style={{ color: c.goldDeep }}>Fale sobre Enterprise →</Link>

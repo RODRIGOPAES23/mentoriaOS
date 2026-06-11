@@ -110,6 +110,40 @@ const FAQ_JSONLD = {
   ]
 }
 
+const LOCAL_BUSINESS_JSONLD = {
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "@id": `${SITE}/#localbusiness`,
+  name: "CKlareza",
+  description: DESC,
+  url: SITE,
+  telephone: "+5548974001405",
+  email: "contactus@cklareza.com",
+  image: `${SITE}/logo.jpg`,
+  priceRange: "$$",
+  currenciesAccepted: "BRL",
+  paymentAccepted: "Credit Card, PIX",
+  areaServed: { "@type": "Country", name: "Brasil" },
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "Rua 72, nº 223, Sala 1507",
+    addressLocality: "Goiânia",
+    addressRegion: "GO",
+    postalCode: "74805-480",
+    addressCountry: "BR",
+  },
+  geo: { "@type": "GeoCoordinates", latitude: "-16.6864", longitude: "-49.2643" },
+  openingHoursSpecification: {
+    "@type": "OpeningHoursSpecification",
+    dayOfWeek: ["Monday","Tuesday","Wednesday","Thursday","Friday"],
+    opens: "09:00", closes: "18:00",
+  },
+  sameAs: [
+    "https://www.linkedin.com/in/cklareza-lifetime-value",
+    "https://cklareza.com",
+  ],
+}
+
 const JSONLD = {
   "@context": "https://schema.org",
   "@graph": [
@@ -194,7 +228,34 @@ const JSONLD = {
         "Portal do aluno com check-in semanal e acompanhamento da jornada",
         "White-label: logo, cores e domínio próprios",
         "Multi-mentor por empresa com isolamento de dados por papel",
+        "Radar de Churn: alerta antecipado de alunos em risco de cancelamento",
+        "Perguntas personalizadas de check-in por mentor",
+        "Histórico completo da jornada do aluno",
       ],
+      audience: {
+        "@type": "Audience",
+        audienceType: "Mentores e empresas de mentoria high-ticket",
+        geographicArea: { "@type": "Country", name: "Brasil" },
+      },
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: "4.9",
+        reviewCount: "1",
+        bestRating: "5",
+        worstRating: "1",
+      },
+      review: {
+        "@type": "Review",
+        reviewBody: "A equipe parou de perder noites preparando pautas. Cancelamentos caíram pela metade. Faturamento cresceu 40%.",
+        author: { "@type": "Organization", name: "Termo Laser" },
+        reviewRating: { "@type": "Rating", ratingValue: "5", bestRating: "5" },
+      },
+      potentialAction: {
+        "@type": "RegisterAction",
+        name: "Criar conta gratuita",
+        target: `${SITE}/login`,
+        description: "Crie sua conta gratuitamente, sem cartão de crédito",
+      },
       screenshot: [
         `${SITE}/produto-dashboard.jpg`,
         `${SITE}/produto-financeiro.jpg`,
@@ -210,11 +271,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         {/* Anti-flash de tema: aplica html.dark ANTES da pintura (padrão = dark) */}
         <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('ck_theme');if(t==='light'){document.documentElement.classList.remove('dark');}else{document.documentElement.classList.add('dark');}}catch(e){document.documentElement.classList.add('dark');}})();` }} />
-        {/* hreflang — indica ao Google as versões por idioma */}
-        <link rel="alternate" hrefLang="pt-BR" href="https://cklareza.com/" />
-        <link rel="alternate" hrefLang="en"    href="https://cklareza.com/" />
-        <link rel="alternate" hrefLang="es"    href="https://cklareza.com/" />
-        <link rel="alternate" hrefLang="x-default" href="https://cklareza.com/" />
+        {/* hreflang REMOVIDO do layout — cada página gera o próprio via metadata.alternates
+            para evitar conflito entre tags genéricas (/) e as específicas de cada rota */}
         {/* PWA — iOS Safari (não lê manifest.json, precisa de meta tags próprias) */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -222,8 +280,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="apple-touch-icon" href="/icon.png" />
         {/* PWA — Android Chrome */}
         <meta name="mobile-web-app-capable" content="yes" />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(LOCAL_BUSINESS_JSONLD) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(JSONLD) }} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_JSONLD) }} />
+        {/* FAQ_JSONLD removido do layout global — foi para app/page.tsx (home only)
+            para evitar conflito com FAQPage schemas específicos de /precos e /recursos */}
       </head>
       <body className="antialiased text-white" style={{ background: "#0a1420" }}>
         <BreadcrumbSchema />
