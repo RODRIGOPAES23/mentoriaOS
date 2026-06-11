@@ -31,6 +31,10 @@ const PALETTES: Record<Theme, any> = {
 const MIN_CORRECAO = 25          // minutos médios para diagnosticar + corrigir + reemitir 1 nota rejeitada
 const PCT_PEGO_ANTES = 0.95      // % dos erros que a pré-validação detecta antes do envio
 const DIAS_ATRASO_RECEBIMENTO = 5 // dias médios que uma nota rejeitada atrasa o recebimento
+const PCT_CAMINHAO_PARADO = 0.10 // % das rejeições que param um caminhão / atrasam entrega crítica
+const DIARIA_CAMINHAO = 600      // R$ por diária de caminhão parado (estadia, mercado: R$500–1.500)
+const PCT_AUTUACAO = 0.01        // % das rejeições que evoluem para autuação / perda fiscal
+const CUSTO_AUTUACAO = 300       // R$ médio conservador por ocorrência fiscal
 
 const fmt = (n: number) => Math.round(n).toLocaleString("pt-BR")
 
@@ -73,6 +77,8 @@ export default function PrevalidadorPage() {
   const [taxaRejeicao, setTaxaRejeicao] = useState(8)
   const [custoHora, setCustoHora] = useState(60)
   const [ticketNota, setTicketNota] = useState(800)
+  const [logistica, setLogistica] = useState(true)       // rejeições atrasam caminhões/entregas?
+  const [investimento, setInvestimento] = useState(500)  // R$/mês na ferramenta (para o payback)
 
   useEffect(() => {
     const saved = localStorage.getItem("ck_theme")
@@ -93,9 +99,15 @@ export default function PrevalidadorPage() {
   // capital parado: valor das notas rejeitadas × dias de atraso × custo de oportunidade (~2% a.m. ≈ 0,066%/dia)
   const capitalAtrasadoMes = rejeitadasMes * ticketNota
   const custoAtrasoMes = capitalAtrasadoMes * 0.00066 * DIAS_ATRASO_RECEBIMENTO
-  const custoTotalAno = (custoRetrabalhoMes + custoAtrasoMes) * 12
+  // fricção logística: parte das rejeições para caminhão / atrasa entrega crítica (estadia)
+  const custoLogisticaMes = logistica ? rejeitadasMes * PCT_CAMINHAO_PARADO * DIARIA_CAMINHAO : 0
+  // risco fiscal: parte das rejeições evolui para autuação / perda
+  const custoFiscalMes = rejeitadasMes * PCT_AUTUACAO * CUSTO_AUTUACAO
+  const custoTotalAno = (custoRetrabalhoMes + custoAtrasoMes + custoLogisticaMes + custoFiscalMes) * 12
   const economiaAno = custoTotalAno * PCT_PEGO_ANTES
   const horasAno = horasRetrabalhoMes * 12 * PCT_PEGO_ANTES
+  // payback: em quantos dias do ano a economia cobre o investimento anual na ferramenta
+  const paybackDias = economiaAno > 0 ? Math.ceil(((investimento * 12) / economiaAno) * 365) : null
 
   return (
     <div style={{ background: c.bg, color: c.ink, transition: "background 0.3s, color 0.3s" }} className="min-h-screen">
@@ -207,6 +219,16 @@ export default function PrevalidadorPage() {
             <Slider c={c} label="Taxa de rejeição/erro" value={taxaRejeicao} setValue={setTaxaRejeicao} min={1} max={25} step={1} suffix="%" />
             <Slider c={c} label="Custo-hora da equipe fiscal" value={custoHora} setValue={setCustoHora} min={20} max={200} step={5} prefix="R$" />
             <Slider c={c} label="Valor médio por nota" value={ticketNota} setValue={setTicketNota} min={100} max={20000} step={100} prefix="R$" />
+            <label className="flex items-start gap-3 p-4 rounded-xl cursor-pointer"
+              style={{ background: c.card2, border: `1px solid ${logistica ? c.gold : c.border}` }}>
+              <input type="checkbox" checked={logistica} onChange={e => setLogistica(e.target.checked)}
+                className="mt-0.5 w-4 h-4 cursor-pointer" style={{ accentColor: c.gold }} />
+              <span>
+                <span className="text-sm font-semibold block" style={{ color: c.ink }}>🚚 As rejeições atrasam caminhões ou entregas?</span>
+                <span className="text-xs" style={{ color: c.muted }}>Aplica estadia/diária de caminhão parado ({PCT_CAMINHAO_PARADO * 100}% das rejeições × R${DIARIA_CAMINHAO}/dia — mercado: R$500–1.500)</span>
+              </span>
+            </label>
+            <Slider c={c} label="Investimento na ferramenta (R$/mês)" value={investimento} setValue={setInvestimento} min={100} max={5000} step={100} prefix="R$" />
           </div>
 
           {/* Resultado: SEM vs COM */}
@@ -220,6 +242,11 @@ export default function PrevalidadorPage() {
               <p className="text-xs mt-3" style={{ color: c.muted }}>
                 {fmt(rejeitadasMes * 12)} notas rejeitadas/ano · {fmt(horasRetrabalhoMes * 12)}h de retrabalho
               </p>
+              <p className="text-xs mt-2 leading-relaxed" style={{ color: c.muted }}>
+                retrabalho R${fmt(custoRetrabalhoMes * 12)}
+                {logistica ? <> · logística R${fmt(custoLogisticaMes * 12)}</> : null}
+                {" "}· capital parado R${fmt(custoAtrasoMes * 12)} · risco fiscal R${fmt(custoFiscalMes * 12)}
+              </p>
             </div>
             <div className="p-6 rounded-xl text-center" style={{ background: `${c.teal}0d`, border: `2px solid ${c.teal}50` }}>
               <p className="flex items-center justify-center gap-2 text-sm font-bold mb-2" style={{ color: c.teal }}>
@@ -230,12 +257,20 @@ export default function PrevalidadorPage() {
               <p className="text-xs mt-3" style={{ color: c.muted }}>
                 + {fmt(horasAno)} horas/ano devolvidas à equipe
               </p>
+              {paybackDias !== null && paybackDias <= 365 && (
+                <p className="text-sm font-bold mt-3 px-3 py-1.5 rounded-lg inline-block"
+                  style={{ background: `${c.teal}18`, color: c.teal }}>
+                  ⚡ Se paga nos primeiros {paybackDias} dias do ano
+                </p>
+              )}
             </div>
           </div>
 
           <p className="text-xs text-center mb-7" style={{ color: c.muted }}>
             Premissas conservadoras: {MIN_CORRECAO} min de correção por nota rejeitada · pré-validação detecta {PCT_PEGO_ANTES * 100}% dos erros antes do envio ·
-            rejeição atrasa o recebimento em ~{DIAS_ATRASO_RECEBIMENTO} dias (custo de oportunidade de 2% a.m.). Multas não incluídas — considere o resultado um piso.
+            rejeição atrasa o recebimento em ~{DIAS_ATRASO_RECEBIMENTO} dias (custo de oportunidade de 2% a.m.) ·
+            inclui estimativa de estadias logísticas e gargalos de expedição ({PCT_CAMINHAO_PARADO * 100}% das rejeições × R${DIARIA_CAMINHAO}/diária) e
+            risco fiscal ({PCT_AUTUACAO * 100}% × R${CUSTO_AUTUACAO}). Glosa de crédito IBS/CBS da Reforma Tributária não incluída — considere o resultado um piso.
           </p>
 
           <div className="text-center">
