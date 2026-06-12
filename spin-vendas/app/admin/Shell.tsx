@@ -23,6 +23,7 @@ export const UI = {
 type NavItem = { href: string; label: string; icon: string }
 const NAV: NavItem[] = [
   { href: "/admin/analytics", label: "Dashboard", icon: "📊" },
+  { href: "/admin/prospeccao", label: "Buscar leads", icon: "🔎" },
   { href: "/admin", label: "Leads (CRM)", icon: "🗂️" },
   { href: "/admin/distribuicao", label: "Distribuição", icon: "📣" },
   { href: "/admin/video", label: "Anúncios em vídeo", icon: "🎬" },
